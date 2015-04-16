@@ -3,7 +3,7 @@
 
 -- The fully vectorized Module using Parallel Arrays
 
-module DotP (dotp_wrapper) where
+module DotP (dotpWrapper) where
  
 import qualified Prelude as P
 import Data.Array.Parallel hiding ((*))
