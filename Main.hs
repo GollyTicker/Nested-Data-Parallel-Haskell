@@ -12,13 +12,8 @@ module Main (main) where
 
 import Data.Array.Parallel
 import Data.Array.Parallel.PArray(PArray, fromList)
-
-import DotP (dotpWrapper)
+import DotP (example)
 
 main :: IO ()
-main =
-    let v   = fromList [1..10]
-        w   = fromList [0,2..20]
-        result  = dotpWrapper v w
-    in  print result
+main = print example
 
