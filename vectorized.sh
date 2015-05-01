@@ -18,11 +18,13 @@
 #       -dstg-stats    -dverbose-core2core    -dverbose-stg2stg   -dshow-passes
 #       -dfaststring-stats
 
-     #   -ddump-rule-firings\
+     # -ddump-rule-firings  -ddump-vect -dshow-passes \
+     # -rtsopts -threaded -fcpr-off -fno-liberate-case
      
-ghc -c -Odph \
-     -ddump-vect -ddump-simpl \
+ghc -c \
+     -Odph -package dph-lifted-vseg \
+     -ddump-vect \
      -dsuppress-idinfo \
      -dsuppress-coercions -dsuppress-type-applications \
      -dsuppress-uniques -dsuppress-module-prefixes \
-     "$1" -O4 DotP.hs > DotP.vect.hs
+     "$1" -O4 Algo.hs > Algo.vect.hs
