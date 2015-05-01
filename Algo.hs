@@ -4,7 +4,8 @@
 -- The fully vectorized Module using Parallel Arrays
 
 module Algo (
-        oneStep
+       -- oneStep
+        minBySndP
     ) where
  
 import qualified Prelude as P
@@ -19,10 +20,10 @@ type SparseMatrix = [:SparseVector:]
 
 type Pred = Int
 l, x, r :: Pred
-l = -1
+l = 0 - 1
 x = 0
 r = 1
-preds = [:-1,0,1:]
+preds = [: l,x,r:]
 
 data Preds = Nil | Cons Pred Preds
 
@@ -47,20 +48,22 @@ oneStep psis row = res
         indices = enumFromToP 0 (lengthP row - 1)
         
         res :: [: (Preds,Int) :]
-        res = [: minByP P.snd ps
+        res = [: minBySndP ps
                 | i <- indices,
                 let ps = mapP (!: i) pss :]
-        
 
+minBySndP :: [: (Preds,Int) :] -> (Preds,Int) 
 -- minByP :: (Ord b) => (a -> b) -> [: a :] -> a
 -- using monomorphic variant, since type-classes are not yet supported in dph
-minByP :: ((Preds,Int) -> Int) -> [: (Preds,Int) :] -> (Preds,Int)
-minByP f ps = if lengthP ps < 2 then ps !: 0 else result
+
+minBySndP ps = if lengthP ps < 2 then ps !: 0 else result
     where
+        f :: (Preds,Int) -> Int
+        f = \(a,b) -> b
         pivot = lengthP ps `div` 2
         psL  = sliceP 0 pivot ps
         psR = sliceP (pivot + 1) (lengthP ps - 1) ps
-        minBoth = [: minByP f ps' | ps' <- [: psL,psR :] :]
+        minBoth = [: minBySndP ps' | ps' <- [: psL,psR :] :]
         minL = minBoth !: 0
         minR = minBoth !: 1
         result = if f minL < f minR

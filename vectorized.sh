@@ -18,7 +18,7 @@
 #       -dstg-stats    -dverbose-core2core    -dverbose-stg2stg   -dshow-passes
 #       -dfaststring-stats
 
-     # -ddump-rule-firings  -ddump-vect -dshow-passes \
+     # -ddump-rule-firings  -ddump-vect \
      # -rtsopts -threaded -fcpr-off -fno-liberate-case
      
 ghc -c \
