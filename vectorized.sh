@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Usage:
+# ./vectorized.sh -fno-code Algo
+# ./vectorized.sh "" ShortestPath
+# ./vectorized.sh "" HistogramBalance
 
 #  -dcore-lint    -ddump-to-file    -ddump-asm    -ddump-bcos   -ddump-cmm
 #       -ddump-core-stats  -ddump-cpranal  -ddump-cse  -ddump-deriv   -ddump-ds
@@ -20,11 +24,23 @@
 
      # -ddump-rule-firings  -ddump-vect \
      # -rtsopts -threaded -fcpr-off -fno-liberate-case
-     
+
+NAME="Algo"
+SUF=".hs"
+INFIX=".vect"
+
+
+if [ -z $2 ]; then
+    A=""
+else
+    NAME=$2
+fi
+
 ghc -c \
      -Odph -package dph-lifted-vseg \
      -ddump-vect \
      -dsuppress-idinfo \
      -dsuppress-coercions -dsuppress-type-applications \
      -dsuppress-uniques -dsuppress-module-prefixes \
-     "$1" -O4 Algo.hs > Algo.vect.hs
+     "$1" -O4 "$NAME$SUF" > "$NAME$INFIX$SUF"
+
