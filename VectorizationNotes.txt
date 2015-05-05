@@ -1,0 +1,46 @@
+
+Naming conventions.
+
+mapP
+  is the parallel array variant of map.
+  it operates on user-arrays [: a :]
+
+lengthPA
+  is the parallel array variant of lengthP which
+  operates on the type-dependent representation
+
+mapPV is the vectorized mapP function
+
+mapPS is the concrete scalar version in mapPV
+mapPL is the concrete lifted version in mapPV
+
+Let expresion vectorization:
+V[ let a = b in c ] = (\a -> V[c]) $: V[b]
+  Proof see #11
+  
+Vectorization of an applied lambda:
+V[ (\a -> c) b] = (\a -> V[c]) $: V[b]
+
+V[ f ] = V[ \a -> b ] where f is declared top-level
+  V[ f ] = V[ Clo () (\() a -> V[b]) (\(ATup0 n) a -> L[b] n) ]
+
+Innerhalb eines mapP wird ide scalare Variante nicht mehr benötigt.
+mapP f xs wird immer fL verwenden (siehe Core of flattening). 
+
+
+Core of flattening - Vectorized mapP: [Harness2008 Page 20-21]
+
+mapPV :: (a :-> b) :-> PA a :-> PA b
+mapPV = Clo
+          ()
+          (\() f -> Clo f mapPS mapPL)
+          (\() fs -> AClo fs mapPS mapPL)
+
+mapPS :: (a :-> b) -> PA a -> PA b
+mapPS (Clo env _ fl) xss =
+  fl (replicatePA (lengthPA xss) env) xss
+
+mapPL :: PA (A :-> b) -> PA (PA a) -> PA (PA b)
+mapPL (AClo env _ fl) xss =
+  unconcatPA xss (fl (expandPA xss env) (concatPA xss))
+
