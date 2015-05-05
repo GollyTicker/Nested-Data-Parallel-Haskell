@@ -1,5 +1,5 @@
 {-# LANGUAGE ParallelArrays #-}
-{-# OPTIONS_GHC -fvectorise #-}
+-- {-# OPTIONS_GHC -fvectorise #-}
 
 -- The fully vectorized Module using Parallel Arrays
 
@@ -48,7 +48,7 @@ normalize :: Int {-a0-} -> Int {-a(gmax)-} -> AkkuHist Int -> AkkuHist Double
 normalize a0' agmax' as =
     let a0 = P.fromIntegral a0'
         agmax = P.fromIntegral agmax'
-        divisor = a0 D.- agmax
+        divisor = agmax D.- a0
     in  [: (P.fromIntegral freq' D.- a0) D./ divisor | freq' <- as :]
 
 scale :: Int {-gmax-} -> AkkuHist Double -> AkkuHist Int
