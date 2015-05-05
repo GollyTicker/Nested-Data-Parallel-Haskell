@@ -22,7 +22,12 @@ Vectorization of an applied lambda:
 V[ (\a -> c) b] = (\a -> V[c]) $: V[b]
 
 V[ f ] = V[ \a -> b ] where f is declared top-level
-  V[ f ] = V[ Clo () (\() a -> V[b]) (\(ATup0 n) a -> L[b] n) ]
+V[ f ] =
+  Clo {
+     env = ()
+    ,scalar = \() a -> V[b]
+    ,lifted = \(ATup0 n) a -> L[b] n
+  }
 
 Innerhalb eines mapP wird ide scalare Variante nicht mehr benötigt.
 mapP f xs wird immer fL verwenden (siehe Core of flattening). 

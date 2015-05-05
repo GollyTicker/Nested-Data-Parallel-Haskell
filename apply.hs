@@ -127,8 +127,8 @@ L[\g -> as !: g] n
 		}
 
 -- final form before inlining
-apply7 :: PA Int :-> PAImage Int :-> PAImage Int
-apply7 =
+applyV :: PA Int :-> PAImage Int :-> PAImage Int
+applyV =
 	Clo {
 		 env = ()
 		,lifted = (...ignored inside context...)

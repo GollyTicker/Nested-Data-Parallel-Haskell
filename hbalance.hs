@@ -167,9 +167,9 @@ hbalance6 =
                         $: (V[normalize] $: headPV a $: lastPV a $: a)
                      )
                   $: img
-              ])
+              )
                 $: (V[accu] $: h)
-          ])
+          )
             $: (V[hist] $: img)
     )
     }
