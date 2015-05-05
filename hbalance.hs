@@ -8,20 +8,6 @@ type AkkuHist a = [: a :]
 
 type PAImage a = PArray (PArray a)
 
-{-
-
-Let expresion vectorization:
-V[ let a = b in c ] = (\a -> V[c]) $: V[b]
-  Proof see #11
-  
-Vectorization of an applied lambda:
-V[ (\a -> c) b] = (\a -> V[c]) $: V[b]
-
-V[ f ] = V[ \a -> b ] where f is declared top-level
-  V[ f ] = V[ Clo () (\() a -> V[b]) (\ATup0 n a -> L[b] n) ]
-
--}
-
 -- Original version
 hbalance :: Image Int -> Image Int
 hbalance img =
@@ -35,9 +21,9 @@ hbalance img =
         img' = apply s img
     in  img'
 
--- desugared. Applying vectorization next.
-hbalance1 :: Image Int -> Image Int
-hbalance1 = \img ->
+-- desugared.
+hbalance0 :: Image Int -> Image Int
+hbalance0 = \img ->
   let 
     h :: Hist Int
     h = hist img
@@ -48,10 +34,25 @@ hbalance1 = \img ->
           (scale (lengthP h - 1) (normalize (headP a) (lastP a) a))
           img
 
--- Vectorize type and Lambda
+-- Vectorized type.
+hbalance1 :: PAImage Int :-> PAImage Int
+hbalance1 =
+  V[\img ->
+      let 
+        h :: Hist Int
+        h = hist img
+      in
+        let a :: AkkuHist Int
+            a = accu h
+        in  apply
+              (scale (lengthP h - 1) (normalize (headP a) (lastP a) a))
+              img
+  ]
+
+-- Vectorize lambda (bind new variable hbalance3)
 hbalance2 :: PAImage Int :-> PAImage Int
 hbalance2 =
-  Clo () (\() img -> hbalance3) (\ATup0 n img -> hbalance3L n)
+  Clo () (\() img -> hbalance3) (\(ATup0 n) img -> hbalance3L n)
 
 -- Vectorize let binding
 hbalance3 :: PAImage Int -- die Variable img ist hier gebunden an das hbalance1
@@ -149,19 +150,29 @@ scale4 =
           $: a)
 
 -- Vectorized hbalance (not including vectorized user-functions like hist)
+-- hbalance3L ist not being shown, since it is going to be
+-- cut-off in scalar applications.
 hbalance6 :: PAImage Int
 hbalance6 =
-    (\h -> 
-      (\a -> 
-        V[apply]
-            $: (V[scale]
-                  $: (minusV $: (lengthPV $: h) $: 1)
-                  $: (V[normalize] $: headPV a $: lastPV a $: a)
-               )
-            $: img
-        ])
-          $: (V[accu] $: h)
-    ])
-      $: (V[hist] $: img)
+  Clo {
+     env = ()
+    ,lifted = (\(ATup0 n) img -> hbalance3L n)
+    ,scalar =
+      (\() img ->
+        (\h -> 
+            (\a -> 
+              V[apply]
+                  $: (V[scale]
+                        $: (minusV $: (lengthPV $: h) $: 1)
+                        $: (V[normalize] $: headPV a $: lastPV a $: a)
+                     )
+                  $: img
+              ])
+                $: (V[accu] $: h)
+          ])
+            $: (V[hist] $: img)
+    )
+    }
+    
 
 

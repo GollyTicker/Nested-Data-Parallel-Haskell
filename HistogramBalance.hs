@@ -55,7 +55,7 @@ scale :: Int {-gmax-} -> AkkuHist Double -> AkkuHist Int
 scale gmax as = [: P.floor (a D.* (P.fromIntegral gmax)) |  a <- as :]
 
 apply :: AkkuHist Int -> Image Int -> Image Int
-apply as img = mapP (mapP (\g -> as !: g )) img
+apply as img = mapP (mapP (as !:)) img
 
 
 
