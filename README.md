@@ -12,7 +12,7 @@ Installation of NDPH (as worked on Ubuntu 14.04)
 4. Add the current llvm into your path: e.g. `/usr/lib/llvm-3.4/bin` into `/etc/environment` 
 5. Install DPH: `cabal install dph-examples`
 5. Specify the used DPH interface: `ghc-pkg expose dph-lifted-vseg-0.7.0.1`
-6. Install Juicy Pixels: `cabal install juicypixels`
+6. Install vector-strategies: `cabal install vector-strategies`
 
 
 Compiling
