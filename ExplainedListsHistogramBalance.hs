@@ -1,6 +1,6 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
-module ListHistogramBalance (
+module ExplainedListHistogramBalance (
         hbalance
     ) where
 
@@ -24,6 +24,16 @@ img =
     ,[6,6,1,1,1,1]
    ]
 
+expectedImage :: Image Int
+expectedImage = 
+  [
+     [4,4,4,4,4,4]
+    ,[4,7,7,4,4,4]
+    ,[5,5,5,0,4,0]
+    ,[5,4,4,0,4,0]
+    ,[7,7,4,4,4,4]
+  ]
+
 gmax :: Int
 gmax = 7 -- höchst möglicher Bildwert. in diesem Fall sind es 4 bit Bilder
 
@@ -31,7 +41,11 @@ printImg :: Show a => Image a -> IO ()
 printImg = putStrLn . intercalate "\n" . map (concat . map show)
 
 main :: IO ()
-main = hbalance img >> return ()
+main = do
+  img' <- hbalance img
+  if img' == expectedImage
+    then putStrLn "Balancing correct."
+    else putStrLn "  ## Balancing incorrect! ##  "
 
 hbalance :: Image Int -> IO (Image Int)
 hbalance img =
