@@ -1,17 +1,23 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
-module ListHistogramBalance (
-        main,
-        hbalance
-    ) where
-
+module ListHistogramBalance (main,hbalance) where
 
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
 import Prelude hiding (scanl)
 import Data.List (intercalate)
 
-type Image a = [[a]]
+main :: IO ()
+main = do
+  putStrLn "Original Image:"
+  printImg img
+  putStrLn "Balanced Image:"
+  printImg (hbalance img)
+
+type Image a  = [[a]]
+type Many a   = [a]
+
+
 type Hist a = Map Int a
 type AkkuHist a = Map Int a
 
@@ -25,18 +31,11 @@ img =
     ,[6,6,1,1,1,1]
    ]
 
-main :: IO ()
-main = do
-  putStrLn "Original Image:"
-  printImg img
-  putStrLn "Balanced Image:"
-  printImg (hbalance img)
-  
 images :: [Image Int]
 images = replicate 1000 img
 
-work :: (Image Int, [Image Int])
-work = (hbalance img, map hbalance images)
+hbalanceBulk :: Many (Image Int) -> Many (Image Int)
+hbalanceBulk = map hbalance
 
 hbalance :: Image Int -> Image Int
 hbalance img =
@@ -71,7 +70,8 @@ scale gmax = M.map (\d -> floor (d * fromIntegral gmax))
 apply :: AkkuHist Int -> Image Int -> Image Int
 apply as img = map (map (as M.!)) img
 
---
+
+-- Utilities
 
 {-
 mapAccum :: (a -> b -> (a,c)) -> a -> Map k b -> (a, Map k c)
