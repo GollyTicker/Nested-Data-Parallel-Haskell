@@ -11,6 +11,7 @@ module Utils (
     ,groupP
     ,sortP
     ,scanlP
+    ,sparseToDenseP
     )
     where
 
@@ -25,6 +26,9 @@ groupP = groupP
 
 sortP :: Ord a => [:a:] -> [:a:]
 sortP = sortP
+
+sparseToDenseP :: Int -> a -> [: (Int,a) :] -> [: a :]
+sparseToDenseP = sparseToDenseP
 
 scanlP :: (a -> b -> b) -> b -> [:a:] -> [:b:]
 scanlP = scanlP

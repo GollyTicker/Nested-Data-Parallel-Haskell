@@ -1,10 +1,11 @@
 {-# LANGUAGE ParallelArrays #-}
--- {-# OPTIONS_GHC -fvectorise #-}
+{-# OPTIONS_GHC -fvectorise #-}
 
--- The fully vectorized Module using Parallel Arrays
+-- The data parallel variant using Nested Data Parallelism in Haskell
 
 module HistogramBalance (
-        hbalance
+        hbalance,
+        hbalanceBulk
     ) where
  
 import qualified Prelude as P
@@ -14,13 +15,22 @@ import Data.Array.Parallel.Prelude.Int
 import qualified Data.Array.Parallel.Prelude.Double as D
 
 import Utils
+{-
+Es gibt die freie Entscheidung hierbei, ob das
+Histogram als Map [:(Int,a):] oder als dense Array [: a :]
+realisiert werden soll. 
+-}
 
+type Many a  = [: a :]
 type Image a = [:[: a :]:]
+
 type Hist a = [: a :]
 type AkkuHist a = [: a :]
 
 (.) = (P..)
-undefined = P.undefined
+
+hbalanceBulk :: Many (Image Int) -> Many (Image Int)
+hbalanceBulk = mapP hbalance
 
 hbalance :: Image Int -> Image Int
 hbalance img =
@@ -28,18 +38,35 @@ hbalance img =
         a = accu h
         a0 = headP a
         agmax = lastP a
-        gmax = lengthP h - 1
         n = normalize a0 agmax a
         s = scale gmax n
         img' = apply s img
     in  img'
 
+gmax :: Int
+gmax = 255      -- der maximale Grauwert
+
+-- TODO: hist und hbalance vectorized updaten!
+
 hist :: Image Int -> Hist Int
 hist = 
-    mapP sumP
+    sparseToDenseP (gmax+1) 0
+    . mapP (\g -> (headP g,lengthP g))
     . groupP
     . sortP
     . concatP
+
+{-
+
+sparseToDenseP :: Enum e => e -> a -> [: (e,a) :] -> [: a :]
+sparseToDenseP              many init map            result
+sparseToDenseP 0 7 9 [: (1,5),(2,4),(6,7) :] == [: 0,5,4,0,0,0,7,0 :]
+
+sparseToDense n z map creates an array of length n where the element
+at the index i has x if (i,x) is in the map, or z otherwise.
+In effect it turns a sparse vector to a dense one
+
+-}
 
 accu :: Hist Int -> AkkuHist Int
 accu = scanlP (+) 0
