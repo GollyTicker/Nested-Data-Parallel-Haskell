@@ -1,6 +1,6 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
-module ListHistogramBalance (main,hbalance,hbalanceBulk) where
+module ListHistogramBalance (main,hbalance,hbalanceBulk,img) where
 
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)

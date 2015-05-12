@@ -1,6 +1,8 @@
 
 -- Define the functions each implementation has to provide
 
+module MyImplHistogramBalance (hbalance,hbalanceBulk) where
+
 type Image a  -- the implementation type of Images can be chosed
 type Many a   -- the implementation of the bulk of iamges xan be chosed
 
