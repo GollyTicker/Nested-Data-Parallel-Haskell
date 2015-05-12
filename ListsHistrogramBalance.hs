@@ -25,9 +25,6 @@ img =
     ,[6,6,1,1,1,1]
    ]
 
-gmax :: Int
-gmax = 7 -- höchst möglicher Bildwert. in diesem Fall sind es 4 bit Bilder
-
 main :: IO ()
 main = do
   putStrLn "Original Image:"
@@ -35,6 +32,11 @@ main = do
   putStrLn "Balanced Image:"
   printImg (hbalance img)
   
+images :: [Image Int]
+images = replicate 1000 img
+
+work :: (Image Int, [Image Int])
+work = (hbalance img, map hbalance images)
 
 hbalance :: Image Int -> Image Int
 hbalance img =
@@ -47,6 +49,8 @@ hbalance img =
       img' = apply s img
   in img'
 
+gmax :: Int
+gmax = 7 -- höchst möglicher Bildwert. in diesem Fall sind es 4 bit Bilder
 
 hist :: Image Int -> Hist Int
 hist = foldr (\i -> M.insertWith (+) i 1) M.empty . concat
