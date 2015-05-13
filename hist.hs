@@ -15,20 +15,24 @@ context = (\h -> ...) $: (V[hist] $: img)
 -- Original definition
 hist :: Image Int -> Hist Int
 hist = 
-    mapP sumP
+    sparseToDenseP (gmax+1) 0
+    . mapP (\g -> (headP g,lengthP g))
     . groupP
     . sortP
     . concatP
 
+    
 -- desugared hist
 hist0 :: Image Int -> Hist Int
 hist0 =
   \img ->
-    mapP (\x -> sumP x)
-      (groupP
-        (sortP
-          (concatP
-            img
+    sparseToDenseP (gmax + 1) 0
+      (mapP (\g -> (headP g, lengthP g))
+        (groupP
+          (sortP
+            (concatP
+              img
+            )
           )
         )
       )
@@ -38,11 +42,13 @@ hist0 =
 hist1 :: PAImage Int :-> PA Int
 hist1 = 
   V[\img ->
-      mapP (\x -> sumP x)
-        (groupP
-          (sortP
-            (concatP
-              img
+      sparseToDenseP (gmax + 1) 0
+        (mapP (\g -> (headP g, lengthP g))
+          (groupP
+            (sortP
+              (concatP
+                img
+              )
             )
           )
         )
@@ -53,11 +59,13 @@ hist2 :: PAImage Int :-> PA Int
 hist2 = 
   Clo () (\() img -> V[b]) (\(ATup0 n) img -> L[b] n)
   where b = 
-          mapP (\x -> sumP x)
-            (groupP
-              (sortP
-                (concatP
-                  img
+          sparseToDenseP (gmax + 1) 0
+            (mapP (\g -> (headP g, lengthP g))
+              (groupP
+                (sortP
+                  (concatP
+                    img
+                  )
                 )
               )
             )
@@ -66,11 +74,13 @@ hist2 =
 hist3 :: PA Int
 hist3 =
   V[
-    mapP (\x -> sumP x)
-      (groupP
-        (sortP
-          (concatP
-            img
+    sparseToDenseP (gmax + 1) 0
+      (mapP (\g -> (headP g, lengthP g))
+        (groupP
+          (sortP
+            (concatP
+              img
+            )
           )
         )
       )
@@ -79,38 +89,47 @@ hist3 =
 -- vector apply
 hist3 :: PA Int
 hist3 =
-  V[mapP]
-    $:  V[(\x -> sumP x)]
-    $:  V[(groupP
-            (sortP
-              (concatP
-                img
-              )
-            )
-        )]
+  V[sparseToDenseP]
+    $: (V[+] $: V[gmax] $: V[1])
+    $: V[0]
+    $: V[mapP (\g -> (headP g, lengthP g))
+         (groupP
+           (sortP
+             (concatP
+               img
+             )
+           )
+         )
+       ]
 
 -- vector apply (more)
 hist3 :: PA Int
 hist3 =
-  V[mapP]
-    $: V[(\x -> sumP x)]
-    $: V[groupP]
-        $: V[sortP]
-            $: V[concatP]
+  V[sparseToDenseP]
+    $: (V[+] $: V[gmax] $: V[1])
+    $: V[0]
+    $: V[mapP]
+       $: V[\g -> (,) (headP g) (lengthP g)]
+       $: V[groupP]
+          $: V[sortP]
+             $: V[concatP]
                 $: V[img]
 
 -- vector function, lambda
 hist3 :: PA Int
 hist3 =
-  mapPV
-    $: Clo {
-         env = ()
-        ,scalar = (...ignored inside mapP...)
-        ,lifted = \(ATup0 n) x -> replPA sumPV n $:L x
-       }
-    $: groupPV
-        $: sortPV
-            $: concatPV
+  sparseToDensePV
+    $: (plusIntV $: gmax $: 1)
+    $: 0
+    $: mapPV
+       $: Clo {
+            env = ()
+           ,scalar = (...ignored inside mapP...)
+           ,lifted = \(ATup0 n) g -> (,)L (replPA n headPV $:L g) (replPA n lengthPV $:L g)
+          }
+       $: groupPV
+          $: sortPV
+             $: concatPV
                 $: img
 
 
@@ -120,16 +139,23 @@ hist4 =
   Clo {
      env = ()
     ,scalar =
-      \() img ->
-        mapPV
-          $: Clo {
-               env = ()
-              ,scalar = (...ignored inside mapP...)
-              ,lifted = \(ATup0 n) x -> replPA sumPV n $:L x
-             }
-          $: groupPV
-              $: sortPV
-                  $: concatPV
+      \() img -> 
+        sparseToDensePV
+          $: (plusIntV $: gmax $: 1)
+          $: 0
+          $: mapPV
+             $: Clo {
+                  env = ()
+                 ,scalar = (...ignored inside mapP...)
+                 ,lifted =
+                    \(ATup0 n) g ->
+                      (,)L
+                        (replPA n headPV $:L g)
+                        (replPA n lengthPV $:L g)
+                }
+             $: groupPV
+                $: sortPV
+                   $: concatPV
                       $: img
     ,lifted = (...ignored in context...)
   }

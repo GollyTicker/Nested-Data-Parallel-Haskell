@@ -21,6 +21,14 @@ hbalance img =
         img' = apply s img
     in  img'
 
+gmax :: Int
+gmax = 255
+
+-- vectorized gmax
+gmax0 :: Int
+gmax0 = 225
+
+
 -- desugared.
 hbalance0 :: Image Int -> Image Int
 hbalance0 = \img ->

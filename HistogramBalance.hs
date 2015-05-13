@@ -46,8 +46,6 @@ hbalance img =
 gmax :: Int
 gmax = 255      -- der maximale Grauwert
 
--- TODO: hist und hbalance vectorized updaten!
-
 hist :: Image Int -> Hist Int
 hist = 
     sparseToDenseP (gmax+1) 0
@@ -65,6 +63,10 @@ sparseToDenseP 0 7 9 [: (1,5),(2,4),(6,7) :] == [: 0,5,4,0,0,0,7,0 :]
 sparseToDense n z map creates an array of length n where the element
 at the index i has x if (i,x) is in the map, or z otherwise.
 In effect it turns a sparse vector to a dense one
+
+O(many)
+Depth: 1
+Work: many + lengthP map
 
 -}
 
