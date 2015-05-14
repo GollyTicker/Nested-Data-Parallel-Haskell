@@ -19,73 +19,64 @@ accu :: Hist Int -> AkkuHist Int
 accu = scanlP (+) 0
 
 -- desugared accu
-accu0 :: AkkuHist Int -> AkkuHist Int
-accu0 = \xs -> scanlP (\x -> \y -> x + y) 0 xs
+accu0 :: [:Int:] -> [:Int:]
+accu0 = \xs -> scanlP (+) 0 xs
+{-
+  Note: desugaring (+) to (\x -> \y -> x + y)
+  is not nesessary. This is an optimization to
+  reduce the number of steps in the vectorization/lifting.
+-}
 
 
--- vector type, lambda
-accu0 :: PA Int :-> PA Int
-accu0 =
-  Clo {
-     env = ()
-    ,scalar = \() xs -> V[scanlP (\x -> \y -> x + y) 0 xs]
-    ,lifted = (...ignored inside context...)
-  }
+{-                LIFTED & VECTORIZED   ACCU      -}
 
--- vectorizing local expression
-V[scanlP (\x -> \y -> x + y) 0 xs]
-  -- vector apply
-  = V[scanlP]
-      $: V[\x -> \y -> x + y]
-      $: V[0]
-      $: V[xs]
-  -- vector apply
-  = scanlPV
-      $: V[\x -> \y -> x + y]
-      $: 0
-      $: xs
+L[accu] :: PA (PA Int :-> PA Int)
+  = L[\xs -> scanlP (+) 0 xs]
+  = AClo {
+       aenv = ()
+      ,ascalar = \() xs -> V[accuBody]
+      ,alifted = \(ATup0 n) xs -> L[accuBody] n
+    }
 
--- vectorizing local expression
-V[\x -> \y -> x + y]
-  -- double vector lambda
-  =
-    Clo {
-     env = ()
-    ,scalar =
-      \() x -> 
-        Clo {
-           env = (x)
-          ,scalar = \(x) y -> V[(+) x y]
-          ,lifted = (...ignored inside scanlP...)
-        }
-    ,lifted = (...ignored inside scanlP...)
-  }
+V[accu] :: PA Int :-> PA Int
+  = V[\xs -> scanlP (+) 0 xs]
+  = Clo {
+       env = ()
+      ,scalar = \() xs -> V[accuBody]
+      ,lifted = \(ATup0 n) xs -> L[accuBody] n
+    }
 
-V[(+) x y]
-  -- vector function, vector variables
-  = plusIntV $: x $: y
+accuBody :: AkkuHist Int
+accuBody = scanlP (+) 0 xs
 
--- final form before inlining
-accu1 :: PA Int :-> PA Int
-accu1 =
-  Clo {
-     env = ()
-    ,scalar =
-      \() xs ->
-        scanlPV
-          $: Clo {
-               env = ()
-              ,scalar =
-                \() x -> 
-                  Clo {
-                     env = (x)
-                    ,scalar = \(x) y -> plusIntV $: x $: y
-                    ,lifted = (...ignored inside scanlP...)
-                  }
-              ,lifted = (...ignored inside scanlP...)
-             }
-          $: 0
-          $: xs
-    ,lifted = (...ignored inside context...)
-  }
+{-                LIFTING & VECTORIZING ACCU BODY      -}
+V[accuBody]
+  = V[scanlP (+) 0 xs]
+  = scanlPV $: plusIntV $: 0 $: xs
+L[accuBody] n
+  = L[scanlP (+) 0 xs] n
+  = scanlPL $:L plusIntVL $:L replPA n 0 $:L xs
+
+
+{-            FINAL FORM BEFORE OPTIMIZATION      -}
+
+L[accu] :: PA (PA Int :-> PA Int)
+  = AClo {
+       aenv = ()
+      ,ascalar = \() xs -> V[accuBody]
+      ,alifted = \(ATup0 n) xs -> L[accuBody] n
+    }
+
+V[accu] :: PA Int :-> PA Int
+  = Clo {
+       env = ()
+      ,scalar = \() xs -> V[accuBody]
+      ,lifted = \(ATup0 n) xs -> L[accuBody] n
+    }
+
+V[accuBody] :: PA Int
+  = scanlPV $: plusIntV $: 0 $: xs
+
+L[accuBody] n :: PA (PA Int)
+  = scanlPL $:L plusIntVL $:L replPA n 0 $:L xs
 

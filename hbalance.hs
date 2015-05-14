@@ -235,45 +235,48 @@ scale4 =
           $: a)
 
 {-                    FINAL FORM BEFORE OPTIMIZATION       -}
-
--- Vectorized hbalance (not including vectorized user-functions like hist)
--- hbalance3L ist not being shown, since it is going to be
--- cut-off in scalar applications.
-hbalance3 :: PAImage Int
-hbalance3 =
-  Clo {
-     env = ()
-    ,lifted =
-      \(ATup0 n) img ->
-        (\h ->
-          (\a -> 
-            L[apply] n
-              $:L L[scale] n
-                    $:L gmax
-                    $:L L[normalize] n
-                          $:L (headPL $:L a)
-                          $:L (lastPL $:L a)
-                          $:L a
-              $:L img
-          ) (L[accu] n $:L h)
-        ) (L[hist] n $:L img)
-      
-    ,scalar =
-      \() img ->
-        (\h -> 
-            (\a -> 
-              V[apply]
-                  $: (V[scale]
-                        $: gmax
-                        $: V[normalize]
-                              $: (headPV $: a)
-                              $: (lastPV $: a)
-                              $: a
-                     )
-                  $: img
-              ) (V[accu] $: h)
-          ) (V[hist] $: img)
+V[hbalance] :: PA (PA Int) :-> PA (PA Int)
+  = Clo {
+       env = ()
+      ,scalar = V[hbalanceBody]
+      ,lifted = L[hbalanceBody]
     }
-    
 
+L[hbalance] :: PA ( PA (PA Int) :-> PA (PA Int) )
+  = AClo {
+       aenv = ()
+      ,ascalar = V[hbalanceBody]
+      ,alifted = L[hbalanceBody]
+    }
+
+V[hbalanceBody] :: PA (PA Int) -> PA (PA Int)
+  = \() img ->
+      (\h -> 
+        (\a -> 
+          V[apply]
+              $: (V[scale]
+                    $: gmax
+                    $: V[normalize]
+                          $: (headPV $: a)
+                          $: (lastPV $: a)
+                          $: a
+                 )
+              $: img
+          ) (V[accu] $: h)
+      ) (V[hist] $: img)
+
+L[hbalanceBody] :: PA (PA (PA Int))  ->  PA (PA (PA Int))
+  = \(ATup0 n) img ->
+      (\h ->
+        (\a -> 
+          L[apply] n
+            $:L L[scale] n
+                  $:L gmax
+                  $:L L[normalize] n
+                        $:L (headPL $:L a)
+                        $:L (lastPL $:L a)
+                        $:L a
+            $:L img
+        ) (L[accu] n $:L h)
+      ) (L[hist] n $:L img)
 

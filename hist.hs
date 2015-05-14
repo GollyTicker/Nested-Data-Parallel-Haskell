@@ -25,7 +25,7 @@ hist =
 
     
 -- desugared hist
-hist0 :: Image Int -> Hist Int
+hist0 :: [:[:Int:]:] -> Hist Int
 hist0 =
   \img ->
     sparseToDenseP (gmax + 1) 0
@@ -43,7 +43,7 @@ hist0 =
 {-                VECTORIZE HIST              -}
 
 -- vectorized type
-hist1 :: PAImage Int :-> PA Int
+hist1 :: PA (PA Int)) :-> PA Int
 hist1 = 
   V[\img ->
       sparseToDenseP (gmax + 1) 0
@@ -197,18 +197,16 @@ lambdaGL
 
 {-                FINAL FORMS BEFORE OPTIMIZATION        -}
 
-V[hist] :: PAImage Int :-> PA Int
-V[hist] = 
-  Clo {
-     env = ()
-    ,scalar = V[histBody]
-    ,lifted = (...ignored in context...)
-  }
+V[hist] :: PA (PA Int)) :-> PA Int
+  = Clo {
+       env = ()
+      ,scalar = V[histBody]
+      ,lifted = (...ignored in context...)
+    }
 
-L[hist]
-  = L[\img -> histBody]
+L[hist] :: PA ( PA (PA Int) :-> PA Int )
   = AClo {
        aenv = ATup0 n
-      ,ascalar = \() img -> V[histBody]
+      ,ascalar = (...ignored in context...)
       ,alifted = \(ATup0 n) img -> L[histBody]
     }
