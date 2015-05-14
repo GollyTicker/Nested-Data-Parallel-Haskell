@@ -168,7 +168,7 @@ L[histBody]
                   $:L concatPL
                       $:L img
       ]
- = L[histBody]
+ = L[histBody] :: PA (PA Int)
  =  sparseToDensePL
       $:L plusIntL $:L replPA n gmax $:L replPA n 1]
       $:L replPA n 0
@@ -185,7 +185,6 @@ L[histBody]
       ]
 
 {-                LIFTED LAMBDA G               -}
-
 lambdaGL
   = L[lambdaG]
   = L[\g -> (,) (headP g) (lengthP g)]

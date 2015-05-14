@@ -10,16 +10,16 @@ type PAImage a = PArray (PArray a)
 
 
 -- Original context
-context = applyV $: (V[scale] $: (...) $: (...))
-context = applyL $:L (L[scale] n $:L (...) $:L (...))
+contextV = applyV $: (V[scale] $: (...) $: (...))
+contextL = applyL $:L (L[scale] n $:L (...) $:L (...))
 
 -- Original definition
 -- (*) refers to double-multiplication
-scale :: Int -> AkkuHist Double -> AkkuHist Int
+scale :: Int -> [:Double:] -> [:Int:]
 scale gmax as = [: floor (a * fromIntegral gmax) |  a <- as :]
 
 -- desugared scale
-scale0 :: Int -> AkkuHist Double -> AkkuHist Int
+scale0 :: Int -> [:Double:] -> [:Int:]
 scale0 =
   \gmax ->
     \as ->
@@ -27,6 +27,7 @@ scale0 =
         (\a -> floor (fromIntegral gmax * a))
         as
 
+{-                    VECTORIZED & LIFTED SCALE       -}
 
 -- vectorized type
 scale1 :: Int :-> PA Double :-> PA Int
