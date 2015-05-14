@@ -60,3 +60,47 @@ mapPL :: PA (A :-> b) -> PA (PA a) -> PA (PA b)
 mapPL (AClo env _ fl) xss =
   unconcatPA xss (fl (expandPA xss env) (concatPA xss))
 
+
+
+                      REWRITE RULES
+
+
+"unitEnv" forall body xs.
+            (\(ATup0 n) xs' -> body )
+              (replPA (lengthPA xs) ())
+              xs
+            = (\n xs' -> body ) (lengthPA xs) xs
+
+
+
+
+
+"unitEnv" proof
+f :: PA () -> PA a -> PA a
+f (replPA (lengthPA xs) ()) xs
+  -- definition of lifted
+  = (\(ATup0 n) xs -> body )
+    (replPA (lengthPA xs) ())
+    xs
+  -- no need of Unit Environment-Variables
+  = (\n xs -> body ) (lengthPA xs) xs
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

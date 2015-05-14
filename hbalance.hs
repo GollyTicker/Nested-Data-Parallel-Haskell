@@ -9,11 +9,9 @@ type AkkuHist a = [: a :]
 type PAImage a = PA (PA a)
 
 -- Original context
-result = hbalance (... image ...)
+resultA = V[hbalance] $: V[... image ...]
 
-result = mapP hbalance (... parallel array of images ...)
-
--- We therefore have to use to scalar and lifted version of the function.
+resultB = mapPV $: V[hbalance] $: V[... parallel array of images ...]
 
 -- Original version
 hbalance :: Image Int -> Image Int
@@ -123,7 +121,7 @@ hbalanceBodyL3 n =
         (scale gmax (normalize (headP a) (lastP a) a))
         img
   
-{-                    HABALANVE BODY     APPLY           -}
+{-                    HABALANCE BODY     APPLY           -}
 L[applyBody]
   = L[apply]
       $:L L[scale gmax (normalize (headP a) (lastP a) a))]
@@ -242,14 +240,7 @@ V[hbalance] :: PA (PA Int) :-> PA (PA Int)
       ,lifted = L[hbalanceBody]
     }
 
-L[hbalance] :: PA ( PA (PA Int) :-> PA (PA Int) )
-  = AClo {
-       aenv = ()
-      ,ascalar = V[hbalanceBody]
-      ,alifted = L[hbalanceBody]
-    }
-
-V[hbalanceBody] :: PA (PA Int) -> PA (PA Int)
+V[hbalanceBody] :: () -> PA (PA Int) -> PA (PA Int)
   = \() img ->
       (\h -> 
         (\a -> 
@@ -265,7 +256,7 @@ V[hbalanceBody] :: PA (PA Int) -> PA (PA Int)
           ) (V[accu] $: h)
       ) (V[hist] $: img)
 
-L[hbalanceBody] :: PA (PA (PA Int))  ->  PA (PA (PA Int))
+L[hbalanceBody] :: PA () -> PA (PA (PA Int))  ->  PA (PA (PA Int))
   = \(ATup0 n) img ->
       (\h ->
         (\a -> 
@@ -279,4 +270,25 @@ L[hbalanceBody] :: PA (PA (PA Int))  ->  PA (PA (PA Int))
             $:L img
         ) (L[accu] n $:L h)
       ) (L[hist] n $:L img)
+
+
+
+{-              INLINING DEFINITIONS            -}
+
+-- let images :: PA (PA (PA Int)) be a parallel array of Images
+resultB = mapPV $: V[hbalance] $: img
+  -- definition of mapP and $:
+  = mapP1 () V[hbalance] $: img
+  -- definition of mapP1
+  = Clo (V[hbalance]) mapPS mapPL $: img
+  -- definition of $:
+  = mapPS V[hbalance] img
+  -- definition of V[hbalance]
+  = mapPS (Clo () V[hbalanceBody] L[hbalanceBody]) img
+  -- definition of mapPS
+  = L[hbalanceBody] (replPA (lengthPA images) ()) img
+  -- rewrite rule unitEnv
+  = (\n img -> (...)) (lengthPA img) img
+  
+
 
