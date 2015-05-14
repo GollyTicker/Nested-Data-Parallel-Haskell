@@ -10,7 +10,9 @@ type PAImage a = PArray (PArray a)
 
 
 -- Original context
-context = (\h -> ...) $: (V[hist] $: img)
+context = (\h -> ...) (V[hist] $: img)
+and
+context = (\h -> ...) (L[hist] $:L img)
 
 -- Original definition
 hist :: Image Int -> Hist Int

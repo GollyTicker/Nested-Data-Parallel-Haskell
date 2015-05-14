@@ -11,6 +11,7 @@ type PAImage a = PArray (PArray a)
 
 -- Original context
 context = applyV $: (V[scale] $: (...) $: (...))
+context = applyL $:L (L[scale] n $:L (...) $:L (...))
 
 -- Original definition
 -- (*) refers to double-multiplication

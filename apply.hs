@@ -11,6 +11,7 @@ type PAImage a = PArray (PArray a)
 
 -- Original context
 context = V[apply] $: (...) $: (...)
+context = L[apply] n $:L (...) $:L (...)
 
 -- Original definition
 apply :: AkkuHist Int -> Image Int -> Image Int

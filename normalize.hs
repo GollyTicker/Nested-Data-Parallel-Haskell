@@ -11,6 +11,7 @@ type PAImage a = PArray (PArray a)
 
 -- Original context
 context = (...) $: (V[normalize] $: (...) $: (...) $: (...))
+context = (...) $:L (L[normalize] n $:L (...) $:L (...) $:L (...))
 
 -- Original definition
 -- (-) and (/) refer to double-substraction and double-division

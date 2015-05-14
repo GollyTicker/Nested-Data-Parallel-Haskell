@@ -11,6 +11,7 @@ type PAImage a = PArray (PArray a)
 
 -- Original context
 context = (\a -> ...) (V[accu] $: h)
+context = (\a -> ...) (L[accu] n $:L h)
 
 -- Original definition
 -- (+) refers to double-multiplication
