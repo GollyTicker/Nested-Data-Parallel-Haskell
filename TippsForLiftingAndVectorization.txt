@@ -15,17 +15,19 @@ mapPS is the concrete scalar version in mapPV
 mapPL is the concrete lifted version in mapPV
 
 Let expresion vectorization:
-V[ let a = b in c ] = (\a -> V[c]) $: V[b]
+V[ let a = b in c ] = (\a -> V[c]) V[b]
   Proof see #11
 
 Let expression lifting:
+L[ let a = b in c ] n
 L[ (\a -> c) b ] n
   = L[\a -> c] $:L L[b]
   = AClo {
-       aenv = ATup k y1..yk
+       aenv = ATupk n y1..yk
       ,ascalar = \(y1..yk) a -> V[c]
-      ,alifted = \(ATupk n y1..ykk) a -> L[c] n
-    } $: L[b]
+      ,alifted = \(ATupk n y1..yk) a -> L[c] n
+    } $:L L[b] n
+  = (\a -> (L[c] n)) (L[b] n)
 
 Vectorization of an applied lambda:
 V[ (\a -> c) b] = (\a -> V[c]) $: V[b]

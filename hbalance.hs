@@ -70,9 +70,10 @@ hbalance2 :: PAImage Int :-> PAImage Int
 hbalance2 =
   Clo () (\() img -> hbalanceBody) (\(ATup0 n) img -> hbalanceBodyL n)
 
+
 {-                    HBALANCE BODY      LIFTED         -}
 hbalanceBodyL1 :: PA (PAImage Int)
-hbalanceBodyL1 n =    -- TODO: continue here!
+hbalanceBodyL1 n =
   L[let 
       h :: Hist Int
       h = hist img
@@ -83,6 +84,59 @@ hbalanceBodyL1 n =    -- TODO: continue here!
             (scale gmax (normalize (headP a) (lastP a) a))
             img
   ] n
+
+-- let expression lifting
+hbalanceBodyL2 :: PA (PAImage Int)
+hbalanceBodyL2 n =
+  (\h -> (L[lambdaA] n)) (L[hist img] n)
+  where
+    lambdaA = 
+      let a :: AkkuHist Int
+          a = accu h
+      in  apply
+            (scale gmax (normalize (headP a) (lastP a) a))
+            img
+
+-- let expression lifting
+hbalanceBodyL2 :: PA (PAImage Int)
+hbalanceBodyL2 n =
+  (\h -> L[lambdaA] n) (L[hist] $:L img)
+  where
+    lambdaA = 
+      let a :: AkkuHist Int
+          a = accu h
+      in  apply
+            (scale gmax (normalize (headP a) (lastP a) a))
+            img
+
+-- let expression lifting
+hbalanceBodyL3 :: PA (PAImage Int)
+hbalanceBodyL3 n =
+  (\h ->
+    (\a -> 
+      L[applyBody] n
+    ) (L[accu] n $:L h)
+  ) (L[hist] n $:L img)
+  where
+    applyBody =
+      apply
+        (scale gmax (normalize (headP a) (lastP a) a))
+        img
+  
+{-                    HABALANVE BODY     APPLY           -}
+L[applyBody]
+  = L[apply]
+      $:L L[scale gmax (normalize (headP a) (lastP a) a))]
+      $:L L[img]
+  = L[apply]
+      $:L L[scale]
+            $:L gmax
+            $:L L[normalize]
+                  $:L (headPL $:L a)
+                  $:L (lastPL $:L a)
+                  $:L a
+      $:L img
+
 
 {-                    HBALANCE BODY      SCALAR         -}
 
@@ -96,7 +150,7 @@ hbalanceBody1 =
         in  apply
               (scale gmax (normalize (headP a) (lastP a) a))
               img
-    ]) $: V[hist img]
+    ]) V[hist img]
 
 -- Vectorize let binding
 hbalanceBody2 :: PAImage Int
@@ -106,8 +160,8 @@ hbalanceBody2 =
         V[apply
             (scale gmax (normalize (headP a) (lastP a) a))
             img
-        ]) $: V[accu h]
-    ]) $: V[hist img]
+        ]) V[accu h]
+    ]) V[hist img]
   
 -- Vectorize function application
 hbalanceBody3 :: PAImage Int
@@ -117,10 +171,8 @@ hbalanceBody3 =
         V[apply]
             $: V[(scale gmax (normalize (headP a) (lastP a) a))]
             $: V[img]
-        ])
-          $: (V[accu] $: V[h])
-    ])
-      $: (V[hist] $: V[img])
+        ]) (V[accu] $: V[h])
+    ]) (V[hist] $: V[img])
 
 -- Vectorize img variable (locally bound in hbalance1)
 -- Vectorize h variable
@@ -132,10 +184,8 @@ hbalanceBody4 =
         V[apply]
             $: scale1
             $: img
-        ])
-          $: (V[accu] $: h)
-    ])
-      $: (V[hist] $: img)
+        ]) (V[accu] $: h)
+    ]) (V[hist] $: img)
 
 
 
@@ -180,8 +230,8 @@ scale4 =
   V[scale]
     $: gmax
     $: (V[normalize]
-          $: headPV a
-          $: lastPV a
+          $: headPV $: a
+          $: lastPV $: a
           $: a)
 
 {-                    FINAL FORM BEFORE OPTIMIZATION       -}
@@ -193,22 +243,36 @@ hbalance3 :: PAImage Int
 hbalance3 =
   Clo {
      env = ()
-    ,lifted = (\(ATup0 n) img -> hbalanceBodyL n)
+    ,lifted =
+      \(ATup0 n) img ->
+        (\h ->
+          (\a -> 
+            L[apply] n
+              $:L L[scale] n
+                    $:L gmax
+                    $:L L[normalize] n
+                          $:L (headPL $:L a)
+                          $:L (lastPL $:L a)
+                          $:L a
+              $:L img
+          ) (L[accu] n $:L h)
+        ) (L[hist] n $:L img)
+      
     ,scalar =
-      (\() img ->
+      \() img ->
         (\h -> 
             (\a -> 
               V[apply]
                   $: (V[scale]
                         $: gmax
-                        $: (V[normalize] $: headPV a $: lastPV a $: a)
+                        $: V[normalize]
+                              $: (headPV $: a)
+                              $: (lastPV $: a)
+                              $: a
                      )
                   $: img
-              )
-                $: (V[accu] $: h)
-          )
-            $: (V[hist] $: img)
-    )
+              ) (V[accu] $: h)
+          ) (V[hist] $: img)
     }
     
 
