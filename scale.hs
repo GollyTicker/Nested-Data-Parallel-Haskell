@@ -6,12 +6,12 @@ type Image a = [:[: a :]:]
 type Hist a = [: a :]
 type AkkuHist a = [: a :]
 
-type PAImage a = PArray (PArray a)
-
 
 -- Original context
-contextV = applyV $: (V[scale] $: (...) $: (...))
-contextL = applyL $:L (L[scale] n $:L (...) $:L (...))
+contextV = V[scale] $: someInt $: someNormHist
+contextL = L[scale] n $:L someInt $:L someNormHist
+-- Note: someInt appears in scalar and lifted variant.
+-- despite the equal variable name, both have different types signatures!
 
 -- Original definition
 -- (*) refers to double-multiplication
@@ -80,35 +80,49 @@ L[floor (fromIntegral gmax * a)] n
       $:L multDoubleV
             $:L replPA fromIntegralV n
                   $:L gmax
-            $:L a n
+            $:L a
 
--- final form before inlining
-scale2 :: Int :-> PA Double :-> PA Int
-scale2 = 
+{-                  VECTORIZED SCALE           -}
+V[scale] :: Int :-> PA Double :-> PA Int
+V[scale] = 
   Clo {
      env = ()
-    ,scalar =
-      \() gmax ->
-        Clo {
-           env = (gmax)
-          ,scalar =
-            \(gmax) as ->
-              mapPV
-                $: Clo {
-                     env = (gmax)
-                    ,lifted =
-                      \(ATup1 n gmax) a ->
-                        replPA floorV n
-                          $:L multDoubleV
-                                $:L replPA fromIntegralV n
-                                      $:L gmax
-                                $:L a n
-                                    $: as
-                    ,scalar = (...ignored inside mapP...)
-                   }
-          ,lifted = (...ignored in context...)
-        }
+    ,scalar = \() gmax -> V[body1]
     ,lifted = (...ignored in context...)
   }
 
+V[body1] =
+  Clo {
+     env = (gmax)
+    ,scalar = \(gmax) as -> V[body2]
+    ,lifted = (...ignored in context...)
+  }
 
+V[body2] =
+  mapPV
+    $: Clo {
+         env = (gmax)
+        ,lifted = \(ATup1 n gmax) a -> L[body3]
+        ,scalar = (...ignored inside mapP...)
+       }
+
+L[body3] =
+  replPA floorV n
+    $:L multDoubleV
+        $:L replPA fromIntegralV n
+            $:L gmax
+        $:L a
+
+{-            INLINING LIFTED & VECTORIZED SCALE              -}
+with scale = 
+        \gmax ->
+          \as ->
+            mapP
+              (\a -> floor (fromIntegral gmax * a))
+              as
+
+contextV = V[scale] $: someInt $: someNormHist
+
+contextL = L[scale] n $:L someInt $:L someNormHist
+
+-- TODO: einsetzten

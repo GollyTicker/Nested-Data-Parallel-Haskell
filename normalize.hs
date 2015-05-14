@@ -10,8 +10,8 @@ type PAImage a = PArray (PArray a)
 
 
 -- Original context
-context = (...) $: (V[normalize] $: (...) $: (...) $: (...))
-context = (...) $:L (L[normalize] n $:L (...) $:L (...) $:L (...))
+contextV = V[normalize] $: someInt1 $: someInt2 $: someAccu
+contextL = L[normalize] n $:L someInt1 $:L someInt2 $:L someAccu
 
 -- Original definition
 -- (-) and (/) refer to double-substraction and double-division
@@ -167,6 +167,25 @@ normalize2 =
   }
 
 
+
+{-            INLINING LIFTED & VECTORIZED SCALE              -}
+with normalize = 
+      \a0' ->
+        \agmax' ->
+          \as ->
+            let a0 = fromIntegral a0'
+            in  let divisor = (fromIntegral agmax') - a0
+                in  mapP
+                      (\a ->
+                         (fromIntegral a - a0) / divisor
+                      )
+                      as
+
+contextV = V[normalize] $: someInt1 $: someInt2 $: someAccu
+
+contextL = L[normalize] n $:L someInt1 $:L someInt2 $:L someAccu
+
+-- TODO: einsetzten!
 
 
 
