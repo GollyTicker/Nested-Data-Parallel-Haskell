@@ -40,6 +40,8 @@ hist0 =
       )
 
 
+{-                VECTORIZE HIST              -}
+
 -- vectorized type
 hist1 :: PAImage Int :-> PA Int
 hist1 = 
@@ -60,7 +62,7 @@ hist1 =
 hist2 :: PAImage Int :-> PA Int
 hist2 = 
   Clo () (\() img -> V[b]) (\(ATup0 n) img -> L[b] n)
-  where b = 
+  where histBody = 
           sparseToDenseP (gmax + 1) 0
             (mapP (\g -> (headP g, lengthP g))
               (groupP
@@ -71,10 +73,20 @@ hist2 =
                 )
               )
             )
-  let hist3 = V[b]
+  let hist3 = V[histBody]
+{-                LIFTED HIST                      -}
+L[hist]
+  = L[\img -> histBody]
+  = AClo {
+       aenv = ATup0 n
+      ,ascalar = \() img -> V[histBody]
+      ,alifted = \(ATup0 n) img -> L[histBody]
+    }
 
-hist3 :: PA Int
-hist3 =
+{-                VECTORIZE HIST BODY              -}
+
+V[histBody] :: PA Int
+V[histBody] =
   V[
     sparseToDenseP (gmax + 1) 0
       (mapP (\g -> (headP g, lengthP g))
@@ -89,8 +101,8 @@ hist3 =
   ]
 
 -- vector apply
-hist3 :: PA Int
-hist3 =
+V[histBody] :: PA Int
+V[histBody] =
   V[sparseToDenseP]
     $: (V[+] $: V[gmax] $: V[1])
     $: V[0]
@@ -105,8 +117,8 @@ hist3 =
        ]
 
 -- vector apply (more)
-hist3 :: PA Int
-hist3 =
+V[histBody] :: PA Int
+V[histBody] =
   V[sparseToDenseP]
     $: (V[+] $: V[gmax] $: V[1])
     $: V[0]
@@ -118,8 +130,8 @@ hist3 =
                 $: V[img]
 
 -- vector function, lambda
-hist3 :: PA Int
-hist3 =
+V[histBody] :: PA Int
+V[histBody] =
   sparseToDensePV
     $: (plusIntV $: gmax $: 1)
     $: 0
@@ -134,31 +146,69 @@ hist3 =
              $: concatPV
                 $: img
 
+{-                LIFTED HIST BODY            -}
+L[histBody]
+ =  sparseToDensePL
+      $:L L[(+) $:L replPA n gmax $:L replPA n 1]
+      $:L replPA n 0
+      $: mapPL
+          $:L L[\g -> (,) (headP g) (lengthP g)]
+          $:L L[groupP]
+              $:L L[sortP]
+                  $:L L[concatP]
+                      $:L L[img]
+      ]
+ =  sparseToDensePL
+      $:L plusIntL $:L replPA n gmax $:L replPA n 1]
+      $:L replPA n 0
+      $:L mapPL
+          $:L L[\g -> (,) (headP g) (lengthP g)]
+          $:L groupPL
+              $:L sortPL
+                  $:L concatPL
+                      $:L img
+      ]
+ = L[histBody]
+ =  sparseToDensePL
+      $:L plusIntL $:L replPA n gmax $:L replPA n 1]
+      $:L replPA n 0
+      $:L mapPL
+          $:L AClo {
+                 aenv = ATup0 n
+                ,ascalar = (...ignored inside mapPL...)
+                ,alifted = lambdaGL
+              }
+          $:L groupPL
+              $:L sortPL
+                  $:L concatPL
+                      $:L img
+      ]
 
--- final form before inlining
-hist4 :: PAImage Int :-> PA Int
-hist4 = 
+{-                LIFTED LAMBDA G               -}
+
+lambdaGL
+  = L[lambdaG]
+  = L[\g -> (,) (headP g) (lengthP g)]
+  = \(ATup0 n) g ->
+      (,)L
+        (replPA n headPV $:L g)
+        (replPA n lengthPV $:L g)
+
+
+{-                FINAL FORMS BEFORE OPTIMIZATION        -}
+
+V[hist] :: PAImage Int :-> PA Int
+V[hist] = 
   Clo {
      env = ()
-    ,scalar =
-      \() img -> 
-        sparseToDensePV
-          $: (plusIntV $: gmax $: 1)
-          $: 0
-          $: mapPV
-             $: Clo {
-                  env = ()
-                 ,scalar = (...ignored inside mapP...)
-                 ,lifted =
-                    \(ATup0 n) g ->
-                      (,)L
-                        (replPA n headPV $:L g)
-                        (replPA n lengthPV $:L g)
-                }
-             $: groupPV
-                $: sortPV
-                   $: concatPV
-                      $: img
+    ,scalar = V[histBody]
     ,lifted = (...ignored in context...)
   }
-  
+
+L[hist]
+  = L[\img -> histBody]
+  = AClo {
+       aenv = ATup0 n
+      ,ascalar = \() img -> V[histBody]
+      ,alifted = \(ATup0 n) img -> L[histBody]
+    }
