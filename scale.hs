@@ -72,12 +72,12 @@ V[mapP (\a -> floor (fromIntegral gmax * a)) as]
 -- lift local expression
 L[floor (fromIntegral gmax * a)] n
   -- lift function
-  = replPA floorV n $:L L[(*) (fromIntegral gmax) a] n
+  = replPA n floorV $:L L[(*) (fromIntegral gmax) a] n
   -- lift function
-  = replPA floorV n $:L (multDoubleV $:L L[(fromIntegral gmax)] n $:L L[a] n)
+  = replPA n floorV $:L (replPA n multDoubleV $:L L[(fromIntegral gmax)] n $:L L[a] n)
   -- lift function, lift variables
-  = replPA floorV n
-      $:L multDoubleV
+  = replPA n floorV
+      $:L replPA n multDoubleV
             $:L replPA fromIntegralV n
                   $:L gmax
             $:L a
@@ -108,8 +108,8 @@ V[body2] =
     $: as
 
 L[body3] =
-  replPA floorV n
-    $:L multDoubleV
+  replPA n floorV
+    $:L replPA n multDoubleV
         $:L replPA fromIntegralV n
             $:L gmax
         $:L a
@@ -160,7 +160,7 @@ contextV
       mapPV
         $: Clo {
              env = (someInt)
-            ,lifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+            ,lifted = \(ATup1 n gmax) a -> replPA n floorV $:L (replPA n multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
             ,scalar = (...ignored inside mapP...)
            }
         $: as
@@ -170,7 +170,7 @@ contextV
   = mapPV
       $: Clo {
            env = (someInt)
-          ,lifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+          ,lifted = \(ATup1 n gmax) a -> replPA n floorV $:L (replPA n multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
           ,scalar = (...ignored inside mapP...)
          }
       $: someNormHist
@@ -196,7 +196,7 @@ contextL n
       replPA n mapPV
         $:L AClo {
              aenv = ATup1 n someInt
-            ,alifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+            ,alifted = \(ATup1 n gmax) a -> replPA n floorV $:L (replPA n multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
             ,scalar = (...ignored inside mapPV...)
            }
         $:L as
@@ -205,7 +205,7 @@ contextL n
   = replPA n mapPV
       $:L AClo {
            aenv = ATup1 n someInt
-          ,alifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+          ,alifted = \(ATup1 n gmax) a -> replPA n floorV $:L (replPA n multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
           ,scalar = (...ignored inside mapPV...)
          }
       $:L someNormHist
@@ -217,7 +217,7 @@ contextV
   = mapPV
       $: Clo {
            env = (someInt)
-          ,lifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+          ,lifted = \(ATup1 n gmax) a -> replPA n floorV $:L (replPA n multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
           ,scalar = (...ignored inside mapP...)
          }
       $: someNormHist
@@ -227,7 +227,7 @@ contextL
   = replPA n mapPV
       $:L AClo {
            aenv = ATup1 n someInt
-          ,alifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+          ,alifted = \(ATup1 n gmax) a -> replPA n floorV $:L (replPA n multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
           ,scalar = (...ignored inside mapPV...)
          }
       $:L someNormHist

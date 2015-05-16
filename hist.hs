@@ -210,7 +210,7 @@ L[hist] :: PA ( PA (PA Int) :-> PA Int )
     }
 
 
-{-              FINAL VERISONS HIST IN CONTEXT            -}
+{-              FINAL FORM WITH HIST IN CONTEXT            -}
 
 contextV
   = V[hist] $: img
@@ -236,4 +236,3 @@ contextL
                   $:L replPA n concatPV
                       $:L img
 
--- TODO: gmax aus den argumenten entfernen! normalize

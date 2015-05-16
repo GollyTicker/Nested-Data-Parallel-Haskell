@@ -60,7 +60,7 @@ L[accuBody] n
   = scanlPL $:L plusIntV $:L replPA n 0 $:L xs
 
 
-{-            FINAL FORM BEFORE OPTIMIZATION      -}
+{-            FINAL FORM WITH ACCU IN CONTEXT       -}
 
 contextV
   = V[accu] $: h

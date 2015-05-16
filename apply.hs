@@ -10,8 +10,8 @@ type PAImage a = PArray (PArray a)
 
 
 -- Original context
-context = V[apply] $: (...) $: (...)
-context = L[apply] n $:L (...) $:L (...)
+contextV = V[apply] $: (...) $: (...)
+contextL = L[apply] n $:L (...) $:L (...)
 
 -- Original definition
 apply :: AkkuHist Int -> Image Int -> Image Int
@@ -43,7 +43,7 @@ apply1 =
 -- Vectorize lambda
 apply2 :: PA Int :-> PAImage Int :-> PAImage Int
 apply2 =
-	Clo () (\() as -> V[b]) (\(ATup0 n) as -> L[b] n)
+	Clo () (\() as -> V[b]) (_)
   where
   	b = \img ->
             mapP
@@ -64,39 +64,45 @@ apply3 = V[\img ->
 -- Vectorize lambda (variable img. as is env)
 apply3 :: PAImage Int :-> PAImage Int
 apply3 =
-	Clo (as) (\(as) img -> V[b]) (\(ATup1 n as) img -> L[b] n)
+	Clo (as) (\(as) img -> V[applyBody] ) (_)
 	where b = mapP
 							(\xs ->
 							  mapP (\g -> as !: g) xs
 							)
 							img
-	let apply4 = V[b]
 
-apply4 :: PAImage Int
-apply4 = V[mapP
+applyBody = mapP
 							(\xs ->
 							  mapP (\g -> as !: g) xs
 							)
 							img
-				 ]
 
--- Vector apply
-apply5 :: PAImage Int
-apply5 = mapPV
-					$: V[(\xs -> mapP (\g -> as !: g)  xs)]
-					$: V[img]
+-- nested scalar versions ommited
+V[applyBody]
+  = mapPV
+			$: Clo { env = (as)
+					,lifted =
+					  \(ATup1 n as) xs ->
+					    replPA n mapPV
+					      $:L AClo { aenv = ATup1 n as
+			                ,lifted = \(ATup1 n as) g -> replicatePA n indexPV $:L as $:L g
+		                }
+                $:L xs
+				 }
+			$: img
 
-
--- Vector locally-bound variable
--- Vector lambda
-apply6 :: PAImage Int
-apply6 = mapPV
-					$: Clo {
-							 env = (as)
-							,scalar = \(as) xs -> V[mapP (\g -> as !: g) xs]
-							,lifted = \(ATup1 n as) xs -> L[mapP (\g -> as !: g) xs] n
-						 }
-					$: img
+L[applyBody] n
+  = replPA n mapPV
+			$:L AClo { env = ATup1 n as
+					,alifted =
+					  \(ATup1 n as) xs ->
+					    replPA n mapPV
+					      $:L AClo { aenv = ATup1 n as
+			                ,lifted = \(ATup1 n as) g -> replicatePA n indexPV $:L as $:L g
+		                }
+                $:L xs
+				 }
+			$:L img
 
 -- lifting locally
 -- only lifted version will be needed, since it is an argument of mapP
@@ -127,33 +133,43 @@ L[\g -> as !: g] n
 			,lifted = \(ATup1 n as) g -> replicatePA n indexPV $:L as $:L g
 		}
 
--- final form before inlining
-applyV :: PA Int :-> PAImage Int :-> PAImage Int
-applyV =
-	Clo {
-		 env = ()
-		,lifted = (...ignored inside context...)
-		,scalar =
-			\() as -> 
-				mapPV
-						$: Clo {
-								 env = (as)
-								,scalar = (...ignored inside mapP...)
-								,lifted =
-									\(ATup1 n as) xs ->
-										replPA n mapPV
-											$:L AClo {
-													  aenv = (as)
-													 ,scalar = (...ignored inside mapP...)
-													 ,lifted =
-													 		\(ATup1 n as) g ->
-																replicatePA n indexPV
-																	$:L as
-																	$:L g
-													}
-											$:L xs
-							 }
-						$: img
-	}
+
+{-            FINAL FORM OF APPLY IN CONTEXT        -}
+
+contextV
+  = V[apply] $: someAkku $: someImage
+-- inline vertorized apply
+  = Clo () (\() as -> Clo (as) (\(as) img -> V[applyBody] ) (_)) (_) $: someAkku $: someImage
+-- definition of $: 2x
+  = mapPV
+			$: Clo { env = (someAkku)
+					,lifted =
+					  \(ATup1 n as) xs ->
+					    replPA n mapPV
+					      $:L AClo { aenv = ATup1 n as
+			                ,lifted = \(ATup1 n as) g -> replicatePA n indexPV $:L as $:L g
+		                }
+                $:L xs
+				 }
+			$: someImage
+
+contextL n
+  = L[apply] n $:L someAkku $:L someImage
+-- inline vertorized apply, and definition of $:
+  = AClo _ _ (\_ as -> AClo (ATup0 n as) _ (\(ATup0 n as) img -> L[applyBody])) $:L someAkku $:L someImage
+-- definition of $:L 2x
+  = replPA n mapPV
+			$:L AClo { env = ATup1 n someAkku
+					,alifted =
+					  \(ATup1 n as) xs ->
+					    replPA n mapPV
+					      $:L AClo { aenv = ATup1 n as
+			                ,lifted = \(ATup1 n as) g -> replicatePA n indexPV $:L as $:L g
+		                }
+                $:L xs
+				 }
+			$:L someImage
+
+
 
 

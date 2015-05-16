@@ -44,11 +44,11 @@ normalize1 =
      env = ()
     ,scalar = \() a0' ->
       Clo {
-         env = (a0)
-        ,scalar = \(a0) agmax' ->
+         env = (a0')
+        ,scalar = (a0') agmax' ->
           Clo {
-             env = (a0,agmax)
-            ,scalar = \(a0,agmax) as ->
+             env = (a0',agmax')
+            ,scalar = \(a0',agmax) as ->
               V[
                 let a0 = fromIntegral a0'
                 in  let divisor = (fromIntegral agmax') - a0
@@ -72,11 +72,11 @@ normalize1 =
      env = ()
     ,scalar = \() a0' ->
       Clo {
-         env = (a0)
-        ,scalar = \(a0) agmax' ->
+         env = (a0')
+        ,scalar = \(a0') agmax' ->
           Clo {
-             env = (a0,agmax)
-            ,scalar = \(a0,agmax) as ->
+             env = (a0',agmax')
+            ,scalar = \(a0',agmax') as ->
               (\a0 ->
                 (\divisor -> 
                   V[mapP
@@ -126,8 +126,8 @@ V[(fromIntegral agmax') - a0]
   = minusDoubleV $: (fromIntegralV $: agmax') $: a0
 
 -- vectorize local expression 3
-V[fromIntegral a0]
-  = fromIntegralV $: a0
+V[fromIntegral a0']
+  = fromIntegralV $: a0'
 
 
 -- final form before inlining
@@ -137,11 +137,11 @@ normalize2 =
      env = ()
     ,scalar = \() a0' ->
       Clo {
-         env = (a0)
-        ,scalar = \(a0) agmax' ->
+         env = (a0')
+        ,scalar = \(a0') agmax' ->
           Clo {
-             env = (a0,agmax)
-            ,scalar = \(a0,agmax) as ->
+             env = (a0',agmax')
+            ,scalar = \(a0',agmax') as ->
               (\a0 ->
                 (\divisor -> 
                   mapPV
@@ -158,7 +158,7 @@ normalize2 =
                        }
                     $: as
                 ) $: (minusDoubleV $: (fromIntegralV $: agmax') $: a0)
-              ) $: (fromIntegralV $: a0)
+              ) $: (fromIntegralV $: a0')
             ,lifted = (...ignored inside context...)
           }
         ,lifted = (...ignored inside context...)
@@ -168,24 +168,111 @@ normalize2 =
 
 
 
-{-            INLINING LIFTED & VECTORIZED SCALE              -}
-with normalize = 
-      \a0' ->
-        \agmax' ->
-          \as ->
-            let a0 = fromIntegral a0'
-            in  let divisor = (fromIntegral agmax') - a0
-                in  mapP
-                      (\a ->
-                         (fromIntegral a - a0) / divisor
-                      )
-                      as
+{-                FINAL FORM OF NORMALIZE N CONTEXT              -}
 
-contextV = V[normalize] $: someInt1 $: someInt2 $: someAccu
+contextV
+  = V[normalize] $: someA0 $: someAgmax $: someAccu
+-- inline vectorized normalize
+  = Clo {
+       env = ()
+      ,scalar = \() a0' ->
+        Clo {
+           env = (a0')
+          ,scalar = \(a0') agmax' ->
+            Clo {
+               env = (a0,agmax')
+              ,scalar = \(a0',agmax') as ->
+                (\a0 ->
+                  (\divisor -> 
+                    mapPV
+                      $: Clo {
+                            env = (a0,divisior)
+                           ,scalar = (...ignored inside mapP...)
+                           ,lifted =
+                             \(ATup2 n a0 divisior) a ->
+                                replPA n divV
+                                  $:L replPA n minusV
+                                        $:L (replPA n fromIntegralV $:L a)
+                                        $:L a0
+                                  $:L divisor
+                         }
+                      $: as
+                  ) $: (minusDoubleV $: (fromIntegralV $: agmax') $: a0)
+                ) $: (fromIntegralV $: a0')
+              ,lifted = (...ignored inside context...)
+            }
+          ,lifted = (...ignored inside context...)
+        }
+      ,lifted = (...ignored inside context...)
+    } $: someA0 $: someAgmax $: someAccu
+-- reduce a0' = someA0, agmax' = someAgmax, as = someAccu
+  = (\a0 ->
+      (\divisor -> 
+        mapPV
+          $: Clo {
+                env = (a0,divisior)
+               ,scalar = (...ignored inside mapP...)
+               ,lifted =
+                 \(ATup2 n a0 divisior) a ->
+                    replPA n divV
+                      $:L replPA n minusV
+                            $:L (replPA n fromIntegralV $:L a)
+                            $:L a0
+                      $:L divisor
+             }
+          $: someAccu
+      ) $: (minusDoubleV $: (fromIntegralV $: someAgmax) $: a0)
+    ) $: (fromIntegralV $: someA0)
+  = V[normalize] $: someA0 $: someAgmax $: someAccu
 
-contextL = L[normalize] n $:L someInt1 $:L someInt2 $:L someAccu
+contextL
+  = L[normalize] n $:L someA0 $:L someAgmax $:L someAccu
+  = AClo {
+       aenv = ATup0 n
+      ,alifted = \(ATup0 n) a0' ->
+        AClo {
+           aenv = ATup1 n a0'
+          ,alifted = \(ATup1 n a0') agmax' ->
+            AClo {
+               aenv = (ATup2 n a0' agmax')
+              ,alifted = \(ATup2 n a0' agmax') as ->
+                (\a0 ->
+                  (\divisor -> 
+                    replPA n mapPV
+                      $:L AClo {
+                            aenv = ATup2 n a0 divisior
+                           ,alifted =
+                             \(ATup2 n a0 divisior) a ->
+                                replPA n divV
+                                  $:L replPA n minusV
+                                        $:L (replPA n fromIntegralV $:L a)
+                                        $:L a0
+                                  $:L divisor
+                         }
+                      $:L as
+                  ) $:L (replPA n minusDoubleV $:L (replPA n fromIntegralV $:L agmax') $:L a0)
+                ) $:L (replPA n fromIntegralV $:L a0')
+            }
+        }
+    } $:L someA0 $:L someAgmax $:L someAccu
+  = (\a0 ->
+      (\divisor -> 
+        replPA n mapPV
+          $:L AClo {
+                aenv = ATup2 n a0 divisior
+               ,alifted =
+                 \(ATup2 n a0 divisior) a ->
+                    replPA n divV
+                      $:L replPA n minusV
+                            $:L (replPA n fromIntegralV $:L a)
+                            $:L a0
+                      $:L divisor
+             }
+          $:L someAccu
+      ) $:L (replPA n minusDoubleV $:L (replPA n fromIntegralV $:L someAgmax) $:L a0)
+    ) $:L (replPA n fromIntegralV $:L someA0)
+  = L[normalize] n $:L someA0 $:L someAgmax $:L someAccu
 
--- TODO: einsetzten!
 
 
 
