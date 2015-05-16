@@ -40,30 +40,81 @@ V[ f ] =
     ,lifted = \(ATup0 n) a -> L[b] n
   }
 
-Innerhalb eines mapP wird ide scalare Variante nicht mehr benötigt.
+Innerhalb eines mapP wird die scalare Variante nicht mehr benötigt.
 mapP f xs wird immer fL verwenden (siehe Core of flattening). 
 
 
-Core of flattening - Vectorized mapP: [Harness2008 Page 20-21]
+Optimization steps in GHC: http://stackoverflow.com/questions/12653787/what-optimizations-can-ghc-be-expected-to-perform-reliably/12661937#12661937
 
-mapPV :: (a :-> b) :-> PA a :-> PA b
-mapPV = Clo
-          ()
-          (\() f -> Clo f mapPS mapPL)
-          (\() fs -> AClo fs mapPS mapPL)
+* Strictness Alanysis / Immediate calculation
+* Common Subexpression elimination
+* Inlining
+* Merged case expressions
+* Communication Fusioning / Stream Fusioning
+
+DESUGARING -> VECTORIZATION -> FUSION -> GANG PARALLELISM
+
+Example Definition: (extracted from DPH Status report)
+sumPS = sumD . mapD sumS . splitD
+
+
+"For an explanation of the used closure conversion: See Higher Order Flattening, p.43, 4.3.2, p.57 in PDF"
+
+"Core of flattening - Vectorized mapP: [Harness2008 Page 20-21]"
+
+"See Higher Order Flattening, p.55, 4.5, p.69 in PDF"
+
+-- Definition of mapPV (from lifted combinators)
+mapPV   :: (a :-> b) :-> PA a :-> PA b
+mapPV   = closure2' mapPS mapPL
 
 mapPS :: (a :-> b) -> PA a -> PA b
-mapPS (Clo env _ fl) xss =
-  fl (replicatePA (lengthPA xss) env) xss
+mapPS f as
+  = replPA (lengthPA as) f $:^ as -- whcih simplifies. (proof see #10)
+  = fv (replPA (lengthPA as) env) as
 
-mapPL :: PA (A :-> b) -> PA (PA a) -> PA (PA b)
-mapPL (AClo env _ fl) xss =
-  unconcatPA xss (fl (expandPA xss env) (concatPA xss))
+mapPL :: PA (a :-> b) -> PA (PA a) -> PA (PA b)
+mapPL = \fv ass -> unconcatPA ass $ replsPA (getSegd ass) fv $:L concatPA ass
+  = \(AClo aenv fs fl) ass -> unconcatPA ass $ fl (replsPA (getSegd ass) aenv) $:L concatPA ass -- simplified #12
+
+
+"Why scalar and lifted variant in (Array) Closures?"
+
+Closure ---> replP, mapP ---> Array Closure
+  ^                               |
+  |                               | 
+  +----------   indexP    <-------+
+
+In code appliations need to be able to switch inbetween
+both varients to account for repliations, mapping and indexing in context.
+
+#10: 
+
+mapPS :: (a :-> b) - PA a -> PA b
+  = \fv as -> replPa (lengthPA as) fv $:L as
+  = \fv@(Clo env fs fl) as -> replPa (lengthPA as) fv $:L as
+-- Definition of replPA for Closures
+  = AClo (replPA (lengthPA as) env) fs fv $:L as
+-- Definition of $:L
+  = fv (replPA (lengthPA as) env) as
+
+#12:
+
+mapPL
+  = \fv ass -> unconcatPA ass $ replsPA (getSegd ass) fv $:L concatPA ass
+  = \fv@(AClo aenv fs fl) ass -> unconcatPA ass $ replsPA (getSegd ass) fv $:L concatPA ass
+-- Definition of replsPA for PA (a :-> b)         See "Lifted.Closure" https://hackage.haskell.org/package/dph-lifted-vseg-0.7.0.1/docs/src/Data-Array-Parallel-Lifted-Closure.html#%3A-%3E
+  = \(AClo aenv fs fl) ass -> unconcatPA ass $ AClo (replsPA (getSegd ass) aenv) fs fl) $:L concatPA ass
+-- Definition of $:L
+  = \(AClo aenv fs fl) ass -> unconcatPA ass $ fl (replsPA (getSegd ass) aenv) $:L concatPA ass
+
+
+
+" Lifted.Combinators: https://hackage.haskell.org/package/dph-lifted-vseg-0.7.0.1/docs/src/Data-Array-Parallel-Lifted-Combinators.html#emptyPP"
 
 
 
                       REWRITE RULES
-
 
 "unitEnv" forall body xs.
             (\(ATup0 n) xs' -> body )
@@ -72,7 +123,7 @@ mapPL (AClo env _ fl) xss =
             = (\n xs' -> body ) (lengthPA xs) xs
 
 
-
+-- TODO: get all rewrite rules from Higher Order flattening!
 
 
 "unitEnv" proof
@@ -87,9 +138,35 @@ f (replPA (lengthPA xs) ()) xs
 
 
 
-
-
-
+"Efficient Type dependent functions over Arrays"
+class PR a where
+  -- O(1)
+  indexPA       :: PA a -> Int -> a
+  lengthPA      :: PA a -> Int
+  
+  -- O(n)
+  emptyPA       :: PA a
+  replicatePA   :: Int -> a -> PA a
+  
+  -- =(sum lengths)
+  replicatesPA  :: Segd -> PA a -> PA a
+    
+  -- O(slice len)
+  extractPA,slicePA  :: PA a -> Int -> Int -> PA a
+  
+  -- > O(n)
+  appendPA      :: PA a -> PA a -> PA a
+  combine2PA    :: Sel2 -> PA a -> PA a -> PA a
+  
+  -- ?
+  appendvsPA    :: U.Segd
+                -> U.VSegd -> PAs a
+                -> U.VSegd -> PAs a
+                -> PA a
+  indexsPA      :: PA (PA a) -> PA (Int, Int) -> PA a
+  indexvsPA     :: PAs a -> U.VSegd -> U.Array (Int, Int) -> PA a
+  extractssPA    :: PAs a -> U.SSegd -> PA a
+  extractvsPA    :: PAs a -> U.VSegd -> PA a
 
 
 
