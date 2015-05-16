@@ -1,6 +1,6 @@
 {-# LANGUAGE ParallelArrays #-}
 
--- Manual vectorization of hbalance
+-- Manual vectorization of scale
 
 type Image a = [:[: a :]:]
 type Hist a = [: a :]
@@ -105,6 +105,7 @@ V[body2] =
         ,lifted = \(ATup1 n gmax) a -> L[body3]
         ,scalar = (...ignored inside mapP...)
        }
+    $: as
 
 L[body3] =
   replPA floorV n
@@ -113,16 +114,121 @@ L[body3] =
             $:L gmax
         $:L a
 
-{-            INLINING LIFTED & VECTORIZED SCALE              -}
-with scale = 
-        \gmax ->
-          \as ->
-            mapP
-              (\a -> floor (fromIntegral gmax * a))
-              as
+{-            CONTEXT LIFTED & VECTORIZED SCALE              -}
+original:
+  scale = 
+    \gmax ->
+      \as ->
+        mapP
+          (\a -> floor (fromIntegral gmax * a))
+          as
 
-contextV = V[scale] $: someInt $: someNormHist
+contextV
+  = V[scale] $: someInt $: someNormHist
+  -- apply $:
+  = (\gmax ->
+      Clo {
+         env = (gmax)
+        ,scalar =
+          \(gmax) as ->
+            mapPV
+              $: Clo {
+                   env = (gmax)
+                  ,lifted = \(ATup1 n gmax) a -> L[body3]
+                  ,scalar = (...ignored inside mapP...)
+                 }
+              $: as
+        ,lifted = (...ignored in context...)
+      }
+    ) someInt $: someNormHist
+-- reduce gmax = someInt
+  = Clo {
+       env = (someInt)
+      ,scalar =
+        \(gmax) as ->
+          mapPV
+            $: Clo {
+                 env = (gmax)
+                ,lifted = \(ATup1 n gmax) a -> L[body3]
+                ,scalar = (...ignored inside mapP...)
+               }
+            $: as
+      ,lifted = (...ignored in context...)
+    } $: someNormHist
+-- apply $: and reduce gmax = someInt, inline L[body3]
+  = (\as ->
+      mapPV
+        $: Clo {
+             env = (someInt)
+            ,lifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+            ,scalar = (...ignored inside mapP...)
+           }
+        $: as
+    ) someNormHist
+-- reduce as = someNormHist
+  = contextV
+  = mapPV
+      $: Clo {
+           env = (someInt)
+          ,lifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+          ,scalar = (...ignored inside mapP...)
+         }
+      $: someNormHist
 
-contextL = L[scale] n $:L someInt $:L someNormHist
+contextL n
+  = L[scale] n $:L someInt $:L someNormHist
+-- ganz außen liften
+  = AClo {
+       aenv = ATup0 n
+      ,ascalar = \() gmax -> V[body1]
+      ,alifted = \(ATup0 n) gmax -> L[body1]
+    } n $:L someInt $:L someNormHist
+-- definition of $:L
+  = (\gmax -> L[body1]) someInt $:L someNormHist
+-- reduce gmax = someInt
+  = AClo {
+       aenv = ATup1 n someInt
+      ,ascalar = \(gmax) as -> V[body2]
+      ,alifted = \(ATup1 n gmax) as -> L[body2]
+    } $:L someNormHist
+-- definition of $:L
+  = (\as ->
+      replPA n mapPV
+        $:L AClo {
+             aenv = ATup1 n someInt
+            ,alifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+            ,scalar = (...ignored inside mapPV...)
+           }
+        $:L as
+    ) someNormHist
+-- reduce as = someNormHist
+  = replPA n mapPV
+      $:L AClo {
+           aenv = ATup1 n someInt
+          ,alifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+          ,scalar = (...ignored inside mapPV...)
+         }
+      $:L someNormHist
 
--- TODO: einsetzten
+{-                  FINAL VERSIONS OF SCALE WITH CONTEXT          -}
+
+contextV
+  = V[scale] $: someInt $: someNormHist
+  = mapPV
+      $: Clo {
+           env = (someInt)
+          ,lifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+          ,scalar = (...ignored inside mapP...)
+         }
+      $: someNormHist
+
+contextL
+  = L[scale] n $:L someInt $:L someNormHist
+  = replPA n mapPV
+      $:L AClo {
+           aenv = ATup1 n someInt
+          ,alifted = \(ATup1 n gmax) a -> replPA floorV n $:L (multDoubleV $:L (replPA fromIntegralV n $:L gmax) $:L a)
+          ,scalar = (...ignored inside mapPV...)
+         }
+      $:L someNormHist
+
