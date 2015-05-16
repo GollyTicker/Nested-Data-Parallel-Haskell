@@ -290,5 +290,15 @@ resultB = mapPV $: V[hbalance] $: img
   -- rewrite rule unitEnv
   = (\n img -> (...)) (lengthPA img) img
   
+{-
+Optimization steps in GHC: http://stackoverflow.com/questions/12653787/what-optimizations-can-ghc-be-expected-to-perform-reliably/12661937#12661937
+* Strictness Alanysis / Immediate calculation
+* Common Subexpression elimination
+* Inlining
+* Merged case expressions
+* Communication Fusioning / Stream Fusioning 
+
+
+-}
 
 
