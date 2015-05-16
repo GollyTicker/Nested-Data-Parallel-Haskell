@@ -10,8 +10,8 @@ type PAImage a = PArray (PArray a)
 
 
 -- Original context
-context = (\a -> ...) (V[accu] $: h)
-context = (\a -> ...) (L[accu] n $:L h)
+contextV = V[accu] $: h
+contextL = L[accu] n $:L h
 
 -- Original definition
 -- (+) refers to double-multiplication
@@ -50,33 +50,26 @@ accuBody :: AkkuHist Int
 accuBody = scanlP (+) 0 xs
 
 {-                LIFTING & VECTORIZING ACCU BODY      -}
+
 V[accuBody]
   = V[scanlP (+) 0 xs]
   = scanlPV $: plusIntV $: 0 $: xs
+  
 L[accuBody] n
   = L[scanlP (+) 0 xs] n
-  = scanlPL $:L plusIntVL $:L replPA n 0 $:L xs
+  = scanlPL $:L plusIntV $:L replPA n 0 $:L xs
 
 
 {-            FINAL FORM BEFORE OPTIMIZATION      -}
 
-L[accu] :: PA (PA Int :-> PA Int)
-  = AClo {
-       aenv = ()
-      ,ascalar = \() xs -> V[accuBody]
-      ,alifted = \(ATup0 n) xs -> L[accuBody] n
-    }
+contextV
+  = V[accu] $: h
+  = (\xs -> scanlPV $: plusIntV $: 0 $: xs) $: h
+  = scanlPV $: plusIntV $: 0 $: h
 
-V[accu] :: PA Int :-> PA Int
-  = Clo {
-       env = ()
-      ,scalar = \() xs -> V[accuBody]
-      ,lifted = \(ATup0 n) xs -> L[accuBody] n
-    }
+contextL n
+  = L[accu] n $:L h
+  = scanlPL $:L plusIntV $:L replPA n 0 $:L h
 
-V[accuBody] :: PA Int
-  = scanlPV $: plusIntV $: 0 $: xs
 
-L[accuBody] n :: PA (PA Int)
-  = scanlPL $:L plusIntVL $:L replPA n 0 $:L xs
 
