@@ -10,9 +10,8 @@ type PAImage a = PArray (PArray a)
 
 
 -- Original context
-context = (\h -> ...) (V[hist] $: img)
-and
-context = (\h -> ...) (L[hist] $:L img)
+contextV = V[hist] $: img
+contextL = L[hist] $:L img
 
 -- Original definition
 hist :: Image Int -> Hist Int
@@ -148,40 +147,40 @@ V[histBody] =
 
 {-                LIFTED HIST BODY            -}
 L[histBody]
- =  sparseToDensePL
+ = replPA n sparseTodensePV
       $:L L[(+) $:L replPA n gmax $:L replPA n 1]
       $:L replPA n 0
-      $: mapPL
+      $:L replPA n mapPV
           $:L L[\g -> (,) (headP g) (lengthP g)]
           $:L L[groupP]
               $:L L[sortP]
                   $:L L[concatP]
                       $:L L[img]
       ]
- =  sparseToDensePL
-      $:L plusIntL $:L replPA n gmax $:L replPA n 1]
+ = replPA n sparseTodensePV
+      $:L replPA n plusIntV $:L replPA n gmax $:L replPA n 1
       $:L replPA n 0
-      $:L mapPL
+      $:L replPA n mapPV
           $:L L[\g -> (,) (headP g) (lengthP g)]
-          $:L groupPL
-              $:L sortPL
-                  $:L concatPL
+          $:L replPA n groupPV
+              $:L replPA n sortPV
+                  $:L replPA n concatPV
                       $:L img
       ]
  = L[histBody] :: PA (PA Int)
- =  sparseToDensePL
-      $:L plusIntL $:L replPA n gmax $:L replPA n 1]
+ = replPA n sparseTodensePV
+      $:L replPA n plusIntV $:L replPA n gmax $:L replPA n 1
       $:L replPA n 0
-      $:L mapPL
+      $:L replPA n mapPV
           $:L AClo {
                  aenv = ATup0 n
-                ,ascalar = (...ignored inside mapPL...)
+                ,ascalar = (...ignored inside mapPV...)
                 ,alifted = lambdaGL
               }
-          $:L groupPL
-              $:L sortPL
-                  $:L concatPL
-                      $:L img
+          $:L replPA n groupPV
+              $:L replPA n sortPV
+                  $:L replPA n concatPV
+                      $:L replPA n img
       ]
 
 {-                LIFTED LAMBDA G               -}
@@ -196,7 +195,7 @@ lambdaGL
 
 {-                FINAL FORMS BEFORE OPTIMIZATION        -}
 
-V[hist] :: PA (PA Int)) :-> PA Int
+V[hist] :: PA (PA Int) :-> PA Int
   = Clo {
        env = ()
       ,scalar = V[histBody]
@@ -209,3 +208,32 @@ L[hist] :: PA ( PA (PA Int) :-> PA Int )
       ,ascalar = (...ignored in context...)
       ,alifted = \(ATup0 n) img -> L[histBody]
     }
+
+
+{-              FINAL VERISONS HIST IN CONTEXT            -}
+
+contextV
+  = V[hist] $: img
+  = sparseToDensePV
+      $: (plusIntV $: gmax $: 1)
+      $: 0
+      $: mapPV
+         $: Clo () _ lambdaGL
+         $: groupPV
+            $: sortPV
+               $: concatPV
+                  $: img
+
+contextL
+  = L[hist] n $:L img
+  = replPA n sparseToDensePV
+      $:L replPA n plusIntV $:L replPA n gmax $:L replPA n 1
+      $:L replPA n 0
+      $:L replPA n mapPV
+          $:L AClo (_) _ lambdaGL
+          $:L replPA n groupPV
+              $:L replPA n sortPV
+                  $:L replPA n concatPV
+                      $:L img
+
+-- TODO: gmax aus den argumenten entfernen! normalize
