@@ -130,7 +130,13 @@ mapPL
 
 
 -- TODO: get all rewrite rules from Higher Order flattening!
+    needed?
 
+-- TOOD: get all rewrite rules from all files in the libraries
+    grep -rl "RULE" . | xargs -L1 gedit
+    http://askubuntu.com/questions/55325/how-to-use-grep-command-to-find-text-including-subdirectories
+    http://stackoverflow.com/questions/2711001/how-to-apply-shell-command-to-each-line-of-a-command-output
+    grep -r -A 7 "\-# RULE" .
 
 "unitEnv" proof
 f :: PA () -> PA a -> PA a
