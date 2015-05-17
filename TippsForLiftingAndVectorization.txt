@@ -64,19 +64,25 @@ sumPS = sumD . mapD sumS . splitD
 
 "See Higher Order Flattening, p.55, 4.5, p.69 in PDF"
 
--- Definition of mapPV (from lifted combinators)
+-- Definition of mapPV (from lifted combinators and DPH - Status Report)
 mapPV   :: (a :-> b) :-> PA a :-> PA b
-mapPV   = closure2' mapPS mapPL
+mapPV   = Clo () mapP1 mapP2
+
+mapP1 :: () -> (a :-> b) -> PA a :-> PA b
+mapP1 _ fv = Clo fv mapPS mapPL
+
+mapP2 :: PA () -> PA (a :-> b) -> PA (PA a :-> PA b)
+mapP2 _ fvs = AClo fvs mapPS mapPL
 
 mapPS :: (a :-> b) -> PA a -> PA b
-mapPS f as
-  = replPA (lengthPA as) f $:^ as -- whcih simplifies. (proof see #10)
+mapPS fv as
+  = replPA (lengthPA as) fv $:^ as -- whcih simplifies. (proof see #10)
   = fv (replPA (lengthPA as) env) as
 
 mapPL :: PA (a :-> b) -> PA (PA a) -> PA (PA b)
-mapPL = \fv ass -> unconcatPA ass $ replsPA (getSegd ass) fv $:L concatPA ass
-  = \(AClo aenv fs fl) ass -> unconcatPA ass $ fl (replsPA (getSegd ass) aenv) $:L concatPA ass -- simplified #12
-
+mapPL
+  = \fv ass -> unconcatPA ass $ replsPA (getSegd ass) fv $:L concatPA ass
+  = \(AClo aenv _ fl) ass -> unconcatPA ass . fl (replsPA (getSegd ass) aenv) . concatPA $ ass -- simplified #12
 
 "Why scalar and lifted variant in (Array) Closures?"
 
@@ -106,7 +112,7 @@ mapPL
 -- Definition of replsPA for PA (a :-> b)         See "Lifted.Closure" https://hackage.haskell.org/package/dph-lifted-vseg-0.7.0.1/docs/src/Data-Array-Parallel-Lifted-Closure.html#%3A-%3E
   = \(AClo aenv fs fl) ass -> unconcatPA ass $ AClo (replsPA (getSegd ass) aenv) fs fl) $:L concatPA ass
 -- Definition of $:L
-  = \(AClo aenv fs fl) ass -> unconcatPA ass $ fl (replsPA (getSegd ass) aenv) $:L concatPA ass
+  = \(AClo aenv fs fl) ass -> unconcatPA ass . fl (replsPA (getSegd ass) aenv) . concatPA $ ass
 
 
 
