@@ -4,8 +4,9 @@ module ListHistogramBalance (main,hbalance,hbalanceBulk,img) where
 
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
-import Prelude hiding (scanl)
-import Data.List (intercalate)
+import Prelude hiding (scanl,concat)
+import qualified Data.List as L (intercalate,concat)
+import qualified Data.Vector as V
 
 main :: IO ()
 main = do
@@ -14,15 +15,15 @@ main = do
   putStrLn "Balanced Image:"
   printImg (hbalance img)
 
-type Image a  = [[a]]
-type Many a   = [a]
+type Image a  = V.Vector (V.Vector a)
+type Many a   = V.Vector a
 
 
 type Hist a = Map Int a
 type AkkuHist a = Map Int a
 
-img :: Image Int
-img =
+imgL :: [[Int]]
+imgL =
   [
      [1,1,1,1,1,1]
     ,[1,6,6,1,1,1]
@@ -31,11 +32,14 @@ img =
     ,[6,6,1,1,1,1]
    ]
 
-images :: [Image Int]
-images = replicate 1000 img
+img :: Image Int
+img = V.map (V.fromList) . V.fromList $ imgL
+
+images :: Many (Image Int)
+images = V.replicate 1000 img
 
 hbalanceBulk :: Many (Image Int) -> Many (Image Int)
-hbalanceBulk = map hbalance
+hbalanceBulk = V.map hbalance
 
 hbalance :: Image Int -> Image Int
 hbalance img =
@@ -52,7 +56,7 @@ gmax :: Int
 gmax = 7 -- höchst möglicher Bildwert. in diesem Fall sind es 4 bit Bilder
 
 hist :: Image Int -> Hist Int
-hist = foldr (\i -> M.insertWith (+) i 1) M.empty . concat
+hist = V.foldr (\i -> M.insertWith (+) i 1) M.empty . concat
 
 accu :: Hist Int -> AkkuHist Int
 accu = scanl (+) 0
@@ -68,7 +72,7 @@ scale :: Int -> AkkuHist Double -> AkkuHist Int
 scale gmax = M.map (\d -> floor (d * fromIntegral gmax))
 
 apply :: AkkuHist Int -> Image Int -> Image Int
-apply as img = map (map (as M.!)) img
+apply as img = V.map (V.map (as M.!)) img
 
 
 -- Utilities
@@ -79,7 +83,14 @@ mapAccum :: (a -> b -> (a,c)) -> a -> Map k b -> (a, Map k c)
 scanl :: (b -> c -> c) -> c -> Map k b -> Map k c
 scanl f z = snd . M.mapAccum (\accu elem -> let x = f elem accu in (x,x)) z
 
+concat :: V.Vector (V.Vector a) -> V.Vector a
+concat = V.concatMap id
 
 printImg :: Show a => Image a -> IO ()
-printImg = putStrLn . intercalate "\n" . map (concat . map show)
+printImg =
+  putStrLn
+  . L.intercalate "\n"
+  . map (L.concat . map show)
+  . map (V.toList) . V.toList
+
 

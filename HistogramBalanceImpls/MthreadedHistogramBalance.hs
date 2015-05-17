@@ -30,7 +30,7 @@ imgH = 6
 imgSize = imgW * imgH
 
 img :: Image Int -- let img be an example image. 400x400 with some values
-img = V.fromList . concat $ L.img
+img = V.fromList . concat $ L.imgL
 
 imgs :: Many (Image Int) -- let imgs be a collection of images for bulk operation
 imgs = VB.replicate 1000 img
