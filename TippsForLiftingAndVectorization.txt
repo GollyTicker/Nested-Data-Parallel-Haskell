@@ -29,9 +29,6 @@ L[ (\a -> c) b ] n
     } $:L L[b] n
   = (\a -> (L[c] n)) (L[b] n)
 
-Vectorization of an applied lambda:
-V[ (\a -> c) b] = (\a -> V[c]) $: V[b]
-
 V[ f ] = V[ \a -> b ] where f is declared top-level
 V[ f ] =
   Clo {
@@ -114,13 +111,11 @@ mapPL
 -- Definition of $:L
   = \(AClo aenv fs fl) ass -> unconcatPA ass . fl (replsPA (getSegd ass) aenv) . concatPA $ ass
 
-
-
 " Lifted.Combinators: https://hackage.haskell.org/package/dph-lifted-vseg-0.7.0.1/docs/src/Data-Array-Parallel-Lifted-Combinators.html#emptyPP"
 
 
 
-                      REWRITE RULES
+                      "REWRITE RULES"
 
 "unitEnv" forall body xs.
             (\(ATup0 n) xs' -> body )
@@ -128,15 +123,99 @@ mapPL
               xs
             = (\n xs' -> body ) (lengthPA xs) xs
 
+-- module Data.Array.Parallel.Prim
+"replicatePA_Int#" forall n# i#.
+  replicatePA_Int# n# i# = U.replicate (I# n#) (I# i#)
+
+-- module Data.Array.Parallel.Unlifted.Distributed.Arrays
+"splitD[unbalanced]/joinD" forall g b da.
+  splitD g unbalanced (joinD g b da) = da
+
+"splitD[balanced]/joinD" forall g da.
+  splitD g balanced (joinD g balanced da) = da
+
+"splitD/splitJoinD" forall g b f xs.
+  splitD g b (splitJoinD g f xs) = f (splitD g b xs)
+
+"splitJoinD/joinD" forall g b f da.
+  splitJoinD g f (joinD g b da) = joinD g b (f da)
+
+"splitJoinD/splitJoinD" forall g f1 f2 xs.
+  splitJoinD g f1 (splitJoinD g f2 xs) = splitJoinD g (f1 . f2) xs
+
+"Seq.zip/joinD[1]" forall g xs ys.
+  Seq.zip (joinD g balanced xs) ys
+    = joinD g balanced (zipWithD WZip g Seq.zip xs (splitD g balanced ys))
+
+"Seq.zip/joinD[2]" forall g xs ys.
+  Seq.zip xs (joinD g balanced ys)
+    = joinD g balanced (zipWithD WZip g Seq.zip (splitD g balanced xs) ys)
+
+"Seq.zip/splitJoinD" 
+  forall what1 what2 gang f g xs ys
+  . Seq.zip (splitJoinD gang (imapD what1 gang f) xs) 
+            (splitJoinD gang (imapD what2 gang g) ys)
+  = splitJoinD gang 
+        (imapD (WFZipMap what1 what2)
+               gang (\i zs -> let (as,bs) = Seq.unzip zs
+                              in Seq.zip (f i as) (g i bs)))
+                    (Seq.zip xs ys)
+
+
+-- module Data.Array.Parallel.Unlifted.Distributed.Combinators
+
+"imapD/generateD"
+  forall wMap wGen gang f g
+  . imapD wMap gang f (generateD wGen gang g) 
+  = generateD (W.WFMapGen wMap wGen) gang (\i -> f i (g i))
+
+"imapD/generateD_cheap" 
+  forall wMap wGen gang f g
+  . imapD wMap gang f (generateD_cheap wGen gang g) 
+  = generateD (W.WFMapGen wMap wGen) gang (\i -> f i (g i))
+
+"imapD/imapD" 
+  forall wMap1 wMap2 gang f g d
+  . imapD wMap1 gang f (imapD wMap2 gang g d) 
+  = imapD (W.WFMapMap wMap1 wMap2) gang (\i x -> f i (g i x)) d
+
+"zipD/imapD[1]" 
+  forall gang f xs ys what
+  . zipD (imapD what gang f xs) ys
+  = imapD what gang (\i (x,y) -> (f i x, y)) (zipD xs ys)
+
+"zipD/imapD[2]" 
+  forall gang f xs ys what
+  . zipD xs (imapD what gang f ys)
+  = imapD what gang (\i (x,y) -> (x, f i y)) (zipD xs ys)
+
+"zipD/generateD[1]" 
+  forall gang f xs what
+  . zipD (generateD what gang f) xs
+  = imapD what gang (\i x -> (f i, x)) xs
+
+"zipD/generateD[2]" 
+  forall gang f xs what
+  . zipD xs (generateD what gang f)
+  = imapD what gang (\i x -> (x, f i)) xs
+
+-- module Data.Array.Parallel.Unlifted.Distributed.Data.USegd.Split
+"splitSD/splitJoinD" 
+  forall g d f xs
+  . splitSD g d (splitJoinD g f xs)
+  = f (splitSD g d xs)
+
+"splitSD/Seq.zip" 
+  forall g d xs ys
+  . splitSD g d (Seq.zip xs ys) 
+  = zipWithD WZip g Seq.zip 
+        (splitSD g d xs)
+        (splitSD g d ys)
+
+
 
 -- TODO: get all rewrite rules from Higher Order flattening!
     needed?
-
--- TOOD: get all rewrite rules from all files in the libraries
-    grep -rl "RULE" . | xargs -L1 gedit
-    http://askubuntu.com/questions/55325/how-to-use-grep-command-to-find-text-including-subdirectories
-    http://stackoverflow.com/questions/2711001/how-to-apply-shell-command-to-each-line-of-a-command-output
-    grep -r -A 7 "\-# RULE" .
 
 "unitEnv" proof
 f :: PA () -> PA a -> PA a
@@ -191,5 +270,9 @@ class PR a where
 
 
 
-
+-- DONE: get all rewrite rules from all files in the libraries
+    grep -rl "RULE" . | xargs -L1 gedit
+    http://askubuntu.com/questions/55325/how-to-use-grep-command-to-find-text-including-subdirectories
+    http://stackoverflow.com/questions/2711001/how-to-apply-shell-command-to-each-line-of-a-command-output
+    grep -r -A 7 "\-# RULE" .
 

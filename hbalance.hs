@@ -271,22 +271,6 @@ L[hbalanceBody] :: PA () -> PA (PA (PA Int))  ->  PA (PA (PA Int))
         ) (L[accu] n $:L h)
       ) (L[hist] n $:L img)
 
-{-              INLINING DEFINITIONS            -}
-
--- let images :: PA (PA (PA Int)) be a parallel array of Images
-resultB = mapPV $: V[hbalance] $: img
-  -- definition of mapP and $:
-  = mapP1 () V[hbalance] $: img
-  -- definition of mapP1
-  = Clo (V[hbalance]) mapPS mapPL $: img
-  -- definition of $:
-  = mapPS V[hbalance] img
-  -- definition of V[hbalance]
-  = mapPS (Clo () V[hbalanceBody] L[hbalanceBody]) img
-  -- definition of mapPS
-  = L[hbalanceBody] (replPA (lengthPA images) ()) img
-  -- rewrite rule unitEnv
-  = (\n img -> (...)) (lengthPA img) img
   
 
 

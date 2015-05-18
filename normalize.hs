@@ -83,8 +83,8 @@ normalize1 =
                       (\a -> (fromIntegral a - a0) / divisor)
                       as
                   ]                                   -- 1
-                ) $: V[(fromIntegral agmax') - a0]    -- 2
-              ) $: V[fromIntegral a0']                -- 3
+                ) V[(fromIntegral agmax') - a0]    -- 2
+              ) V[fromIntegral a0']                -- 3
             ,lifted = (...ignored inside context...)
           }
         ,lifted = (...ignored inside context...)
@@ -157,8 +157,8 @@ normalize2 =
                                 $:L divisor
                        }
                     $: as
-                ) $: (minusDoubleV $: (fromIntegralV $: agmax') $: a0)
-              ) $: (fromIntegralV $: a0')
+                ) (minusDoubleV $: (fromIntegralV $: agmax') $: a0)
+              ) (fromIntegralV $: a0')
             ,lifted = (...ignored inside context...)
           }
         ,lifted = (...ignored inside context...)
@@ -197,8 +197,8 @@ contextV
                                   $:L divisor
                          }
                       $: as
-                  ) $: (minusDoubleV $: (fromIntegralV $: agmax') $: a0)
-                ) $: (fromIntegralV $: a0')
+                  ) (minusDoubleV $: (fromIntegralV $: agmax') $: a0)
+                ) (fromIntegralV $: a0')
               ,lifted = (...ignored inside context...)
             }
           ,lifted = (...ignored inside context...)
@@ -221,8 +221,8 @@ contextV
                       $:L divisor
              }
           $: someAccu
-      ) $: (minusDoubleV $: (fromIntegralV $: someAgmax) $: a0)
-    ) $: (fromIntegralV $: someA0)
+      ) (minusDoubleV $: (fromIntegralV $: someAgmax) $: a0)
+    ) (fromIntegralV $: someA0)
   = V[normalize] $: someA0 $: someAgmax $: someAccu
 
 contextL
@@ -250,8 +250,8 @@ contextL
                                   $:L divisor
                          }
                       $:L as
-                  ) $:L (replPA n minusDoubleV $:L (replPA n fromIntegralV $:L agmax') $:L a0)
-                ) $:L (replPA n fromIntegralV $:L a0')
+                  ) (replPA n minusDoubleV $:L (replPA n fromIntegralV $:L agmax') $:L a0)
+                ) (replPA n fromIntegralV $:L a0')
             }
         }
     } $:L someA0 $:L someAgmax $:L someAccu
@@ -269,8 +269,8 @@ contextL
                       $:L divisor
              }
           $:L someAccu
-      ) $:L (replPA n minusDoubleV $:L (replPA n fromIntegralV $:L someAgmax) $:L a0)
-    ) $:L (replPA n fromIntegralV $:L someA0)
+      ) (replPA n minusDoubleV $:L (replPA n fromIntegralV $:L someAgmax) $:L a0)
+    ) (replPA n fromIntegralV $:L someA0)
   = L[normalize] n $:L someA0 $:L someAgmax $:L someAccu
 
 
