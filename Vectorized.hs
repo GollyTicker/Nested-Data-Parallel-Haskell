@@ -5,14 +5,14 @@
 "$:  and .:  are scalar application/composition of vectorized functions"
 "$:L and .:L are lifted application/composition of usual functions"
 
-"replPS was rewritten to replPS to confirm to the notational standard
+"replPA was rewritten to replPS to confirm to the notational standard
 ",because replPS form the paper refers to the scalar function"
 
 "Inlining simple definitions"
 
 V[hbalance] $: img :: PA (PA Int)
   = let a = scanlPS plusIntV 0    -- accu
-            . sparseToDensePS (plusIntV gmax 1) 0   -- hist end
+            . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
             . mapPS
                $ Clo { env = ()
                     ,lifted = \(ATup0 n) g -> (,)L (replPS n headPV $:L g) (replPS n lengthPV $:L g)

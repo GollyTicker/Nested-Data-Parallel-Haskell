@@ -72,14 +72,14 @@ mapP2 :: PA () -> PA (a :-> b) -> PA (PA a :-> PA b)
 mapP2 _ fvs = AClo fvs mapPS mapPL
 
 mapPS :: (a :-> b) -> PA a -> PA b
-mapPS fv as
-  = replPA (lengthPA as) fv $:^ as -- whcih simplifies. (proof see #10)
-  = fv (replPA (lengthPA as) env) as
+mapPS fv@(Clo env _ fl) as
+  = replPS (lengthPS as) fv $:^ as -- which simplifies. (proof see #10)
+  = fl (replPS (lengthPS as) env) as
 
 mapPL :: PA (a :-> b) -> PA (PA a) -> PA (PA b)
 mapPL
-  = \fv ass -> unconcatPA ass $ replsPA (getSegd ass) fv $:L concatPA ass
-  = \(AClo aenv _ fl) ass -> unconcatPA ass . fl (replsPA (getSegd ass) aenv) . concatPA $ ass -- simplified #12
+  = \fv ass -> unconcatPA ass $ replsPS (getSegd ass) fv $:L concatPS ass
+  = \(AClo aenv _ fl) ass -> unconcatPS ass . fl (replsPS (getSegd ass) aenv) . concatPS $ ass -- simplified #12
 
 "Why scalar and lifted variant in (Array) Closures?"
 
@@ -97,9 +97,9 @@ mapPS :: (a :-> b) - PA a -> PA b
   = \fv as -> replPa (lengthPA as) fv $:L as
   = \fv@(Clo env fs fl) as -> replPa (lengthPA as) fv $:L as
 -- Definition of replPA for Closures
-  = AClo (replPA (lengthPA as) env) fs fv $:L as
+  = AClo (replPA (lengthPA as) env) fs fl $:L as
 -- Definition of $:L
-  = fv (replPA (lengthPA as) env) as
+  = fl (replPA (lengthPA as) env) as
 
 #12:
 
