@@ -10,9 +10,10 @@ import Data.Vector.Strategies
 
 import qualified ListHistogramBalance as L
 
--- Paralation of hbalance?
--- Problem. One has ot choose between unboxed arrays without paralation
--- and boxed arrays with paralation.
+-- Vector parallel of hbalance?
+-- one has to chose between fast unboxed sequential vectors
+-- and slightly-slower but parallel boxed vectors
+-- inthis approach, the unboxed fast vectors were taken.
 
 -- In this implementation each histogram calculation is
 -- sequential (but fast using unbboxed arrays). But the
