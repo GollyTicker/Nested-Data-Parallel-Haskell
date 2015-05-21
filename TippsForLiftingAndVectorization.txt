@@ -61,7 +61,7 @@ sumPS = sumD . mapD sumS . splitD
 
 "See Higher Order Flattening, p.55, 4.5, p.69 in PDF"
 
--- Definition of mapPV (from lifted combinators and DPH - Status Report)
+" Definition of mapPV (from lifted combinators and DPH - Status Report)"
 mapPV   :: (a :-> b) :-> PA a :-> PA b
 mapPV   = Clo () mapP1 mapP2
 
@@ -81,6 +81,22 @@ mapPL
   = \fv ass -> unconcatPA ass $ replsPS (getSegd ass) fv $:L concatPS ass
   = \(AClo aenv _ fl) ass -> unconcatPS ass . fl (replsPS (getSegd ass) aenv) . concatPS $ ass -- simplified #12
 
+"         Definition of zipWithPV       "
+
+
+zipWithPV :: (a :-> b :-> c) :-> PA a :-> PA b :-> PA c
+zipWithPV = closure3' zipWithPP_v zipWithPP_l
+
+zipWithPS :: (a :-> b) -> 
+zipWithPS f as bs
+        = replPS (lengthPS as) f $:^ as $:^ bs
+
+zipWithPL fs ass bss
+        =   unconcatPS ass
+        $   replsPS (getSegd ass) fs
+        $:^ concatPS ass
+        $:^ concatPS bss
+
 "Why scalar and lifted variant in (Array) Closures?"
 
 Closure ---> replP, mapP ---> Array Closure
@@ -90,6 +106,39 @@ Closure ---> replP, mapP ---> Array Closure
 
 In code appliations need to be able to switch inbetween
 both varients to account for repliations, mapping and indexing in context.
+
+type Segd = PA (Int,Int)
+-- e.g. ATup2 indices lengths
+replsPS :: Segd -> PA a -> PA a
+replsPS (ATup2 is ls) as
+  = concatP [: replP len a | len <- ls, a <- as :]    -- vanilla haskell, vectorize
+  = concatPS (zipWithPS replPV ls as)           -- inline zipWithPS
+  = concatPS $ replPS (lengthPS as) replPV $:^ ls $:^ as  -- replicate for functions
+  = concatPS $ (AClo (replPS (lengthPS as) replPLenv) replPS replPL) $:^ ls $:^ as    -- the curried args in replPLenv is simply a unit
+  = concatPS $ (AClo (replPS (lengthPS as) ()) replPS replPL) $:^ ls $:^ as   -- inline replication of units, inline $:L 2x
+  = concatPS $ replPL ls as   -- kann weiter durch inlining optimiert werden, da nur die Daten genommen werden.
+
+replPL :: PA Int -> PA a -> PA (PA a)
+replPL = ... "replPL [3,0,2] [a,b,c] = [[a,a,a],[],[c,c]] => stored as => AArr [a,a,a,c,c] [(0,3),(3,0),(3,2)]" 
+" -> kann effizient implementiert werden"
+
+
+"Faces: you start seeing faces when you sit too much on your thesis"
+
+Smiley    Description     Dir.Of.Downw.
+:->   sharp smile         ->
+
+$:^   eyebrows            ->
+
+:]
+[:    rectangular smile   <->
+
+xs)   x-smile             ->
+
+$:a)  eyebrows and smile  ->
+
+$:    uh-oh...            <-
+
 
 #10: 
 
@@ -263,10 +312,14 @@ class PR a where
 
 
 
+"distributed definitions"
+grep -r "^.*=.*[a-z+]D "
 
 
-
-
+"Classifying Types in GHC." "https://ghc.haskell.org/trac/ghc/wiki/Commentary/Compiler/TypeType#Classifyingtypes"
+  "Algebraic = supports case deconstruction, e.g. ( a,b ) and (# a,b #)"
+  "unlifted = cannot represent bottom, aka no pointer, e.g. ByteArray#"
+  "unboxed = raw primitive value, unlifted & no pointer, e.g. Int#"
 
 
 

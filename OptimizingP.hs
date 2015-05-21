@@ -107,6 +107,20 @@ replPS n a b = ATup1 n (replPS n a) (replPS n b)
 
 -- constructor specialisation
 
+-- inline mapPL
+mapPL = \(AClo aenv _ fl) ass -> unconcatPS ass . fl (replsPS (getSegd ass) aenv) . concatPS $ ass
+
+-- context
+(\(ATup1 n as) xs ->
+  mapPL (AClo { aenv = ATup1 n as, lifted = \(ATup1 n as) g -> indexPL as g }) xs
+)
+  -- inline mapPL
+  = (\(ATup1 n as) xs ->
+      unconcatPS xs . (\(ATup1 n as) g -> indexPL as g) (replsPS (getSegd as) (ATup1 n as)) . concatPS $ xs
+    ) -- could be further optimized ...
+
+replPS :: Segd -> PA a -> PA a -- aus Tipps.txt
+replPS segd = concatPS . replPL (lengths segd)   -- kann weiter durch inlining optimiert werden, da nur die Daten genommen werden.
 
 V[hbalance] $: img :: PA (PA Int)
   = let a = scanlPS plusIntV 0    -- accu
@@ -117,19 +131,63 @@ V[hbalance] $: img :: PA (PA Int)
             . concatPS                              -- hist begin
             $ img
         n = length a
-    in  -- apply on every pixel
-    (\(ATup1 n as) xs -> mapPL (AClo { aenv = ATup1 n as, lifted = \(ATup1 n as) g -> indexPL as g }) xs)-- core of nested data parallelism here!
-      (replPS
+    in  -- apply on every pixel -- core of nested data parallelism here!
+    (\(ATup1 n as) xs ->
+      unconcatPS xs . (\(ATup1 n as) g -> indexPL as g) (replsPS (getSegd as) (ATup1 n as)) . concatPS $ xs
+    ) (replPS
         (lengthPS img)
         $ floorL
             (multDoubleL (int2DoubleL (replPS n gmax)))
           . divL    -- normalize, normalize every value in akku-histogram
               (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
               (  replPS n (minusDoubleS (int2Double (lastPS a)) a0)  )
-        )
+      )
       img
 
--- TODO: inline more of mapPL etc...
 -- TODO: rewrites and special semantics of accumulator calculation
+-- primiitve Funktionen:
+-- divL = <built-in parallel divL> OR < mapD divS; with distributed types and extended library optimization >
+
+-- next: specify execution oder with a let
+-- next: replication of an array: replPS n a = AArr (cycleVector n a) [(0,n),(n,n),...,(n*n-n,n)]
+--                cycleVector :: Int -> Vector a -> Vector a
+--                cycleVector 3 [a,b,c] = [a,b,c,a,b,c,a,b,c]
+
+-- replicate as one-tuple is same as replication with the element itself.
+-- ATup1 n as -> as
+
+-- next: inline replPS
+-- note:
+--  Der Ausdruck (concatPS . replPL (lengths (getSegd as)) as) sorgt lediglich dafür,
+--  dass der bereits einmal senkrecht-replizierte AkkumulatorArray nochmal waagerecht-repliziert wird.
+--  Damit steht jedem Pixel eine direkte Kopie des gesamten Akkumulators zur Verfügung.
+--  Durch "Work Efficient Vectorization" kann diese Replikation effizienter gemacht werden.
+
+V[hbalance] $: img :: PA (PA Int)
+  = let a = scanlPS plusIntV 0    -- accu
+            . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
+            . (\g -> (,)L (headPL g) (lengthPL g))  -- ignored argument
+            . groupPS
+            . sortPS
+            . concatPS                              -- hist begin
+            $ img
+        n = length a
+        as = replPS (lengthPS img)            -- replicate width
+             . floorL                                     -- normalize and scale
+               (multDoubleL (int2DoubleL (replPS n gmax)))
+             . divL
+                 (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
+             . replPS n
+             $ minusDoubleS (int2Double (lastPS a)) a0
+    in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
+         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd as)) as) . concatPS $ xs
+       ) img
+
+
+"TODO": wann wechsel zu distributedTypes?
+0. Work Efficient Vectorization lesen. Insb. wie die Replikation von Nested Arrays effizienter gemacht werden kann.
+1. myFuncP durch myFunc2D . myFuncD etc ausdrücken
+2. weiter inlinen und communication/stream fusioning
+3. Progress Report schreiben
 
 
