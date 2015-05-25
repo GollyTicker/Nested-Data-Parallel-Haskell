@@ -25,7 +25,6 @@ type Many a  = [: a :]
 type Image a = [:[: a :]:]
 
 type Hist a = [: a :]
-type AkkuHist a = [: a :]
 
 (.) = (P..)
 
@@ -70,20 +69,20 @@ Work: many + lengthP map
 
 -}
 
-accu :: Hist Int -> AkkuHist Int
+accu :: Hist Int -> Hist Int
 accu = scanlP (+) 0
 
-normalize :: Int {-a0-} -> Int {-a(gmax)-} -> AkkuHist Int -> AkkuHist Double
+normalize :: Int {-a0-} -> Int {-a(gmax)-} -> Hist Int -> Hist Double
 normalize a0' agmax' as =
     let a0 = P.fromIntegral a0'
         agmax = P.fromIntegral agmax'
         divisor = agmax D.- a0
     in  [: (P.fromIntegral freq' D.- a0) D./ divisor | freq' <- as :]
 
-scale :: Int {-gmax-} -> AkkuHist Double -> AkkuHist Int
+scale :: Int {-gmax-} -> Hist Double -> Hist Int
 scale gmax as = [: P.floor (a D.* P.fromIntegral gmax) |  a <- as :]
 
-apply :: AkkuHist Int -> Image Int -> Image Int
+apply :: Hist Int -> Image Int -> Image Int
 apply as img = mapP (mapP (as !:)) img
 
 

@@ -12,7 +12,6 @@ import Data.List (intercalate)
 
 type Image a = [[a]]
 type Hist a = Map Int a
-type AkkuHist a = Map Int a
 
 img :: Image Int
 img =
@@ -75,20 +74,20 @@ hbalance img =
 hist :: Image Int -> Hist Int
 hist = foldr (\i -> M.insertWith (+) i 1) M.empty . concat
 
-accu :: Hist Int -> AkkuHist Int
+accu :: Hist Int -> Hist Int
 accu = scanl (+) 0
 
-normalize :: Int -> Int -> AkkuHist Int -> AkkuHist Double
+normalize :: Int -> Int -> Hist Int -> Hist Double
 normalize a0' agmax' as =
     let a0 = fromIntegral a0'
         agmax = fromIntegral agmax'
         divisor = agmax - a0
     in  M.map (\freq' -> (fromIntegral freq' - a0) / divisor) as
 
-scale :: Int -> AkkuHist Double -> AkkuHist Int
+scale :: Int -> Hist Double -> Hist Int
 scale gmax = M.map (\d -> floor (d * fromIntegral gmax))
 
-apply :: AkkuHist Int -> Image Int -> Image Int
+apply :: Hist Int -> Image Int -> Image Int
 apply as img = map (map (as M.!)) img
 
 --

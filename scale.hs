@@ -4,7 +4,6 @@
 
 type Image a = [:[: a :]:]
 type Hist a = [: a :]
-type AkkuHist a = [: a :]
 
 
 -- Original context

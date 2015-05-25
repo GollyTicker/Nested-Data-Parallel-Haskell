@@ -24,7 +24,7 @@ type Image a  = V.Vector a   -- unboxed vector. aka dense heap array
 type Many a   = VB.Vector a 
 
 type Hist a     = V.Vector a   -- der Index soll der Grauwert sein
-type AkkuHist a = V.Vector a   -- und der enthaltene Wert das Ergebnis
+                               -- und der enthaltene Wert das Ergebnis
 
 imgW = 6
 imgH = 6
@@ -70,10 +70,10 @@ hist =
 update :: V.Vector Int -> (Int,Int) -> V.Vector Int
 update v (i,res) = v `V.update` (V.singleton (i, res))
 
-accu :: Hist Int -> AkkuHist Int
+accu :: Hist Int -> Hist Int
 accu = V.scanl1 (+)
 
-normalize :: Int -> Int -> AkkuHist Int -> AkkuHist Double
+normalize :: Int -> Int -> Hist Int -> Hist Double
 normalize a0' agmax' as =
     let a0 = fromIntegral a0'
         agmax = fromIntegral agmax'
@@ -81,9 +81,9 @@ normalize a0' agmax' as =
     in  V.map (\freq' -> (fromIntegral freq' - a0) / divisor) as
 
 
-scale :: Int -> AkkuHist Double -> AkkuHist Int
+scale :: Int -> Hist Double -> Hist Int
 scale gmax = V.map (\d -> floor (d * fromIntegral gmax))
 
-apply :: AkkuHist Int -> Image Int -> Image Int
+apply :: Hist Int -> Image Int -> Image Int
 apply as = V.map (as V.!)
 

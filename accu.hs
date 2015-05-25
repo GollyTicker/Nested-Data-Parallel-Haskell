@@ -4,7 +4,6 @@
 
 type Image a = [:[: a :]:]
 type Hist a = [: a :]
-type AkkuHist a = [: a :]
 
 type PAImage a = PArray (PArray a)
 
@@ -15,7 +14,7 @@ contextL = L[accu] n $:L h
 
 -- Original definition
 -- (+) refers to double-multiplication
-accu :: Hist Int -> AkkuHist Int
+accu :: Hist Int -> Hist Int
 accu = scanlP (+) 0
 
 -- desugared accu
@@ -46,7 +45,7 @@ V[accu] :: PA Int :-> PA Int
       ,lifted = \(ATup0 n) xs -> L[accuBody] n
     }
 
-accuBody :: AkkuHist Int
+accuBody :: Hist Int
 accuBody = scanlP (+) 0 xs
 
 {-                LIFTING & VECTORIZING ACCU BODY      -}

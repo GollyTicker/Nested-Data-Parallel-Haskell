@@ -4,7 +4,6 @@
 
 type Image a = [:[: a :]:]
 type Hist a = [: a :]
-type AkkuHist a = [: a :]
 
 type PAImage a = PArray (PArray a)
 
@@ -15,7 +14,7 @@ contextL = L[normalize] n $:L someInt1 $:L someInt2 $:L someAccu
 
 -- Original definition
 -- (-) and (/) refer to double-substraction and double-division
-normalize :: Int -> Int -> AkkuHist Int -> AkkuHist Double
+normalize :: Int -> Int -> Hist Int -> Hist Double
 normalize a0' agmax' as =
     let a0 = fromIntegral a0'
         agmax = fromIntegral agmax'
@@ -23,7 +22,7 @@ normalize a0' agmax' as =
     in  [: (fromIntegral freq' - a0) / divisor | freq' <- as :]
 
 -- desugared normalize
-normalize0 :: Int -> Int -> AkkuHist Int -> AkkuHist Double
+normalize0 :: Int -> Int -> Hist Int -> Hist Double
 normalize0 =
   \a0' ->
     \agmax' ->

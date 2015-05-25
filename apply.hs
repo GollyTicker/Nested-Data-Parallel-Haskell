@@ -4,7 +4,6 @@
 
 type Image a = [:[: a :]:]
 type Hist a = [: a :]
-type AkkuHist a = [: a :]
 
 type PAImage a = PArray (PArray a)
 
@@ -14,11 +13,11 @@ contextV = V[apply] $: (...) $: (...)
 contextL = L[apply] n $:L (...) $:L (...)
 
 -- Original definition
-apply :: AkkuHist Int -> Image Int -> Image Int
+apply :: Hist Int -> Image Int -> Image Int
 apply as img = mapP (mapP (as !:)) img
 
 -- desugared apply
-apply0 :: AkkuHist Int -> Image Int -> Image Int
+apply0 :: Hist Int -> Image Int -> Image Int
 apply0 =
     \as ->
         \img ->

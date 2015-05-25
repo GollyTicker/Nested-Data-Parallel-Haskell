@@ -4,7 +4,6 @@
 
 type Image a = [:[: a :]:]
 type Hist a = [: a :]
-type AkkuHist a = [: a :]
 
 type PAImage a = PA (PA a)
 
@@ -40,7 +39,7 @@ hbalance0 = \img ->
     h :: Hist Int
     h = hist img
   in
-    let a :: AkkuHist Int
+    let a :: Hist Int
         a = accu h
     in  apply
           (scale gmax (normalize (headP a) (lastP a) a))
@@ -56,7 +55,7 @@ hbalance1 =
         h :: Hist Int
         h = hist img
       in
-        let a :: AkkuHist Int
+        let a :: Hist Int
             a = accu h
         in  apply
               (scale gmax (normalize (headP a) (lastP a) a))
@@ -76,7 +75,7 @@ hbalanceBodyL1 n =
       h :: Hist Int
       h = hist img
     in
-      let a :: AkkuHist Int
+      let a :: Hist Int
           a = accu h
       in  apply
             (scale gmax (normalize (headP a) (lastP a) a))
@@ -89,7 +88,7 @@ hbalanceBodyL2 n =
   (\h -> (L[lambdaA] n)) (L[hist img] n)
   where
     lambdaA = 
-      let a :: AkkuHist Int
+      let a :: Hist Int
           a = accu h
       in  apply
             (scale gmax (normalize (headP a) (lastP a) a))
@@ -101,7 +100,7 @@ hbalanceBodyL2 n =
   (\h -> L[lambdaA] n) (L[hist] $:L img)
   where
     lambdaA = 
-      let a :: AkkuHist Int
+      let a :: Hist Int
           a = accu h
       in  apply
             (scale gmax (normalize (headP a) (lastP a) a))
@@ -143,7 +142,7 @@ hbalanceBody1 :: PAImage Int -- die Variable img ist hier gebunden an das hbalan
 hbalanceBody1 =
     (\h -> 
       V[
-        let a :: AkkuHist Int
+        let a :: Hist Int
             a = accu h
         in  apply
               (scale gmax (normalize (headP a) (lastP a) a))

@@ -20,7 +20,6 @@ type Many a   = V.Vector a
 
 
 type Hist a = Map Int a
-type AkkuHist a = Map Int a
 
 imgL :: [[Int]]
 imgL =
@@ -53,29 +52,32 @@ hbalance img =
   in img'
 
 gmax :: Int
-gmax = 7 -- höchst möglicher Bildwert. in diesem Fall sind es 4 bit Bilder
+gmax = 255
 
 hist :: Image Int -> Hist Int
 hist = V.foldr (\i -> M.insertWith (+) i 1) M.empty . concat
 
-accu :: Hist Int -> AkkuHist Int
+accu :: Hist Int -> Hist Int
 accu = scanl (+) 0
 
-normalize :: Int -> Int -> AkkuHist Int -> AkkuHist Double
+normalize :: Int -> Int -> Hist Int -> Hist Double
 normalize a0' agmax' as =
     let a0 = fromIntegral a0'
         agmax = fromIntegral agmax'
         divisor = agmax - a0
     in  M.map (\freq' -> (fromIntegral freq' - a0) / divisor) as
 
-scale :: Int -> AkkuHist Double -> AkkuHist Int
+scale :: Int -> Hist Double -> Hist Int
 scale gmax = M.map (\d -> floor (d * fromIntegral gmax))
 
-apply :: AkkuHist Int -> Image Int -> Image Int
+apply :: Hist Int -> Image Int -> Image Int
 apply as img = V.map (V.map (as M.!)) img
 
 
 -- Utilities
+
+TODO: findWithDefault instead of M.!
+M.! causes an error when looking for values the image was not defined for.
 
 {-
 mapAccum :: (a -> b -> (a,c)) -> a -> Map k b -> (a, Map k c)
