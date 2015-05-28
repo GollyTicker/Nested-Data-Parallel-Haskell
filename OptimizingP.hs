@@ -60,7 +60,7 @@ V[hbalance] $: img :: PA (PA Int)
 V[hbalance] $: img :: PA (PA Int)
   = let a = scanlPS plusIntV 0    -- accu
             . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
-            . (\(ATup0 n) g -> (,)L (headPL g) (lengthPL g)) (replPS (lengthPS g))
+            . (\(ATup0 n) g -> ATup2 (headPL g) (lengthPL g)) (replPS (lengthPS g))
             . groupPS
             . sortPS
             . concatPS                              -- hist begin
@@ -125,7 +125,7 @@ replPS segd = concatPS . replPL (lengths segd)   -- kann weiter durch inlining o
 V[hbalance] $: img :: PA (PA Int)
   = let a = scanlPS plusIntV 0    -- accu
             . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
-            . (\g -> (,)L (headPL g) (lengthPL g))  -- ignored argument
+            . (\g -> ATup2 (headPL g) (lengthPL g))  -- ignored argument
             . groupPS
             . sortPS
             . concatPS                              -- hist begin
@@ -166,7 +166,7 @@ V[hbalance] $: img :: PA (PA Int)
 V[hbalance] $: img :: PA (PA Int)
   = let a = scanlPS plusIntV 0    -- accu
             . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
-            . (\g -> (,)L (headPL g) (lengthPL g))  -- ignored argument
+            . (\g -> ATup2 (headPL g) (lengthPL g))  -- ignored argument
             . groupPS
             . sortPS
             . concatPS                              -- hist begin

@@ -137,7 +137,7 @@ V[histBody] =
        $: Clo {
             env = ()
            ,scalar = (...ignored inside mapP...)
-           ,lifted = \(ATup0 n) g -> (,)L (replPA n headPV $:L g) (replPA n lengthPV $:L g)
+           ,lifted = \(ATup0 n) g -> ATup2 (replPA n headPV $:L g) (replPA n lengthPV $:L g)
           }
        $: groupPV
           $: sortPV
@@ -187,7 +187,7 @@ lambdaGL
   = L[lambdaG]
   = L[\g -> (,) (headP g) (lengthP g)]
   = \(ATup0 n) g ->
-      (,)L
+      ATup2
         (replPA n headPV $:L g)
         (replPA n lengthPV $:L g)
 

@@ -37,6 +37,8 @@ V[ f ] =
     ,lifted = \(ATup0 n) a -> L[b] n
   }
 
+Tuple Lifting: (,)L -> ATup2
+
 Innerhalb eines mapP wird die scalare Variante nicht mehr benötigt.
 mapP f xs wird immer fL verwenden (siehe Core of flattening). 
 

@@ -100,7 +100,7 @@ V[hbalance] $: img :: PA (PA Int)
         $: 0
         $: mapPV
            $: Clo { env = ()
-                ,lifted = \(ATup0 n) g -> (,)L (replPS n headPV $:L g) (replPS n lengthPV $:L g)
+                ,lifted = \(ATup0 n) g -> ATup2 (replPS n headPV $:L g) (replPS n lengthPV $:L g)
               }
            $: groupPV
               $: sortPV
@@ -212,7 +212,7 @@ contextL
                       $:L img
 lambdaGL
   = \(ATup0 n) g ->
-          (,)L
+          ATup2
             (replPS n headPV $:L g)
             (replPS n lengthPV $:L g)
 
