@@ -144,25 +144,6 @@ V[hbalance] $: img :: PA (PA Int)
       )
       img
 
--- TODO: rewrites and special semantics of accumulator calculation
--- primiitve Funktionen:
--- divL = <built-in parallel divL> OR < mapD divS; with distributed types and extended library optimization >
-
--- next: specify execution oder with a let
--- next: replication of an array: replPS n a = AArr (cycleVector n a) [(0,n),(n,n),...,(n*n-n,n)]
---                cycleVector :: Int -> Vector a -> Vector a
---                cycleVector 3 [a,b,c] = [a,b,c,a,b,c,a,b,c]
-
--- replicate as one-tuple is same as replication with the element itself.
--- ATup1 n as -> as
-
--- next: inline replPS
--- note:
---  Der Ausdruck (concatPS . replPL (lengths (getSegd as)) as) sorgt lediglich dafür,
---  dass der bereits einmal senkrecht-replizierte AkkumulatorArray nochmal waagerecht-repliziert wird.
---  Damit steht jedem Pixel eine direkte Kopie des gesamten Akkumulators zur Verfügung.
---  Durch "Work Efficient Vectorization" kann diese Replikation effizienter gemacht werden.
-
 V[hbalance] $: img :: PA (PA Int)
   = let a = scanlPS plusIntV 0    -- accu
             . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
@@ -183,11 +164,9 @@ V[hbalance] $: img :: PA (PA Int)
          unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd as)) as) . concatPS $ xs
        ) img
 
-
-"TODO": wann wechsel zu distributedTypes?
-0. Work Efficient Vectorization lesen. Insb. wie die Replikation von Nested Arrays effizienter gemacht werden kann.
-1. myFuncP durch myFunc2D . myFuncD etc ausdrücken
-2. weiter inlinen und communication/stream fusioning
-3. Progress Report schreiben
-
+note:
+ Der Ausdruck (concatPS . replPL (lengths (getSegd as)) as) sorgt lediglich dafür,
+ dass der bereits einmal senkrecht-replizierte AkkumulatorArray nochmal waagerecht-repliziert wird.
+ Damit steht jedem Pixel eine direkte Kopie des gesamten Akkumulators zur Verfügung.
+ Durch "Work Efficient Vectorization" kann diese Replikation effizienter gemacht werden.
 

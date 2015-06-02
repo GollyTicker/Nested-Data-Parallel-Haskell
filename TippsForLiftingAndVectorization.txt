@@ -263,11 +263,6 @@ mapPL
         (splitSD g d xs)
         (splitSD g d ys)
 
-
-
--- TODO: get all rewrite rules from Higher Order flattening!
-    needed?
-
 "unitEnv" proof
 f :: PA () -> PA a -> PA a
 f (replPA (lengthPA xs) ()) xs
@@ -311,9 +306,6 @@ class PR a where
   extractvsPA    :: PAs a -> U.VSegd -> PA a
 
 
-
-
-
 "distributed definitions"
 grep -r "^.*=.*[a-z+]D "
 
@@ -323,11 +315,9 @@ grep -r "^.*=.*[a-z+]D "
   "unlifted = cannot represent bottom, aka no pointer, e.g. ByteArray#"
   "unboxed = raw primitive value, unlifted & no pointer, e.g. Int#"
 
-
-
--- DONE: get all rewrite rules from all files in the libraries
-    grep -rl "RULE" . | xargs -L1 gedit
-    http://askubuntu.com/questions/55325/how-to-use-grep-command-to-find-text-including-subdirectories
-    http://stackoverflow.com/questions/2711001/how-to-apply-shell-command-to-each-line-of-a-command-output
-    grep -r -A 7 "\-# RULE" .
+-- getting all rewrite rules from all files in the libraries
+grep -rl "RULE" . | xargs -L1 gedit
+http://askubuntu.com/questions/55325/how-to-use-grep-command-to-find-text-including-subdirectories
+http://stackoverflow.com/questions/2711001/how-to-apply-shell-command-to-each-line-of-a-command-output
+grep -r -A 7 "\-# RULE" .
 
