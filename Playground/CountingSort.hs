@@ -3,6 +3,9 @@ import Control.Monad
 
 main = csortM 5 [3,5,2,3,2,3,0,0]
 
+-- war ein Versuch eines Alternativen Algorithmus
+-- nichts schnell genug. Counting Sort hat kaum Parallelisierungsmöglichkeiten
+
 csortM :: Int -> [Int] -> IO [Int]
 csortM k xs =
   do  
