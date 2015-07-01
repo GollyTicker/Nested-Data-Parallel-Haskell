@@ -2,88 +2,52 @@
 
 -- module MthreadedHistogramBalance (hbalance,hbalanceBulk,hist,img,accu,apply,scale,normalize) where
 
--- Define the functions each implementation has to provide
 
-import qualified Data.Vector.Unboxed as V -- dense arrays
-import qualified Data.Vector as VB        -- array of pointers
-import Data.Vector.Strategies
+type Image  = V.Vector   -- unboxed vector. aka dense heap array
 
-import qualified ListHistogramBalance as L
-
--- Vector parallel of hbalance?
--- one has to chose between fast unboxed sequential vectors
--- and slightly-slower but parallel boxed vectors
--- inthis approach, the unboxed fast vectors were taken.
-
--- In this implementation each histogram calculation is
--- sequential (but fast using unbboxed arrays). But the
--- entire Collection of images can be efficiently parallized using parallel strategies.
-
-
-type Image a  = V.Vector a   -- unboxed vector. aka dense heap array
-type Many a   = VB.Vector a 
-
-type Hist a     = V.Vector a   -- der Index soll der Grauwert sein
-                               -- und der enthaltene Wert das Ergebnis
+type Hist   = V.Vector Int   -- der Index soll der Grauwert sein
+                             -- und der enthaltene Wert das Ergebnis
 
 imgW = 6
 imgH = 6
 imgSize = imgW * imgH
 
-img :: Image Int -- let img be an example image. 400x400 with some values
-img = V.fromList . concat $ L.imgL
 
-imgs :: Many (Image Int) -- let imgs be a collection of images for bulk operation
-imgs = VB.replicate 1000 img
-
-main :: IO ()
-main =
-  let nCores = 4
-  in  mapM_ print $ VB.toList $ VB.take 5 $ hbalanceBulk nCores imgs
-
--- bulk application of HistrogramBalance
-hbalanceBulk :: Int -> Many (Image Int) -> Many (Image Int)
-hbalanceBulk cores imgs = (VB.map hbalance imgs) `using` (parVector cores)
-
-
-hbalance :: Image Int -> Image Int
+hbalance :: Image -> Image
 hbalance img =
-  let h = hist img
-      a = accu h
-      a0 = V.head a
-      agmax = V.last a
-      n = normalize a0 agmax a
-      s = scale gmax n
-      img' = apply s img
-  in img'
+  let h = parAccuHist img
+      min = h[0]
+      max = h[gmax]
+      apply h = parMap (\i -> h[i]) img
+      sclNrm :: Int -> Int
+      sclNrm x = round( (x-min)/(max - min)*gmax )
+  in  apply (parMap sclNrm) hist
 
+-- parMap sei ein primitiv zum Bulk-Parallelen Ausführen einer Abbildung
+-- parZipWith sei ein primitiv zum elementweise-parallelen Abbilden zweier Arrays
+-- parZipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
 
 gmax :: Int
 gmax = 7 -- höchst möglicher Bildwert. in diesem Fall sind es 4 bit Bilder
 
-hist :: Image Int -> Hist Int
-hist =
-  let init = V.replicate (gmax + 1) 0
-      step g v = v `update` (g,1 + v V.! g)
-  in  foldr step init . V.toList
+parAccuHist :: Image -> Hist
+parAccuHist []  = replicate gmax 0 -- [0,...,0]
+parAccuHist [x] = generate gmax (\i -> if (i >= x) then 1 else 0 ) -- [0,...0,1,...,1], erste 1 ab index x
+parAccuHist xs  =
+  let (left,right) = splitMid xs
+      [leftRes,rightRes] = parMap parAccuHist [left,right]  -- parallele rek. Aufruf
+  in  parZipWith (+) leftRes rightRes
 
-update :: V.Vector Int -> (Int,Int) -> V.Vector Int
-update v (i,res) = v `V.update` (V.singleton (i, res))
-
-accu :: Hist Int -> Hist Int
-accu = V.scanl1 (+)
-
-normalize :: Int -> Int -> Hist Int -> Hist Double
-normalize a0' agmax' as =
-    let a0 = fromIntegral a0'
-        agmax = fromIntegral agmax'
-        divisor = agmax - a0
-    in  V.map (\freq' -> (fromIntegral freq' - a0) / divisor) as
-
-
-scale :: Int -> Hist Double -> Hist Int
-scale gmax = V.map (\d -> floor (d * fromIntegral gmax))
-
-apply :: Hist Int -> Image Int -> Image Int
-apply as = V.map (as V.!)
-
+{-
+       f          O(W)       O(D)
+--------------------------------
+  hbalance        n*gmax      log n
+  parAccuHist     n*gmax      log n
+  splitMid        1           1
+  zipWith         gmax        1
+  replicate       gmax        1
+  generate        gmax        1
+  parMap          n           1
+  apply           n           1
+  arr[i]          1           1
+-}
