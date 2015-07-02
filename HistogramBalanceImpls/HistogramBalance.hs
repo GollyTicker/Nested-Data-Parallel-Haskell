@@ -57,7 +57,7 @@ hist =
 
 sparseToDenseP :: Enum e => e -> a -> [: (e,a) :] -> [: a :]
 sparseToDenseP              many init map            result
-sparseToDenseP 0 7 9 [: (1,5),(2,4),(6,7) :] == [: 0,5,4,0,0,0,7,0 :]
+sparseToDenseP 8 0 [: (1,5),(2,4),(6,7) :] == [: 0,5,4,0,0,0,7,0 :]
 
 sparseToDense n z map creates an array of length n where the element
 at the index i has x if (i,x) is in the map, or z otherwise.
