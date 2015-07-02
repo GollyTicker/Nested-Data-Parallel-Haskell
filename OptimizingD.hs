@@ -25,7 +25,7 @@ V[hbalance] $: img :: PA (PA Int)
              . replPS n
              $ minusDoubleS (int2DoubleS (lastPS a)) (headPS a)
     in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
-         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd xs)) as) . concatPS $ xs
+         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd xs)) $ as) . concatPS $ xs
        ) img
 
 note:
@@ -59,14 +59,14 @@ V[hbalance] $: img :: PA (PA Int)
              . replPS n
              $ minusDoubleS (int2DoubleS (lastPS a)) (headPS a)
     in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
-         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd xs)) as) . concatPS $ xs
+         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd xs)) $ as) . concatPS $ xs
        ) img
 
 
 "inline sparseToDensePS and scanlP and concatPS"
 sparseToDensePS ps =
   joinD
-  . cmapD (\ctx ps' -> sparseToDenseS ctx size z ps')
+  . sparseToDenseD size z
   . splitSparseD size
   $ ps
   
@@ -91,7 +91,7 @@ V[hbalance] $: img :: PA (PA Int)
             . mapD (scanlS plusIntS 0)
             . splitD                    -- split join rule fires
             . joinD                 -- hist end
-            . cmapD (\ctx ps' -> sparseToDenseS ctx (plusIntS gmax 1) 0 ps')
+            . sparseToDenseD (plusIntS gmax 1) 0
             . splitSparseD (plusIntS gmax 1)      -- splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
             . (\as ->
                 let g = AArr as (convert (split 0 as))
@@ -109,7 +109,7 @@ V[hbalance] $: img :: PA (PA Int)
              . replPS n
              $ minusDoubleS (int2DoubleS (lastPS a)) (headPS a)
     in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
-         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd xs)) as) . concatPS $ xs
+         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd xs)) $ as) . concatPS $ xs
        ) img
 
 "optimise and rule firings"
@@ -121,7 +121,7 @@ let a =
   . mapD (\(as,a) -> mapS (plusIntS a) as)
   . propagateD plusIntS 0                 -- propagateD :: Dist (PA a) -> Dist (PA a, a)
   . mapD (scanlS plusIntS 0)
-  . cmapD (\ctx ps' -> sparseToDenseS ctx (plusIntS gmax 1) 0 ps') -- hist end
+  . sparseToDenseD (plusIntS gmax 1) 0 -- hist end
   . splitSparseD (plusIntS gmax 1)      -- splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
   . (\as ->
       let g = AArr as (convert (split 0 as))
@@ -131,14 +131,15 @@ let a =
   . concatPS                                   -- hist begin
   $ img
 
-"rule: " mapD f . cmapD g = cmapD (\ctx x -> f (g ctx x))
+VERWORFEN: "rule: " mapD f . cmapD g = cmapD (\ctx x -> f (g ctx x))
 -- any further inlining and optimization doesn't reveal anything interesting
 
 V[hbalance] $: img :: PA (PA Int)
   = let a = joinD
             . mapD (\(as,a) -> mapS (plusIntS a) as)
             . propagateD plusIntS 0                 -- propagateD :: Dist (PA a) -> Dist (PA a, a)
-            . mapD (\ctx -> scanlS plusIntS 0 . sparseToDenseS ctx (plusIntS gmax 1) 0) -- hist end
+            . mapD (scanlS plusIntS 0)
+            . sparseToDenseD (plusIntS gmax 1) 0 -- hist end
             . splitSparseD (plusIntS gmax 1)        -- splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
             . (\as ->
                 let g = AArr as (convert (split 0 as))
@@ -356,7 +357,8 @@ V[hbalance] $: img :: PA (PA Int)
   = let a = joinD
             . mapD (\(as,a) -> mapS (plusIntS a) as)
             . propagateD plusIntS 0                 -- propagateD :: Dist (PA a) -> Dist (PA a, a)
-            . mapD (\ctx -> scanlS plusIntS 0 . sparseToDenseS ctx (plusIntS gmax 1) 0) -- hist end
+            . mapD (scanlS plusIntS 0)
+            . sparseToDenseD (plusIntS gmax 1) 0 -- hist end
             . splitSparseD (plusIntS gmax 1)        -- splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
             . (\as ->
                 let g = AArr as (convert (split 0 as))
@@ -377,18 +379,57 @@ V[hbalance] $: img :: PA (PA Int)
               $ a
     in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
          unconcatPS xs
-         . indexPL (concatPS . replPL (lengths (getSegd xs)) as)
+         . indexPL (concatPS . replPL (lengths (getSegd xs)) $ as)
          . concatPS
          $ xs
        ) img
 
-" jetzt die finale Anwendungszeile! :D "
 
-in unconcatPS img
-   . indexPL (concatPS . replPL (lengths (getSegd img)) as) -- apply on every pixel -- core of nested data parallelism here!
-   . concatPS
-   $ img
+"ein bisschen saubern"
+  "senkrechtes replizieren inlined"
+  "replizieren zu jedem Pixel in eine eigene Funktion gepackt. zum lesweren leseverständnis"
+  "lambda (\xs -> ) img agewandt"
 
+V[hbalance] $: img :: PA (PA Int)
+  = let a = joinD
+            . mapD (\(as,a) -> mapS (plusIntS a) as)
+            . propagateD plusIntS 0
+            . mapD (scanlS plusIntS 0)
+            . sparseToDenseD (plusIntS gmax 1) 0 -- hist end
+            . splitSparseD (plusIntS gmax 1)
+            . (\as -> let g = AArr as (convert (split 0 as))
+                      in  ATup2 (headPL g) (lengthPL g)
+              )
+            . sortPS
+            . concatPS                                   -- hist begin
+            $ img
+        n = lengthPS a
+        as = joinD
+             . zipWith4D
+                ( \a b c d -> floorS (multDoubleS (divS (minusS (int2DoubleS c) d) b) a)  )  -- normalize and scale
+                ( replD n . int2DoubleS $ gmax )
+                ( replD n . minusDoubleS (int2DoubleS (lastPS a)) . headPS $ a )
+                ( replD n . int2DoubleS . headPS $ a )
+              . splitD
+              $ a
+        pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)
+    in unconcatPS img
+       . indexPL (pixelReplicate as)  -- apply on every pixel -- core of nested data parallelism here!
+       . concatPS
+       $ img
 
-"kurz vor Ende. Execution ordering mit lets klarmachen"
+{-
+
+propagateD :: Dist (PA a) -> Dist (PA a, a)
+
+sparseToDenseD :: Int -> Int -> Dist (PA (Int,a)) -> Dist (PA a)
+splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
+
+split :: Int -> PA a -> PA (a,Int,Int)        functions implementing the distributed groupP on the segment-descriptor
+convert :: PA (a,Int,Int) -> PA (Int,Int)
+
+lengths :: Segd -> PA Int   retreives the lengths of each subarray.
+
+-}
+
 "nächster Schritt. Fusioning mit stream/unstream-Funktionen (z.B. streamS)"

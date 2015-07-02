@@ -144,6 +144,8 @@ V[hbalance] $: img :: PA (PA Int)
       )
       img
 
+"apply lambda"
+
 V[hbalance] $: img :: PA (PA Int)
   = let a = scanlPS plusIntS 0    -- accu
             . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
@@ -161,7 +163,7 @@ V[hbalance] $: img :: PA (PA Int)
              . replPS n
              $ minusDoubleS (int2Double (lastPS a)) (headPS a)
     in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
-         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd xs)) as) . concatPS $ xs
+         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd xs)) $ as) . concatPS $ xs
        ) img
 
 note:

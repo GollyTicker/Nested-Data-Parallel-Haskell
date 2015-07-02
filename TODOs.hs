@@ -10,8 +10,6 @@
 
 * specify execution oder with a let
 
-* rewrites and special semantics of accumulator calculation
-
 * Twofold interpretation: divL = <built-in parallel divL> OR < mapD divS> with distributed types and extended library optimization
 
 * Überall: floor -> round?
@@ -31,7 +29,9 @@ OK Pseudocode, Divide&Conquer Parallel Histogram Balancing
 
 * Vergleich Divide&Conquer vs Data-Parallel
 
+* Was tun über PNested und Replikation?
 
+VERFERFEN: rewrites and special semantics of accumulator calculation
 Abgelehnt: P_man mit CountingSort unter Berücksichtigung des Kontextes
 
 " ************  Fragen"
