@@ -346,7 +346,7 @@ let as = replPS (lengthPS img)            -- replicate width
 let as = replPS (lengthPS img)            -- replicate width
          . joinD
          . zipWith4D
-            ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )  -- normalize and scale
+            ( \a b d c -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )  -- normalize and scale
             ( replD n . int2Double $ gmax )
             ( replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a )
             ( replD n . int2Double . headPS $ a )
@@ -371,7 +371,7 @@ V[hbalance] $: img :: PA (PA Int)
         as = replPS (lengthPS img)            -- replicate width
              . joinD
              . zipWith4D
-                ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )  -- normalize and scale
+                ( \a b d c -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )  -- normalize and scale
                 ( replD n . int2Double $ gmax )
                 ( replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a )
                 ( replD n . int2Double . headPS $ a )
@@ -406,7 +406,7 @@ V[hbalance] $: img :: PA (PA Int)
         as = replPS (lengthPS img)            -- replicate width
              . joinD
              . mapD  -- normalize and scale
-                ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )
+                ( \a b d c -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )
                     ( replD n . int2Double $ gmax )
                     ( replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a )
                     ( replD n . int2Double . headPS $ a )
@@ -439,7 +439,7 @@ V[hbalance] $: img :: PA (PA Int)
         n = lengthPS a
         as = joinD
              . mapD  -- normalize and scale
-                ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )
+                ( \a b d c -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )
                     ( replD n . int2Double $ gmax )
                     ( replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a )
                     ( replD n . int2Double . headPS $ a )

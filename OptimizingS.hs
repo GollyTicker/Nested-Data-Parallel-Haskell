@@ -37,7 +37,7 @@ V[hbalance] $: img :: PA (PA Int)
         n = lengthPS a
         as = joinD
              . mapD  -- normalize and scale
-                ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )
+                ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS d) c) b) a)  )
                     ( replD n . int2Double $ gmax )       -- gmax
                     ( replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a )    -- divisor
                     ( replD n . int2Double . headPS $ a )    -- a0
@@ -70,9 +70,9 @@ floorDoubleS = unstream . mapSt floorDouble . stream
           (divDoubleS
             (minusDoubleS
               (int2DoubleS
-                c
+                d
               )
-              d
+              c
             )
             b
           )
@@ -86,8 +86,8 @@ floorDoubleS = unstream . mapSt floorDouble . stream
       (unstream . mapSt floorDouble . stream)
         ( (\as -> unstream . zipWithSt multDouble (stream as) . stream $ a)
           ( (\as -> unstream . zipWithSt divDouble (stream as) . stream $ b)
-            ( (\as -> unstream . zipWithSt minusDouble (stream as) . stream $ d)
-              ( (unstream . mapSt int2Double . stream $ c) )
+            ( (\as -> unstream . zipWithSt minusDouble (stream as) . stream $ c)
+              ( (unstream . mapSt int2Double . stream $ d) )
             )
           )
         )
@@ -97,7 +97,7 @@ floorDoubleS = unstream . mapSt floorDouble . stream
     
   = ( \a b c d ->
       (unstream . mapSt floorDouble . stream)
-        (unstream . zipWithSt multDouble (stream (unstream . zipWithSt divDouble (stream (unstream . zipWithSt minusDouble (stream (unstream . mapSt int2Double . stream $ c)) . stream $ d)) . stream $ b)) . stream $ a)
+        (unstream . zipWithSt multDouble (stream (unstream . zipWithSt divDouble (stream (unstream . zipWithSt minusDouble (stream (unstream . mapSt int2Double . stream $ d)) . stream $ c)) . stream $ b)) . stream $ a)
     )
     
     "ready for rules"
@@ -122,9 +122,9 @@ floorDoubleS = unstream . mapSt floorDouble . stream
                           . unstream
                           . mapSt int2Double
                           . stream
-                          $ c)
+                          $ d)
                     . stream
-                    $ d)
+                    $ c)
               . stream
               $ b)
         . stream
@@ -143,9 +143,9 @@ floorDoubleS = unstream . mapSt floorDouble . stream
                divDouble
                (zipWithSt
                    minusDouble
-                   (mapSt int2Double . stream $ c)
+                   (mapSt int2Double . stream $ d)
                . stream
-               $ d)
+               $ c)
              . stream
              $ b)
         . stream
@@ -158,9 +158,9 @@ floorDoubleS = unstream . mapSt floorDouble . stream
   = (\a b c d -> unstream
                 . mapSt floorDouble
                 . zipWith4St
-                    ( \c' d' b' a' -> multDouble (divDouble (minusDouble (int2Double c') d') b') a')
-                    (stream $ c)
+                    ( \d' c' b' a' -> multDouble (divDouble (minusDouble (int2Double d') c') b') a')
                     (stream $ d)
+                    (stream $ c)
                     (stream $ b)
                     (stream $ a)
     )
@@ -186,9 +186,9 @@ V[hbalance] $: img :: PA (PA Int)
                 (\a b c d -> unstream
                              . mapSt floorDouble
                              . zipWith4St             -- normalize and scale
-                                ( \c' d' b' a' -> multDouble (divDouble (minusDouble (int2Double c') d') b') a')
-                                (stream $ c)
+                                ( \d' c' b' a' -> multDouble (divDouble (minusDouble (int2Double d') c') b') a')
                                 (stream $ d)
+                                (stream $ c)
                                 (stream $ b)
                                 (stream $ a)
                 ) ( replD n . int2Double $ gmax )
@@ -208,26 +208,26 @@ V[hbalance] $: img :: PA (PA Int)
                 (\d -> unstream
                        . mapSt floorDouble
                        . zipWith4St             -- normalize and scale
-                          ( \c' d' b' a' -> multDouble (divDouble (minusDouble (int2Double c') d') b') a')
-                          (stream . replD n . int2Double . headPS $ a)
+                          ( \d' c' b' a' -> multDouble (divDouble (minusDouble (int2Double d') c') b') a')
                           (stream $ d)
+                          (stream . replD n . int2Double . headPS $ a)
                           (stream . replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a)
-                          (stream . replD n . int2Double $ gmax )
-                ) 
+                          (stream . replD n . int2Double $ gmax)
+                )
              $ a
              
         "zipWith argument flipping. stream $ d wird zum Ende gebracht und verschwindet durch currying"
-
+        
         as = joinD
              . mapD  -- normalize and scale
                 (unstream
                  . mapSt floorDouble
                  . zipWith4St             -- normalize and scale
-                    ( \c' d' b' a' -> multDouble (divDouble (minusDouble (int2Double c') d') b') a')
+                    ( \c' b' a' d' -> multDouble (divDouble (minusDouble (int2Double d') c') b') a')
                     (stream . replD n . int2Double . headPS $ a)
                     (stream . replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a)
-                    (stream . replD n . int2Double $ gmax )
-                  . stream
+                    (stream . replD n . int2Double $ gmax)
+                 . stream
                 )
              $ a
         
