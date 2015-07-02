@@ -69,7 +69,7 @@ V[hbalance] $: img :: PA (PA Int)
     (\(ATup1 n as) xs -> mapPL (AClo { aenv = ATup1 n as, lifted = \(ATup1 n as) g -> indexPL as g }) xs)
       (replPS (lengthPS img)
             (\a' ->
-                (\(ATup1 n gmax) a -> floorL (multDoubleL (int2DoubleL gmax) a)) (replPS (lengthPS a') gmax) a'
+                (\(ATup1 n gmax) a -> floorL (multDoubleL (int2DoubleL gmax) a) ) (replPS (lengthPS a') gmax) a'
             ) (
                (\(ATup2 n a0 divisior) a -> divL (minusL (int2DoubleL a) a0) divisor) -- normalize, normalize every value in akku-histogram
                    (replPS (lengthPS a) (int2Double (headPS a), minusDoubleS (int2Double (lastPS a)) (headPS a)))
@@ -116,7 +116,7 @@ mapPL = \(AClo aenv _ fl) ass -> unconcatPS ass . fl (replsPS (getSegd ass) aenv
 )
   -- inline mapPL
   = (\(ATup1 n as) xs ->
-      unconcatPS xs . (\(ATup1 n as) g -> indexPL as g) (replsPS (getSegd as) (ATup1 n as)) . concatPS $ xs
+      unconcatPS xs . (\(ATup1 n as) g -> indexPL as g) (replsPS (getSegd xs) (ATup1 n as)) . concatPS $ xs
     ) -- could be further optimized ...
 
 replPS :: Segd -> PA a -> PA a -- aus Tipps.txt
@@ -133,11 +133,11 @@ V[hbalance] $: img :: PA (PA Int)
         n = length a
     in  -- apply on every pixel -- core of nested data parallelism here!
     (\(ATup1 n as) xs ->
-      unconcatPS xs . (\(ATup1 n as) g -> indexPL as g) (replsPS (getSegd as) (ATup1 n as)) . concatPS $ xs
+      unconcatPS xs . (\(ATup1 n as) g -> indexPL as g) (replsPS (getSegd xs) (ATup1 n as)) . concatPS $ xs
     ) (replPS
         (lengthPS img)
         $ floorL
-            (multDoubleL (int2DoubleL (replPS n gmax)))
+          . multDoubleL (int2DoubleL (replPS n gmax))
           . divL    -- normalize, normalize every value in akku-histogram
               (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
               (  replPS n (minusDoubleS (int2Double (lastPS a)) (headPS a))  )
@@ -155,17 +155,17 @@ V[hbalance] $: img :: PA (PA Int)
         n = length a
         as = replPS (lengthPS img)            -- replicate width
              . floorL                                     -- normalize and scale
-               (multDoubleL (int2DoubleL (replPS n gmax)))
+             . multDoubleL (int2DoubleL (replPS n gmax))
              . divL
                  (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
              . replPS n
              $ minusDoubleS (int2Double (lastPS a)) (headPS a)
     in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
-         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd as)) as) . concatPS $ xs
+         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd xs)) as) . concatPS $ xs
        ) img
 
 note:
- Der Ausdruck (concatPS . replPL (lengths (getSegd as)) as) sorgt lediglich dafür,
+ Der Ausdruck (concatPS . replPL (lengths (getSegd xs)) as) sorgt lediglich dafür,
  dass der bereits einmal senkrecht-replizierte AkkumulatorArray nochmal waagerecht-repliziert wird.
  Damit steht jedem Pixel eine direkte Kopie des gesamten Akkumulators zur Verfügung.
  Durch "Work Efficient Vectorization" kann diese Replikation effizienter gemacht werden.
