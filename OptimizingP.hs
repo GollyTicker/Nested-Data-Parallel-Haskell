@@ -43,10 +43,10 @@ V[hbalance] $: img :: PA (PA Int)
                          ,lifted =
                           \(ATup1 n gmax) a ->
                             floorL (multDoubleL (int2DoubleL gmax) a)  -- scale each grayvalue
-                        }
+                        }                                                                                           TODO: check correct order of operations.
                      . mapPS   -- normalize, normalize every value in akku-histogram
                          Clo {
-                             env = (int2Double (headPS a), minusDoubleS (int2Double (lastPS a)) a0)
+                             env = (int2Double (headPS a), minusDoubleS (int2Double (lastPS a)) (headPS a))
                             ,lifted =
                               \(ATup2 n a0 divisior) a ->
                                  divL (minusL (int2DoubleL a) a0) divisor
@@ -72,7 +72,7 @@ V[hbalance] $: img :: PA (PA Int)
                 (\(ATup1 n gmax) a -> floorL (multDoubleL (int2DoubleL gmax) a)) (replPS (lengthPS a') gmax) a'
             ) (
                (\(ATup2 n a0 divisior) a -> divL (minusL (int2DoubleL a) a0) divisor) -- normalize, normalize every value in akku-histogram
-                   (replPS (lengthPS a) (int2Double (headPS a), minusDoubleS (int2Double (lastPS a)) a0))
+                   (replPS (lengthPS a) (int2Double (headPS a), minusDoubleS (int2Double (lastPS a)) (headPS a)))
                a
               )
       )
@@ -140,7 +140,7 @@ V[hbalance] $: img :: PA (PA Int)
             (multDoubleL (int2DoubleL (replPS n gmax)))
           . divL    -- normalize, normalize every value in akku-histogram
               (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
-              (  replPS n (minusDoubleS (int2Double (lastPS a)) a0)  )
+              (  replPS n (minusDoubleS (int2Double (lastPS a)) (headPS a))  )
       )
       img
 
@@ -159,7 +159,7 @@ V[hbalance] $: img :: PA (PA Int)
              . divL
                  (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
              . replPS n
-             $ minusDoubleS (int2Double (lastPS a)) a0
+             $ minusDoubleS (int2Double (lastPS a)) (headPS a)
     in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
          unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd as)) as) . concatPS $ xs
        ) img

@@ -39,7 +39,7 @@ V[hbalance] $: img :: PA (PA Int)
                         }
                      . mapPS   --  normalize, normalize every value in akku-histogram
                          Clo {
-                             env = (int2Double (headPS a), minusDoubleS (int2Double (lastPS a)) a0)
+                             env = (int2Double (headPS a), minusDoubleS (int2Double (lastPS a)) (headPS a))
                             ,lifted =
                               \(ATup2 n a0 divisior) a ->
                                  replPS n divV
