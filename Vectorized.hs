@@ -11,8 +11,8 @@
 "Inlining simple definitions"
 
 V[hbalance] $: img :: PA (PA Int)
-  = let a = scanlPS plusIntS 0    -- accu
-            . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
+  = let a = scanlPS plusInt 0    -- accu
+            . sparseToDensePS (plusInt gmax 1) 0   -- hist end
             . mapPS
                $ Clo { env = ()
                     ,lifted = \(ATup0 n) g -> (,)L (replPS n headPV $:L g) (replPS n lengthPV $:L g)
@@ -39,7 +39,7 @@ V[hbalance] $: img :: PA (PA Int)
                         }
                      . mapPS   --  normalize, normalize every value in akku-histogram
                          Clo {
-                             env = (int2Double (headPS a), minusDoubleS (int2Double (lastPS a)) (headPS a))
+                             env = (int2Double (headPS a), minusDouble (int2Double (lastPS a)) (headPS a))
                             ,lifted =
                               \(ATup2 n a0 divisior) a ->
                                  replPS n divV

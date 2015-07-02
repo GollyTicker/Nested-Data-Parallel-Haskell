@@ -19,8 +19,8 @@ Note: indexPL :: PA a -> PA i -> PA a
 
 
 V[hbalance] $: img :: PA (PA Int)
-  = let a = scanlPS plusIntS 0    -- accu
-            . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
+  = let a = scanlPS plusInt 0    -- accu
+            . sparseToDensePS (plusInt gmax 1) 0   -- hist end
             . mapPS
                $ Clo { env = ()
                     ,lifted = \(ATup0 n) g -> (,)L (headPL g) (lengthPL g)
@@ -46,7 +46,7 @@ V[hbalance] $: img :: PA (PA Int)
                         }                                                                                           TODO: check correct order of operations.
                      . mapPS   -- normalize, normalize every value in akku-histogram
                          Clo {
-                             env = (int2Double (headPS a), minusDoubleS (int2Double (lastPS a)) (headPS a))
+                             env = (int2Double (headPS a), minusDouble (int2Double (lastPS a)) (headPS a))
                             ,lifted =
                               \(ATup2 n a0 divisior) a ->
                                  divL (minusL (int2DoubleL a) a0) divisor
@@ -58,8 +58,8 @@ V[hbalance] $: img :: PA (PA Int)
 -- inlining definitions of mapPS
 
 V[hbalance] $: img :: PA (PA Int)
-  = let a = scanlPS plusIntS 0    -- accu
-            . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
+  = let a = scanlPS plusInt 0    -- accu
+            . sparseToDensePS (plusInt gmax 1) 0   -- hist end
             . (\(ATup0 n) g -> ATup2 (headPL g) (lengthPL g)) (replPS (lengthPS g))
             . groupPS
             . sortPS
@@ -72,7 +72,7 @@ V[hbalance] $: img :: PA (PA Int)
                 (\(ATup1 n gmax) a -> floorL (multDoubleL (int2DoubleL gmax) a) ) (replPS (lengthPS a') gmax) a'
             ) (
                (\(ATup2 n a0 divisior) a -> divL (minusL (int2DoubleL a) a0) divisor) -- normalize, normalize every value in akku-histogram
-                   (replPS (lengthPS a) (int2Double (headPS a), minusDoubleS (int2Double (lastPS a)) (headPS a)))
+                   (replPS (lengthPS a) (int2Double (headPS a), minusDouble (int2Double (lastPS a)) (headPS a)))
                a
               )
       )
@@ -123,8 +123,8 @@ replPS :: Segd -> PA a -> PA a -- aus Tipps.txt
 replPS segd = concatPS . replPL (lengths segd)   -- kann weiter durch inlining optimiert werden, da nur die Daten genommen werden.
 
 V[hbalance] $: img :: PA (PA Int)
-  = let a = scanlPS plusIntS 0    -- accu
-            . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
+  = let a = scanlPS plusInt 0    -- accu
+            . sparseToDensePS (plusInt gmax 1) 0   -- hist end
             . (\g -> ATup2 (headPL g) (lengthPL g))  -- ignored argument
             . groupPS
             . sortPS
@@ -140,15 +140,15 @@ V[hbalance] $: img :: PA (PA Int)
           . multDoubleL (int2DoubleL (replPS n gmax))
           . divL    -- normalize, normalize every value in akku-histogram
               (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
-              (  replPS n (minusDoubleS (int2Double (lastPS a)) (headPS a))  )
+              (  replPS n (minusDouble (int2Double (lastPS a)) (headPS a))  )
       )
       img
 
 "apply lambda"
 
 V[hbalance] $: img :: PA (PA Int)
-  = let a = scanlPS plusIntS 0    -- accu
-            . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
+  = let a = scanlPS plusInt 0    -- accu
+            . sparseToDensePS (plusInt gmax 1) 0   -- hist end
             . (\g -> ATup2 (headPL g) (lengthPL g))  -- ignored argument
             . groupPS
             . sortPS
@@ -161,7 +161,7 @@ V[hbalance] $: img :: PA (PA Int)
              . divL
                  (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
              . replPS n
-             $ minusDoubleS (int2Double (lastPS a)) (headPS a)
+             $ minusDouble (int2Double (lastPS a)) (headPS a)
     in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
          unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd xs)) $ as) . concatPS $ xs
        ) img
