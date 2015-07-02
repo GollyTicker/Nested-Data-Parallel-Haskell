@@ -14,14 +14,25 @@
 
 * Twofold interpretation: divL = <built-in parallel divL> OR < mapD divS> with distributed types and extended library optimization
 
+* Überall: floor -> round?
 
+DONE: Konkreter Algorithmus von Pndpn
+* Konkreter Algorithmus und Laufzeiteinschätzung von Pndpv
 
-* ParAccuHist >=> Normalize >=> Scale >=> Apply als P_man Algorithmus
+* Genau erläuteren und präzisieren wie Work&Depth mit der Anzahl der Prozessoren in den distributed Types zusammenhängen.
+  * Die tatsächliche Parallelität steck in der Anzahl der PUs (Processing Units) und den verteilten Algorithmen
+    zwischen den einzelnen PUs. Damit wird sum auf D(log n) gedrückt. Damit wird ebenfalls 
 
+OK ParAccuHist >=> Normalize >=> Scale >=> Apply als P_man Algorithmus
+
+OK Pseudocode, Divide&Conquer Parallel Histogram Balancing
+
+* Größenvergleiche: n vs. gmax, n*log n vs. gmax
 
 * Vergleich Divide&Conquer vs Data-Parallel
 
-(P_man mit CountingSort unter Berücksichtigung des Kontextes. Pseudocode, Divide&Conquer Parallel Histogram Balancing)
+
+Abgelehnt: P_man mit CountingSort unter Berücksichtigung des Kontextes
 
 " ************  Fragen"
 * Work Efficient Vectorization genauer durchgehen. wie die Replikation von Nested Arrays effizienter gemacht werden kann.
@@ -47,6 +58,8 @@
 
 * Es geht um den Kerngedanken! Und nicht um einen Technical Report mit Reproduzierbarkeit.
 
+* sumP implementierung als Beispiel für Laufzeiteinschätung mit Work/Depth und Anzahl von Prozessoren #17
+
 * Ab jetzt, Details lieber weglassen.
 
 * Seitenanzahl:
@@ -61,7 +74,7 @@
 
 " ************ Sonstiges"
 
-* lifted hBalance verwerfen
+VERWERFEN: lifted hBalance verwerfen
 
 * hbalanceBulk? Verwerfen oder nennen?
 
