@@ -36,13 +36,12 @@ V[hbalance] $: img :: PA (PA Int)
             $ img
         n = lengthPS a
         as = joinD
-             . zipWith4D
-                ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )  -- normalize and scale
-                ( replD n . int2Double $ gmax )
-                ( replD n . minusDouble (int2Double (lastPS a)) . headPS $ a )
-                ( replD n . int2Double . headPS $ a )
-              . splitD
-              $ a
+             . mapD  -- normalize and scale
+                ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )
+                    ( replD n . int2Double $ gmax )       -- gmax
+                    ( replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a )    -- divisor
+                    ( replD n . int2Double . headPS $ a )    -- a0
+             $ a
         pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)
     in unconcatPS img
        . indexPL (pixelReplicate as)  -- apply on every pixel -- core of nested data parallelism here!
@@ -183,7 +182,7 @@ V[hbalance] $: img :: PA (PA Int)
             $ img
         n = lengthPS a
         as = joinD
-             . zipWith4D
+             . mapD  -- normalize and scale
                 (\a b c d -> unstream
                              . mapSt floorDouble
                              . zipWith4St             -- normalize and scale
@@ -192,27 +191,50 @@ V[hbalance] $: img :: PA (PA Int)
                                 (stream $ d)
                                 (stream $ b)
                                 (stream $ a)
-                )
-                ( replD n . int2Double $ gmax )
-                ( replD n . minusDouble (int2Double (lastPS a)) . headPS $ a )
-                ( replD n . int2Double . headPS $ a )
-              . splitD
-              $ a
+                ) ( replD n . int2Double $ gmax )
+                  ( replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a )
+                  ( replD n . int2Double . headPS $ a )
+             $ a
         pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)
     in unconcatPS img
        . indexPL (pixelReplicate as)  -- apply on every pixel -- core of nested data parallelism here!
        . concatPS
        $ img
-   = ( \a b c d ->
-      (
-        unstream
-        . mapSt floorDouble
-        . zipWith4St
-            ( \c' d' b' a' -> multDouble (divDouble (minusDouble (int2Double c') d') b') a')
-            (stream $ c)
-            (stream $ d)
-            (stream $ b)
-            (stream $ a)
-    )
-    
+
+"jetzt können wir lambda-reduction anwenden! :D yeah!"
+
+        as = joinD
+             . mapD  -- normalize and scale
+                (\d -> unstream
+                       . mapSt floorDouble
+                       . zipWith4St             -- normalize and scale
+                          ( \c' d' b' a' -> multDouble (divDouble (minusDouble (int2Double c') d') b') a')
+                          (stream . replD n . int2Double . headPS $ a)
+                          (stream $ d)
+                          (stream . replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a)
+                          (stream . replD n . int2Double $ gmax )
+                ) 
+             $ a
+             
+        "zipWith argument flipping. stream $ d wird zum Ende gebracht und verschwindet durch currying"
+
+        as = joinD
+             . mapD  -- normalize and scale
+                (unstream
+                 . mapSt floorDouble
+                 . zipWith4St             -- normalize and scale
+                    ( \c' d' b' a' -> multDouble (divDouble (minusDouble (int2Double c') d') b') a')
+                    (stream . replD n . int2Double . headPS $ a)
+                    (stream . replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a)
+                    (stream . replD n . int2Double $ gmax )
+                  . stream
+                )
+             $ a
+        
+        "verallgemeinerung vom folgenden rewrite rule zum float-in einer Konstante in ein zipWithSt wird angewendet"
+          zipWithSt f (stream (replD n a)) bs = mapSt (f a) bs
+          
+      "Whoops". welches Argument ist jetzt eigentlich das aus dem Histogram?
+        
+        
 
