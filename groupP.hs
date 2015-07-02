@@ -7,6 +7,23 @@ import Test.QuickCheck (Args(..))
 as = [1,1,2,3,3,3,3,4]
 
 
+{-
+
+A local implementation of groupP.
+Work(n) = O(n)
+Depth(n) = O(log n)
+
+How to build the segment descriptor:
+1. distribute xs
+2. locally build singleton-triples
+3. in a tree-like recursive fasion ( see #23 )
+   exchange the beginnings and ends of each chunk
+   of the linked list and update them
+4. transform the local linked-list-chunks into local segd array-chunks
+
+-}
+
+
 main = 
   do
     putStrLn "Input:"
@@ -23,16 +40,6 @@ main =
       prop_groupPworks
 
 type AArr a = ([a],[(Int,Int)])
-
-{-
-this implementation of groupP s explained on paper #13.
-Work: n * log(n) / p
-Depth: n * log(n) / p
-where
-n = length of array
-p = number of processors
-
--}
 
 groupP :: Eq a => [a] -> ([a],[(Int,Int)]) -- indices and lengths
 groupP as = (as, (convert . split 0) as)
