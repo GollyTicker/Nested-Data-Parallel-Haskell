@@ -34,7 +34,7 @@ V[hbalance] $: img :: PA (PA Int)
                        Clo { env = (gmax)
                          ,lifted =
                           \(ATup1 n gmax) a ->
-                            replPS n floorV
+                            replPS n floorDoubleV
                               $:L (replPS n multDoubleV $:L (replPS fromIntegralV n $:L gmax) $:L a)  -- scale each grayvalue
                         }
                      . mapPS   --  normalize, normalize every value in akku-histogram
@@ -72,7 +72,7 @@ V[hbalance] $: img :: PA (PA Int)
                      $: Clo { env = (gmax)
                          ,lifted =
                           \(ATup1 n gmax) a ->
-                            replPS n floorV
+                            replPS n floorDoubleV
                               $:L (replPS n multDoubleV $:L (replPS fromIntegralV n $:L gmax) $:L a)  -- scale each grayvalue
                         }
                      $: (\a0 ->           -- normalize
@@ -159,7 +159,7 @@ contextV
   = mapPV
       $: Clo {
            env = (someInt)
-          ,lifted = \(ATup1 n gmax) a -> replPS n floorV $:L (replPS n multDoubleV $:L (replPS fromIntegralV n $:L gmax) $:L a)
+          ,lifted = \(ATup1 n gmax) a -> replPS n floorDoubleV $:L (replPS n multDoubleV $:L (replPS fromIntegralV n $:L gmax) $:L a)
           ,scalar = (...ignored inside mapP...)
          }
       $: someNormHist
@@ -169,7 +169,7 @@ contextL
   = replPS n mapPV
       $:L AClo {
            aenv = ATup1 n someInt
-          ,alifted = \(ATup1 n gmax) a -> replPS n floorV $:L (replPS n multDoubleV $:L (replPS fromIntegralV n $:L gmax) $:L a)
+          ,alifted = \(ATup1 n gmax) a -> replPS n floorDoubleV $:L (replPS n multDoubleV $:L (replPS fromIntegralV n $:L gmax) $:L a)
           ,scalar = (...ignored inside mapPV...)
          }
       $:L someNormHist

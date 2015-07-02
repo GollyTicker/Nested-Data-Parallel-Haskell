@@ -42,7 +42,7 @@ V[hbalance] $: img :: PA (PA Int)
                        Clo { env = (gmax)
                          ,lifted =
                           \(ATup1 n gmax) a ->
-                            floorL (multDoubleL (int2DoubleL gmax) a)  -- scale each grayvalue
+                            floorDoubleL (multDoubleL (int2DoubleL gmax) a)  -- scale each grayvalue
                         }                                                                                           TODO: check correct order of operations.
                      . mapPS   -- normalize, normalize every value in akku-histogram
                          Clo {
@@ -69,7 +69,7 @@ V[hbalance] $: img :: PA (PA Int)
     (\(ATup1 n as) xs -> mapPL (AClo { aenv = ATup1 n as, lifted = \(ATup1 n as) g -> indexPL as g }) xs)
       (replPS (lengthPS img)
             (\a' ->
-                (\(ATup1 n gmax) a -> floorL (multDoubleL (int2DoubleL gmax) a) ) (replPS (lengthPS a') gmax) a'
+                (\(ATup1 n gmax) a -> floorDoubleL (multDoubleL (int2DoubleL gmax) a) ) (replPS (lengthPS a') gmax) a'
             ) (
                (\(ATup2 n a0 divisior) a -> divL (minusL (int2DoubleL a) a0) divisor) -- normalize, normalize every value in akku-histogram
                    (replPS (lengthPS a) (int2Double (headPS a), minusDouble (int2Double (lastPS a)) (headPS a)))
@@ -136,7 +136,7 @@ V[hbalance] $: img :: PA (PA Int)
       unconcatPS xs . (\(ATup1 n as) g -> indexPL as g) (replsPS (getSegd xs) (ATup1 n as)) . concatPS $ xs
     ) (replPS
         (lengthPS img)
-        $ floorL
+        $ floorDoubleL
           . multDoubleL (int2DoubleL (replPS n gmax))
           . divL    -- normalize, normalize every value in akku-histogram
               (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
@@ -156,7 +156,7 @@ V[hbalance] $: img :: PA (PA Int)
             $ img
         n = length a
         as = replPS (lengthPS img)            -- replicate width
-             . floorL                                     -- normalize and scale
+             . floorDoubleL                                     -- normalize and scale
              . multDoubleL (int2DoubleL (replPS n gmax))
              . divL
                  (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))

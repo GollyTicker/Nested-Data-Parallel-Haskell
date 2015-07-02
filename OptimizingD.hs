@@ -18,7 +18,7 @@ V[hbalance] $: img :: PA (PA Int)
             $ img
         n = lengthPS a
         as = replPS (lengthPS img)            -- replicate width
-             . floorL                                     -- normalize and scale
+             . floorDoubleL                                     -- normalize and scale
              . multDoubleL (int2DoubleL (replPS n gmax))
              . divL
                  (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
@@ -52,7 +52,7 @@ V[hbalance] $: img :: PA (PA Int)
             $ img
         n = lengthPS a
         as = replPS (lengthPS img)            -- replicate width
-             . floorL                                     -- normalize and scale
+             . floorDoubleL                                     -- normalize and scale
              . multDoubleL (int2DoubleL (replPS n gmax))
              . divL
                  (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
@@ -102,7 +102,7 @@ V[hbalance] $: img :: PA (PA Int)
             $ img
         n = lengthPS a
         as = replPS (lengthPS img)            -- replicate width
-             . floorL                                     -- normalize and scale
+             . floorDoubleL                                     -- normalize and scale
              . multDoubleL (int2DoubleL ( replPS n gmax ))
              . divL
                  (minusL (int2DoubleL a) ( replPS n (int2Double (headPS a)) ))
@@ -150,7 +150,7 @@ V[hbalance] $: img :: PA (PA Int)
             $ img
         n = lengthPS a
         as = replPS (lengthPS img)            -- replicate width
-             . floorL                                     -- normalize and scale
+             . floorDoubleL                                     -- normalize and scale
              . multDoubleL (int2DoubleL ( replPS n gmax ))
              . divL
                  (minusL (int2DoubleL a) ( replPS n (int2Double (headPS a)) ))
@@ -166,14 +166,14 @@ V[hbalance] $: img :: PA (PA Int)
 
 
 "inline primitive lifted operations"
-floorL = joinD . mapD floorS . splitD
+floorDoubleL = joinD . mapD floorDoubleS . splitD
 multDoubleL
   = \as bs -> joinD ( zipWithD multDoubleS (splitD as) (splitD bs) )
   = \as -> joinD . zipWithD multDoubleS (splitD as) . splitD
 
 
 let as = replPS (lengthPS img)            -- replicate width
-         . (joinD . mapD floorS . splitD)                                     -- normalize and scale
+         . (joinD . mapD floorDoubleS . splitD)                                     -- normalize and scale
          . (\as -> joinD . zipWithD multDoubleS (splitD as) . splitD) ((joinD . mapD int2DoubleS . splitD) ( replPS n gmax ))
          . (\as -> joinD . zipWithD divDoubleS (splitD as) . splitD)
              ((\as -> joinD . zipWithD minusDoubleS (splitD as) . splitD) ((joinD . mapD int2DoubleS . splitD) a) ( replPS n (int2Double (headPS a)) ))
@@ -184,7 +184,7 @@ let as = replPS (lengthPS img)            -- replicate width
 
 let as = replPS (lengthPS img)            -- replicate width
          . joinD
-         . mapD floorS
+         . mapD floorDoubleS
          . splitD                                   -- normalize and scale
          . (\as -> joinD . zipWithD multDoubleS (splitD as) . splitD) (joinD . mapD int2DoubleS . splitD .  replPS n $ gmax )
          . (\as -> joinD . zipWithD divDoubleS (splitD as) . splitD)
@@ -197,7 +197,7 @@ let as = replPS (lengthPS img)            -- replicate width
 
 let as = replPS (lengthPS img)            -- replicate width
          . joinD
-         . mapD floorS
+         . mapD floorDoubleS
          . splitD                                     -- normalize and scale
          . joinD
          . zipWithD multDoubleS (splitD . joinD . mapD int2DoubleS . splitD .  replPS n $ gmax)
@@ -222,7 +222,7 @@ let as = replPS (lengthPS img)            -- replicate width
 
 let as = replPS (lengthPS img)            -- replicate width
          . joinD
-         . mapD floorS              -- normalize and scale
+         . mapD floorDoubleS              -- normalize and scale
          . zipWithD multDoubleS (mapD int2DoubleS . splitD . replPS n $ gmax)
          . zipWithD
             divDoubleS
@@ -244,7 +244,7 @@ let as = replPS (lengthPS img)            -- replicate width
 let as = replPS (lengthPS img)            -- replicate width
          . joinD
          . zipWithD
-            (\x y -> floorS (multDoubleS x y))
+            (\x y -> floorDoubleS (multDoubleS x y))
             (mapD int2DoubleS . splitD . replPS n $ gmax) -- normalize and scale
          . zipWithD
             (flip divDoubleS)
@@ -265,15 +265,15 @@ let as = replPS (lengthPS img)            -- replicate width
 
 "fire zipWithD/zipWithD/zipWithD" zipWithD f as . zipWith g bs . zipWithD h cs = zipWith4D (\a b c d -> f a (g b (h c d)) as bs cs
 where
-  ( \a b c d -> (\x y -> floorS (multDoubleS x y)) a ((flip divDoubleS) b (minusDoubleS c d)) )
+  ( \a b c d -> (\x y -> floorDoubleS (multDoubleS x y)) a ((flip divDoubleS) b (minusDoubleS c d)) )
   further simplifies to
-  ( \a b c d -> floorS (multDoubleS (divDoubleS (minusDoubleS c d) b) a)  )
+  ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS c d) b) a)  )
 
 
 let as = replPS (lengthPS img)            -- replicate width
          . joinD
          . zipWith4D
-            ( \a b c d -> floorS (multDoubleS (divDoubleS (minusDoubleS c d) b) a)  )
+            ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS c d) b) a)  )
             (mapD int2DoubleS . splitD . replPS n $ gmax) -- normalize and scale
             ( splitD
              . replPS n
@@ -302,7 +302,7 @@ replD n x =
 let as = replPS (lengthPS img)            -- replicate width
          . joinD
          . zipWith4D
-            ( \a b c d -> floorS (multDoubleS (divDoubleS (minusDoubleS c d) b) a)  )
+            ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS c d) b) a)  )
             (mapD int2DoubleS . replD n $ gmax) -- normalize and scale
             ( replD n
               . minusDouble (int2Double (lastPS a))
@@ -324,7 +324,7 @@ let as = replPS (lengthPS img)            -- replicate width
 let as = replPS (lengthPS img)            -- replicate width
          . joinD
          . zipWith4D
-            ( \a b c d -> floorS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )
+            ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )
             (replD n $ int2Double gmax) -- normalize and scale
             ( replD n
               . minusDouble (int2Double (lastPS a))
@@ -342,16 +342,12 @@ let as = replPS (lengthPS img)            -- replicate width
 let as = replPS (lengthPS img)            -- replicate width
          . joinD
          . zipWith4D
-            ( \a b c d -> floorS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )  -- normalize and scale
+            ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )  -- normalize and scale
             ( replD n . int2Double $ gmax )
             ( replD n . minusDouble (int2Double (lastPS a)) . headPS $ a )
             ( replD n . int2Double . headPS $ a )
           . splitD
           $ a
-
-
-"hier"
-
 
 V[hbalance] $: img :: PA (PA Int)
   = let a = joinD
@@ -371,7 +367,7 @@ V[hbalance] $: img :: PA (PA Int)
         as = replPS (lengthPS img)            -- replicate width
              . joinD
              . zipWith4D
-                ( \a b c d -> floorS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )  -- normalize and scale
+                ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )  -- normalize and scale
                 ( replD n . int2Double $ gmax )
                 ( replD n . minusDouble (int2Double (lastPS a)) . headPS $ a )
                 ( replD n . int2Double . headPS $ a )
@@ -384,6 +380,39 @@ V[hbalance] $: img :: PA (PA Int)
          $ xs
        ) img
 
+"zipWith4D/replD/splitD" =>
+  zipWith4D f (replD n a) (replD n b) (replD n c) . splitD = mapD (f a b c)
+
+
+V[hbalance] $: img :: PA (PA Int)
+  = let a = joinD
+            . mapD (\(as,a) -> mapS (plusInt a) as)
+            . propagateD plusInt 0                 -- propagateD :: Dist (PA a) -> Dist (PA a, a)
+            . mapD (scanlS plusInt 0)
+            . sparseToDenseD (plusInt gmax 1) 0 -- hist end
+            . splitSparseD (plusInt gmax 1)        -- splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
+            . (\as ->
+                let g = AArr as (convert (split 0 as))
+                in  ATup2 (headPL g) (lengthPL g)
+              )
+            . sortPS
+            . concatPS                                   -- hist begin
+            $ img
+        n = lengthPS a
+        as = replPS (lengthPS img)            -- replicate width
+             . joinD
+             . mapD  -- normalize and scale
+                ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )
+                    ( replD n . int2Double $ gmax )
+                    ( replD n . minusDouble (int2Double (lastPS a)) . headPS $ a )
+                    ( replD n . int2Double . headPS $ a )
+             $ a
+    in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
+         unconcatPS xs
+         . indexPL (concatPS . replPL (lengths (getSegd xs)) $ as)
+         . concatPS
+         $ xs
+       ) img
 
 "ein bisschen saubern"
   "senkrechtes replizieren inlined"
@@ -405,13 +434,12 @@ V[hbalance] $: img :: PA (PA Int)
             $ img
         n = lengthPS a
         as = joinD
-             . zipWith4D
-                ( \a b c d -> floorS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )  -- normalize and scale
-                ( replD n . int2Double $ gmax )
-                ( replD n . minusDouble (int2Double (lastPS a)) . headPS $ a )
-                ( replD n . int2Double . headPS $ a )
-              . splitD
-              $ a
+             . mapD  -- normalize and scale
+                ( \a b c d -> floorDoubleS (multDoubleS (divDoubleS (minusDoubleS (int2DoubleS c) d) b) a)  )
+                    ( replD n . int2Double $ gmax )
+                    ( replD n . minusDouble (int2Double (lastPS a)) . headPS $ a )
+                    ( replD n . int2Double . headPS $ a )
+             $ a
         pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)
     in unconcatPS img
        . indexPL (pixelReplicate as)  -- apply on every pixel -- core of nested data parallelism here!
@@ -430,8 +458,10 @@ convert :: PA (a,Int,Int) -> PA (Int,Int)
 
 lengths :: Segd -> PA Int   retreives the lengths of each subarray.
 
-multS, divDoubleS, ... :: PA a -> PA a -> PA a
+-- local raw-array functions implemented using streams
+multS, divDoubleS, ... :: Unboxed a => Vector a -> Vector a -> Vector a
 
+-- primitive arithmetic operations
 mult, div, ... :: a -> a -> a
 
 -}

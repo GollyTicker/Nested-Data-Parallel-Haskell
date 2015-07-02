@@ -60,6 +60,8 @@ Abgelehnt: P_man mit CountingSort unter Berücksichtigung des Kontextes
 
 * sumP implementierung als Beispiel für Laufzeiteinschätung mit Work/Depth und Anzahl von Prozessoren #17
 
+* Erklärung der Types: # 25
+
 * Ab jetzt, Details lieber weglassen.
 
 * Seitenanzahl:
@@ -76,7 +78,7 @@ Abgelehnt: P_man mit CountingSort unter Berücksichtigung des Kontextes
 
 VERWERFEN: lifted hBalance verwerfen
 
-* hbalanceBulk? Verwerfen oder nennen?
+NENNEN hbalanceBulk? Verwerfen oder nennen?
 
 
 " ************ ???? "
