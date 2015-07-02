@@ -19,7 +19,7 @@ Note: indexPL :: PA a -> PA i -> PA a
 
 
 V[hbalance] $: img :: PA (PA Int)
-  = let a = scanlPS plusIntV 0    -- accu
+  = let a = scanlPS plusIntS 0    -- accu
             . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
             . mapPS
                $ Clo { env = ()
@@ -58,7 +58,7 @@ V[hbalance] $: img :: PA (PA Int)
 -- inlining definitions of mapPS
 
 V[hbalance] $: img :: PA (PA Int)
-  = let a = scanlPS plusIntV 0    -- accu
+  = let a = scanlPS plusIntS 0    -- accu
             . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
             . (\(ATup0 n) g -> ATup2 (headPL g) (lengthPL g)) (replPS (lengthPS g))
             . groupPS
@@ -123,7 +123,7 @@ replPS :: Segd -> PA a -> PA a -- aus Tipps.txt
 replPS segd = concatPS . replPL (lengths segd)   -- kann weiter durch inlining optimiert werden, da nur die Daten genommen werden.
 
 V[hbalance] $: img :: PA (PA Int)
-  = let a = scanlPS plusIntV 0    -- accu
+  = let a = scanlPS plusIntS 0    -- accu
             . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
             . (\g -> ATup2 (headPL g) (lengthPL g))  -- ignored argument
             . groupPS
@@ -145,7 +145,7 @@ V[hbalance] $: img :: PA (PA Int)
       img
 
 V[hbalance] $: img :: PA (PA Int)
-  = let a = scanlPS plusIntV 0    -- accu
+  = let a = scanlPS plusIntS 0    -- accu
             . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
             . (\g -> ATup2 (headPL g) (lengthPL g))  -- ignored argument
             . groupPS

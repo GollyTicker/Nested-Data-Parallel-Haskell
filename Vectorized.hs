@@ -11,7 +11,7 @@
 "Inlining simple definitions"
 
 V[hbalance] $: img :: PA (PA Int)
-  = let a = scanlPS plusIntV 0    -- accu
+  = let a = scanlPS plusIntS 0    -- accu
             . sparseToDensePS (plusIntS gmax 1) 0   -- hist end
             . mapPS
                $ Clo { env = ()
