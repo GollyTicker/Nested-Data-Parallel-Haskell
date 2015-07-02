@@ -18,5 +18,5 @@ scanlP f z xs =
   propagate       n       log n
   mapS            n       1
   join            n       1
-  scanlP          n       1
+  scanlP          n       log n
 -}
