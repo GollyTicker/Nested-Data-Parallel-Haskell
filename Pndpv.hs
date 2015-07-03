@@ -29,8 +29,13 @@ hbalance img =
       gmax'   = int2Double $ gmax
       
       normScale :: Int -> Int
-      normScale = floorDouble . (flip multDouble) gmax' . (flip divDouble) divisor . (flip minusDouble) a0 . int2Double -- 0, body of normalize and scale
-      
+      normScale = 
+        floorDouble
+        . (flip multDouble) gmax'
+        . (flip divDouble) divisor
+        . (flip minusDouble) a
+        . int2Double
+        
       as :: Hist                                          -- final mapping array
       as = joinD . mapD (mapS normScale) . splitD $ a              -- 4, normalize and scale applied
       

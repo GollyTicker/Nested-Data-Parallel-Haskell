@@ -1,0 +1,110 @@
+\documentclass{article}
+
+% Latex Tutorial beginners: http://www.latex-tutorial.com/tutorials/beginners/
+
+
+% Packages explained - Adding more functions to LATEX http://www.latex-tutorial.com/tutorials/beginners/lesson-3/
+\usepackage[utf8]{inputenc}     % Zum verwenden von ä,ü und ö: http://en.wikibooks.org/wiki/LaTeX/Special_Characters
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.3in]{geometry}
+\usepackage[nottoc,notlot,notlof,numbib]{tocbibind}
+\usepackage{listings,xcolor}
+\usepackage{amsmath}
+
+
+\newcommand{\comment}[1]{}
+
+\newcommand{\seq}[0]{$P_{seq}$}
+\newcommand{\man}[0]{$P_{man}$}
+\newcommand{\ndpn}[0]{$P_{nest}$}
+\newcommand{\ndpv}[0]{$P_{vect}$}
+\newcommand{\algo}[0]{Histogram Balancing}
+\newcommand{\type}[1]{\texttt{#1}}
+\newcommand{\ts}[0]{\,}% type space
+\newcommand{\Hist}[1]{[:\ts#1\ts:]}
+\newcommand{\pa}[1]{[:#1:]}
+
+\newcommand{\eqdo}[0]{\hskip 4em}
+\newcommand{\W}[0]{\textrm{W}}
+\newcommand{\D}[0]{\textrm{D}}
+
+\definecolor{keywordblue}{HTML}{5F49CC}
+\lstset{
+  frame=none,
+  xleftmargin=2pt,
+  belowcaptionskip=\bigskipamount,
+  captionpos=b,
+  escapeinside={*'}{'*},
+  language=haskell,
+  tabsize=2,
+  gobble=6,
+  emphstyle={\bf},
+  commentstyle=\it,
+  stringstyle=\mdseries\rmfamily,
+  showspaces=false,
+  columns=flexible,
+  showstringspaces=false,
+  morecomment=[l]\%,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{keywordblue},
+  keywords={type,if,then,else,let,in}
+}
+
+\begin{document}
+
+    \section{ algo?}
+      \begin{lstlisting}
+        data Your = Code Here
+      \end{lstlisting}
+    
+    \newpage
+    
+    \section{Work and Depth Table}
+      
+      \begin{itemize}
+        \item n sei die Anzahl der Bildpixel
+        \item w sei die Bildbreite
+        \item h sei die Bildhöhe
+        \item p sei die Anzahl der PUs (gang members).
+      \end{itemize}
+      
+      \paragraph{}
+        \begin{table}[h]
+          \caption{Work and Depth complexities}
+          \label{timetable}
+          \begin{tabular}{lll}
+              \toprule
+              function or variable &      O(W)           & O(D) \\
+              \midrule
+              hbalance        & \max(n \log n, gmax)& \log \max(n, gmax) \\
+          \end{tabular}
+        \end{table}
+        
+    \section{Calculating ?}
+      \begin{equation}
+      \begin{split}
+      \W(?)
+            & = \W(?) + \W(?) \\
+            & \in O(\max(n \log n, gmax)) \\
+      \D(?)
+          & = \max \{ ?,?'\} \\
+          & \in O(?) \\
+      \end{split}
+      \end{equation}
+      
+    \section{Other aspects \small{e.g. sync-points, programmer workload, simplicity}}
+      \begin{itemize}
+        \item optimisations:
+          ?
+        \item progammer-workload: ?
+        \item simplicity: ?
+      \end{itemize}
+      
+
+\end{document}
+
+
+

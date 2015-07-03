@@ -25,6 +25,7 @@ OK ParAccuHist >=> Normalize >=> Scale >=> Apply als P_man Algorithmus
 OK Pseudocode, Divide&Conquer Parallel Histogram Balancing
 
 * Größenvergleiche: n vs. gmax, n*log n vs. gmax
+  Am besten zweidimensionaler Graph!
 
 * Vergleich Divide&Conquer vs Data-Parallel
 

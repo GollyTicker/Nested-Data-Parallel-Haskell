@@ -11,7 +11,7 @@
 \usepackage[T1]{fontenc}
 \usepackage[margin=1.3in]{geometry}
 \usepackage[nottoc,notlot,notlof,numbib]{tocbibind}
-\usepackage{listings}
+\usepackage{listings,xcolor}
 \usepackage{amsmath}
 
 
@@ -31,15 +31,7 @@
 \newcommand{\W}[0]{\textrm{W}}
 \newcommand{\D}[0]{\textrm{D}}
 
-% Adding a bibliography http://www.latex-tutorial.com/tutorials/beginners/lesson-7/
-\bibliographystyle{apalike}
-
-
-\title{Costs for the algorithm}
-\date{19.05.2015}
-\author{Chandrakant Swaneet Kumar Sahoo}
-
-
+\definecolor{keywordblue}{HTML}{5F49CC}
 \lstset{
   frame=none,
   xleftmargin=2pt,
@@ -53,57 +45,61 @@
   commentstyle=\it,
   stringstyle=\mdseries\rmfamily,
   showspaces=false,
-  keywordstyle=\bfseries\rmfamily,
   columns=flexible,
-  basicstyle=\small\sffamily,
   showstringspaces=false,
   morecomment=[l]\%,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{keywordblue},
+  keywords={type,if,then,else,let,in}
 }
 
 \begin{document}
 
-    % \maketitle
-    
-    \section{The algorithm}
+    \section{\ndpn}
       \begin{lstlisting}
         type Image = PA (PA Int)
         type Hist  = PA Int
 
         hbalance :: Image -> Image
         hbalance img =
-          let a :: Hist                                       -- Histogram
-              a = joinD                                       -- accu end
+          let a :: Hist                                     -- Histogram
+              a = joinD                                     -- accu end
                   . mapD (\(as,a) -> mapS (plusInt a) as)
                   . propagateD plusInt 0
-                  . mapD (scanlS plusInt 0)                   -- accu begin
-                  . sparseToDenseD (plusInt gmax 1) 0         -- hist end
+                  . mapD (scanlS plusInt 0)                 -- accu begin
+                  . sparseToDenseD (plusInt gmax 1) 0       -- hist end
                   . splitSparseD (plusInt gmax 1)
                   . joinD
                   . mapD tripletToATup2
                   . segdSplitMerge 0
                   . sortPS
-                  . concatPS                                  -- hist begin
-                  $ img                                       -- 1
+                  . concatPS                                -- hist begin
+                  $ img                                     -- 1
                       
               n :: Int
-              n = lengthPS a                                  -- 2
+              n = lengthPS a                                -- 2
               
               a0, divisor, gmax' :: Double
-              a0      = int2Double . headPS $ a               -- 3, variables for normalize and scale
+              a0      = int2Double . headPS $ a             -- 3, variables for normalize and scale
               divisor = minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a
               gmax'   = int2Double $ gmax
               
-              normScale :: Int -> Int                         -- 0, body of normalize and scale
-              normScale = floorDouble . (flip multDouble) gmax' . (flip divDouble) divisor . (flip minusDouble) a0 . int2Double
+              normScale :: Int -> Int                       -- 0, body of normalize and scale
+              normScale =
+                floorDouble
+                . (flip multDouble) gmax'
+                . (flip divDouble) divisor
+                . (flip minusDouble) a
+                . int2Double
               
-              as :: Hist                                      -- final mapping array
+              as :: Hist                                    -- final mapping array
               as = joinD . mapD (mapS normScale) . splitD $ a -- 4, normalize and scale applied
               
-              pixelReplicate :: Hist -> PA Hist               -- 0, artifact of NDP
+              pixelReplicate :: Hist -> PA Hist             -- 0, artifact of NDP
               pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)
               
           in unconcatPS img
-             . indexPL (pixelReplicate as)                    -- 5, apply. core of nested data parallelism here!
+             . indexPL (pixelReplicate as)                  -- 5, apply. core of nested data parallelism here!
              . concatPS
              $ img
       \end{lstlisting}
@@ -121,7 +117,6 @@
       
       \paragraph{}
         \begin{table}[h]
-          \begin{center}
           \caption{Work and Depth complexities}
           \label{timetable}
           \begin{tabular}{lll}
@@ -129,32 +124,43 @@
               function or variable &      O(W)           & O(D) \\
               \midrule
               hbalance        & \max(n \log n, gmax)& \log \max(n, gmax) \\
+              \midrule
               hist            & \max(n \log n, gmax)& \log n \\
-              accu            & gmax                & \log gmax \\
-              as              & gmax                & 1\\
-              pixelReplicate  & 1 (bzw. $n \cdot gmax$) & 1 \\
-              img'            & n                   & 1 \\
-              \midrule
-              sortPS          & $n \log n$         & $\log n$ \\
               concatPS        & 1                   & 1 \\
-              unconcatPS      & 1                   & 1 \\
-              headPS,lastPS   & 1                   & 1 \\
-              replPS n x      & n                   & 1 \\
-              replPL ns xs    & sum(ns)*size(xs)    & 1 \\
-              indexPL is xs   & size(xs)            & 1 \\
+              sortPS          & $n \log n$          & $\log n$ \\
+              segdSplitMerge  & $n \log n$          & $\log n$ \\
+              mapD tripletToATup2  & gmax           & 1 \\
+              joinD xs        & gmax                & 1 \\
               \midrule
-              mapD tripletToATup2  & gmax $\frac{p}{p}$ & 1 \\
-              segdSplitMerge  & $n \log n$         & $\log n$ \\
-              \midrule
-              mapD fS xs      & $\W(fS,s)*size(xs)$ & $\W(fS,s)*size(xs)/p$ \\
-              lengthPS        & 1                   & 1 \\
-              joinD xs        & $size(xs)$          & 1 \tiny (communication overhead?) \\
-              splitD xs       & $size(xs)$          & 1 \tiny (communication overhead?) \\
-              propagateD xs   & 1                   & $\log size(xs)$ \\
+              accu            & gmax                & \log gmax \\
               sparseToDenseD  & gmax                & 1 \\
               splitSparseD    & gmax                & 1 \\
+              mapD scanlS     & gmax                & 1 \\
+              propagateD      & 1                   & $\log gmax$ \\
+              mapD (mapS plusInt) & gmax            & 1 \\
+              joinD           & gmax                & 1 \\
+              \midrule
+              as              & gmax                & 1 \\
+              splitD          & gmax                & 1 \\
+              mapD normScale  & gmax                & 1 \\
+              joinD           & gmax                & 1 \\
+              \midrule
+              pixelReplicate  & 1 (bzw. $n \cdot gmax$) & 1 \\
+              \midrule
+              img'            & n                   & 1 \\
+              concatPS        & 1                   & 1 \\
+              indexPL         & n                   & 1 \\
+              unconcatPS      & 1                   & 1 \\
+              \midrule
+              & general complexities & \\
+              mapD fS xs      & $\W(fS,s)*size(xs)$ & $\W(fS,s)*size(xs)/p$ \\
+              joinD xs        & size(xs)          & 1 \tiny (communication overhead?) \\
+              splitD xs       & size(xs)          & 1 \tiny (communication overhead?) \\
+              replPS n x      & n                   & 1 \\
+              replPL ns xs    & sum(ns)*size(xs)    & 1 \\
+              sortPS xs       & $size(xs) \log size(xs)$ & $\log size(xs)$ \\
+
           \end{tabular}
-          \end{center}
         \end{table}
         
     \section{Calculating "hbalance" entirely}
@@ -178,7 +184,7 @@
       \begin{split}
       \W(w \times h)
             & = \W(concatPS) + \W(sortPS) + \W(segdSplitMerge) \\
-            & + \W(mapD,localSegdToTup2) + \W(joinD) \\
+            & + \W(mapD,tripletToATup2) + \W(joinD) \\
             & = 1 + n \log n + n \log n + gmax + gmax \\
             & = 1 + 2 (n \log n + gmax) \\
             & \in O(\max(n \log n, gmax)) \\

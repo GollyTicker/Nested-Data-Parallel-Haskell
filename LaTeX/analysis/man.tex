@@ -1,0 +1,173 @@
+\documentclass{article}
+
+% Latex Tutorial beginners: http://www.latex-tutorial.com/tutorials/beginners/
+
+
+% Packages explained - Adding more functions to LATEX http://www.latex-tutorial.com/tutorials/beginners/lesson-3/
+\usepackage[utf8]{inputenc}     % Zum verwenden von ä,ü und ö: http://en.wikibooks.org/wiki/LaTeX/Special_Characters
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.3in]{geometry}
+\usepackage[nottoc,notlot,notlof,numbib]{tocbibind}
+\usepackage{listings,xcolor}
+\usepackage{amsmath}
+
+
+\newcommand{\comment}[1]{}
+
+\newcommand{\seq}[0]{$P_{seq}$}
+\newcommand{\man}[0]{$P_{man}$}
+\newcommand{\ndpn}[0]{$P_{nest}$}
+\newcommand{\ndpv}[0]{$P_{vect}$}
+\newcommand{\algo}[0]{Histogram Balancing}
+\newcommand{\type}[1]{\texttt{#1}}
+\newcommand{\ts}[0]{\,}% type space
+\newcommand{\Hist}[1]{[:\ts#1\ts:]}
+\newcommand{\pa}[1]{[:#1:]}
+
+\newcommand{\eqdo}[0]{\hskip 4em}
+\newcommand{\W}[0]{\textrm{W}}
+\newcommand{\D}[0]{\textrm{D}}
+
+\definecolor{keywordblue}{HTML}{5F49CC}
+\lstset{
+  frame=none,
+  xleftmargin=2pt,
+  belowcaptionskip=\bigskipamount,
+  captionpos=b,
+  escapeinside={*'}{'*},
+  language=haskell,
+  tabsize=2,
+  gobble=6,
+  emphstyle={\bf},
+  commentstyle=\it,
+  stringstyle=\mdseries\rmfamily,
+  showspaces=false,
+  columns=flexible,
+  showstringspaces=false,
+  morecomment=[l]\%,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{keywordblue},
+  keywords={type,if,then,else,let,in}
+}
+
+\begin{document}
+
+    \section{ \man}
+      \begin{lstlisting}
+        type Image  = V.Vector Int   -- unboxed vector. aka dense heap array
+        type Hist   = V.Vector Int   -- the index is the gray-value. its value the result
+
+        hbalance :: Image -> Image
+        hbalance img =
+          let hist = parAccuHist img
+              min = hist ! 0
+              max = hist ! gmax
+              apply hist = parMap (\i -> h ! i) img
+              sclNrm :: Int -> Int
+              sclNrm x = round( (x-min)/(max - min)*gmax )
+          in  apply (parMap sclNrm) hist
+
+        parAccuHist :: Image -> Hist
+        parAccuHist []  = replicate gmax 0            -- creates [0,...,0]
+        parAccuHist [x] = generate gmax (\i -> if (i >= x) then 1 else 0 ) -- create [0,...0,1,...,1]
+        parAccuHist xs  =
+          let (left,right) = splitMid xs
+              [leftRes,rightRes] = parMap parAccuHist [left,right] -- two parallel recursive calls
+          in  parZipWith (+) leftRes rightRes
+      \end{lstlisting}
+    
+    \newpage
+    
+    \section{Work and Depth Table}
+      
+      \begin{itemize}
+        \item n sei die Anzahl der Bildpixel
+        \item w sei die Bildbreite
+        \item h sei die Bildhöhe
+        \item p sei die Anzahl der PUs (gang members).
+      \end{itemize}
+      
+      \paragraph{}
+        \begin{table}[h]
+          \caption{Work and Depth complexities}
+          \label{timetable}
+          \begin{tabular}{lll}
+              \toprule
+              function or variable & O(W)     & O(D) \\
+              \midrule
+              hbalance        & n * gmax      & log n \\
+              apply           & n           & 1 \\
+              parMap sclNrm   & gmax        & 1 \\
+              parAccuHist     & n * gmax      & log n \\
+              \midrule
+              parAccuHist     & n * gmax      & log n \\
+              splitMid        & 1           & 1 \\
+              parZipWith      & gmax        & 1 \\
+              replicate       & gmax        & 1 \\
+              generate        & gmax        & 1 \\
+              parMap f xs     & W(f,x)*size(xs) & 1 \\
+              arr ! i          & 1           & 1 \\
+          \end{tabular}
+        \end{table}
+        
+    \section{Calculating "hbalance"}
+      \begin{equation}
+      \begin{split}
+      \W(n,gmax)
+            & = \W(parAccuHist) + \W(parMap,sclNrm) + \W(apply) \\
+            & = n \cdot gmax + gmax + n \\
+            & \in O(n \cdot gmax) \\
+      \D(n,gmax)
+          & = \max \{ parAccuHist, (parMap,sclNrm), apply\} \\
+          & = \max \{ \log n, 1, 1\} \\
+          & \in O(\log n) \\
+      \end{split}
+      \end{equation}
+        
+    \section{Calculating "parAccuHist"}
+      On each recursive call of parAccuHist, there are consantly
+      many calls to functions of work O(gmax) and depth O(1).
+      The only exception are the two recursive calls.
+      They call the problem with array of half-size.
+      The depth of this function is logarithmic to the input size,
+      because of this type of recursive calls.
+      (If gmax is treated as a constant, then the following result
+      can also be derived from the Master Theorems first case.)
+      \begin{equation}
+      \begin{split}
+      \W(n,gmax)
+            & = \begin{cases}
+                 gmax & \text{ if } n \le 1 \\ 
+                 2 \W(\frac{n}{2}) + gmax & \text{ else }
+                \end{cases} \\
+            & = \begin{cases}
+                  gmax & \text{ if } n \le 1 \\ 
+                  gmax2^0 + 2^1\W(\frac{n}{2}) & \text{ if } n = 2 \\
+                  gmax2^0 + gmax2^1 + 2^2\W(\frac{n}{4}) & \text{ if } n = 3 \\
+                  gmax2^0 + gmax2^1 + ... + gmax 2^{\log n - 1} + 2^{\log n}\W(1) & \text{ else }
+                \end{cases} \\
+            & = \textrm{ (... tying the knot ...) } \\
+            & = gmax \sum_{i=0}^{\log n}{2^i} \\
+            & = gmax (2^{\log n + 1} - 1) \\
+            & = gmax (2n - 1) \\
+            & \in O(n \cdot gmax) \\
+      \D(n,gmax)
+          & \in O(\log n) \\
+      \end{split}
+      \end{equation}
+    \section{Other aspects \small{e.g. sync-points, programmer workload, simplicity}}
+      \begin{itemize}
+        \item optimisations:
+          ?
+        \item progammer-workload: ?
+        \item simplicity: ?
+      \end{itemize}
+      
+
+\end{document}
+
+
+

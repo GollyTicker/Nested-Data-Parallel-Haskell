@@ -15,9 +15,6 @@ hbalance img =
       img' = apply s img
   in img'
 
-gmax :: Int
-gmax = 255
-
 hist :: Image -> Hist Int
 hist = V.foldr (\i -> M.insertWith (+) i 1) M.empty . V.concat
 
@@ -38,35 +35,7 @@ apply :: Hist Int -> Image -> Image
 apply as img = V.map (V.map (M.lookupLessEqual as)) img
 
 {-
-
-n sei die Anzahl der Bildpixel
-w sei die Bildbreite
-h sei die Bildhöhe
-
-       f            O(W)                      O(D) (same as W, because of sequential implementation)
------------------------------------------------------------------------------------------------------
-  hbalance          max(n * log gmax, gmax)   "
-  
-  hist              n * log gmax              "
-  accu              gmax                      "
-  normalize         gmax                      "
-  scale             gmax                      "
-  apply             n * log gmax              "
-                      = w * h * log gmax
-  
-  M.lookupLessEqual log gmax                  "
-  M.insertWith      log gmax                  "
-  M.empty           1                         "
-  M.first           1                         "
-  M.last            1                         "
-  M.map             gmax                      "
-  M.scanl           gmax                      "
-  
-  V.concat          n                         "
-  V.foldr f z       n * log gmax              "
-                      = O( n*W(f,gmax)+W(z) )
-  
-  V.map f xs        size(xs)*W(f,x)           "
+siehe PDF
 
 
 M.first = snd . head . M.toAscList

@@ -16,3 +16,6 @@ hbalance :: Image Int -> Image Int
 -- bulk application of HistrogramBalance
 hbalanceBulk :: Many (Image Int) -> Many (Image Int)
 
+gmax :: Int
+gmax = 1024
+

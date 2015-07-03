@@ -1,0 +1,150 @@
+\documentclass{article}
+
+% Latex Tutorial beginners: http://www.latex-tutorial.com/tutorials/beginners/
+
+
+% Packages explained - Adding more functions to LATEX http://www.latex-tutorial.com/tutorials/beginners/lesson-3/
+\usepackage[utf8]{inputenc}     % Zum verwenden von ä,ü und ö: http://en.wikibooks.org/wiki/LaTeX/Special_Characters
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.3in]{geometry}
+\usepackage[nottoc,notlot,notlof,numbib]{tocbibind}
+\usepackage{listings,xcolor}
+\usepackage{amsmath}
+
+
+\newcommand{\comment}[1]{}
+
+\newcommand{\seq}[0]{$P_{seq}$}
+\newcommand{\man}[0]{$P_{man}$}
+\newcommand{\ndpn}[0]{$P_{nest}$}
+\newcommand{\ndpv}[0]{$P_{vect}$}
+\newcommand{\algo}[0]{Histogram Balancing}
+\newcommand{\type}[1]{\texttt{#1}}
+\newcommand{\ts}[0]{\,}% type space
+\newcommand{\Hist}[1]{[:\ts#1\ts:]}
+\newcommand{\pa}[1]{[:#1:]}
+
+\newcommand{\eqdo}[0]{\hskip 4em}
+\newcommand{\W}[0]{\textrm{W}}
+\newcommand{\D}[0]{\textrm{D}}
+
+\definecolor{keywordblue}{HTML}{5F49CC}
+\lstset{
+  frame=none,
+  xleftmargin=2pt,
+  belowcaptionskip=\bigskipamount,
+  captionpos=b,
+  escapeinside={*'}{'*},
+  language=haskell,
+  tabsize=2,
+  gobble=6,
+  emphstyle={\bf},
+  commentstyle=\it,
+  stringstyle=\mdseries\rmfamily,
+  showspaces=false,
+  columns=flexible,
+  showstringspaces=false,
+  morecomment=[l]\%,
+  basicstyle=\ttfamily,
+  keywordstyle=\color{keywordblue},
+  keywords={type,if,then,else,let,in}
+}
+
+\begin{document}
+
+    \section{ \seq}
+      \begin{lstlisting}
+      type Image  = V.Vector (V.Vector Int)
+      type Hist a = Map Int a
+
+      hbalance :: Image -> Image
+      hbalance img =
+        let h = hist img
+            a = accu h
+            a0 = M.first a      -- M.function refers to functions
+            agmax = M.last a    -- of the tree-based Map datastructure
+            n = normalize a0 agmax a
+            s = scale gmax n
+            img' = apply s img
+        in img'
+
+      hist :: Image -> Hist Int   -- whereas V.function refers to dense-array Vector datastructure
+      hist = V.foldr (\i -> M.insertWith (+) i 1) M.empty . V.concat
+
+      accu :: Hist Int -> Hist Int
+      accu = M.scanl (+) 0
+
+      normalize :: Int -> Int -> Hist Int -> Hist Double
+      normalize a0' agmax' as =
+          let a0 = fromIntegral a0'
+              agmax = fromIntegral agmax'
+              divisor = agmax - a0
+          in  M.map (\freq' -> (fromIntegral freq' - a0) / divisor) as
+
+      scale :: Int -> Hist Double -> Hist Int
+      scale gmax = M.map (\d -> floor (d * fromIntegral gmax))
+
+      apply :: Hist Int -> Image -> Image
+      apply as img = V.map (V.map (M.lookupLessEqual as)) img
+      \end{lstlisting}
+    
+    \newpage
+    
+    \section{Work and Depth Table}
+      
+      \begin{itemize}
+        \item n sei die Anzahl der Bildpixel
+        \item w sei die Bildbreite
+        \item h sei die Bildhöhe
+        \item p sei die Anzahl der PUs (gang members).
+      \end{itemize}
+      
+      \paragraph{}
+        \begin{table}[h]
+          \caption{Work and Depth complexities}
+          \label{timetable}
+          \begin{tabular}{lll}
+              \toprule
+              function or variable &  O(W) and O(D) \\
+              \midrule
+              hbalance          & max(n * log gmax, gmax) \\
+              \midrule
+              hist              & n * log gmax\\
+              V.concat          & n\\ 
+              M.insertWith      & log gmax\\ 
+              V.foldr           & n * log gmax \\ 
+              \midrule
+              accu              & gmax\\ 
+              M.scanl           & gmax\\
+              \midrule
+              normalize         & gmax\\ 
+              scale             & gmax\\ 
+              M.map             & gmax\\ 
+              \midrule
+              apply             & n * log gmax = w * h * log gmax \\
+              M.lookupLessEqual & log gmax \\ 
+              \midrule
+              M.empty           & 1\\ 
+              M.first           & 1\\ 
+              M.last            & 1\\
+              \midrule
+              V.map f xs        & size(xs)*W(f,x)\\ 
+          \end{tabular}
+        \end{table}
+      
+    \section{Other aspects \small{e.g. sync-points, programmer workload, simplicity}}
+      \begin{itemize}
+        \item optimisations:
+          ?
+        \item progammer-workload: ?
+        \item simplicity: ?
+      \end{itemize}
+      
+
+\end{document}
+
+
+
