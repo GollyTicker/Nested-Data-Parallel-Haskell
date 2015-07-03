@@ -1,0 +1,268 @@
+\documentclass{article}
+
+% Latex Tutorial beginners: http://www.latex-tutorial.com/tutorials/beginners/
+
+
+% Packages explained - Adding more functions to LATEX http://www.latex-tutorial.com/tutorials/beginners/lesson-3/
+\usepackage[utf8]{inputenc}     % Zum verwenden von ä,ü und ö: http://en.wikibooks.org/wiki/LaTeX/Special_Characters
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.3in]{geometry}
+\usepackage[nottoc,notlot,notlof,numbib]{tocbibind}
+\usepackage{listings}
+\usepackage{amsmath}
+
+
+\newcommand{\comment}[1]{}
+
+\newcommand{\algo}[0]{Histogram Balancing}
+\newcommand{\type}[1]{\texttt{#1}}
+\newcommand{\ts}[0]{\,}% type space
+\newcommand{\Hist}[1]{[:\ts#1\ts:]}
+\newcommand{\pa}[1]{[:#1:]}
+\newcommand{\Hist}[1]{[:\ts#1\ts:]}
+\newcommand{\Many}[1]{[:\ts#1\ts:]}
+\newcommand{\Image}[1]{[:[:\ts#1\ts:]:]}
+
+
+\newcommand{\eqdo}[0]{\hskip 4em}
+\newcommand{\W}[0]{\textrm{W}}
+\newcommand{\D}[0]{\textrm{D}}
+
+% Adding a bibliography http://www.latex-tutorial.com/tutorials/beginners/lesson-7/
+\bibliographystyle{apalike}
+
+
+\title{Costs for the algorithm}
+\date{19.05.2015}
+\author{Chandrakant Swaneet Kumar Sahoo}
+
+
+\lstset{
+  frame=none,
+  xleftmargin=2pt,
+  belowcaptionskip=\bigskipamount,
+  captionpos=b,
+  escapeinside={*'}{'*},
+  language=haskell,
+  tabsize=2,
+  gobble=6,
+  emphstyle={\bf},
+  commentstyle=\it,
+  stringstyle=\mdseries\rmfamily,
+  showspaces=false,
+  keywordstyle=\bfseries\rmfamily,
+  columns=flexible,
+  basicstyle=\small\sffamily,
+  showstringspaces=false,
+  morecomment=[l]\%,
+}
+
+\begin{document}
+
+    % \maketitle
+    
+    \section{The algorithm}
+      \begin{lstlisting}
+        type Many a  = [: a :]
+        type Image a = [:[: a :]:]
+
+        type Hist a = [: a :]
+
+        hbalanceBulk :: Many (Image Int) -> Many (Image Int)
+        hbalanceBulk = mapP hbalance
+
+        hbalance :: Image Int -> Image Int
+        hbalance img =
+            let h = hist img
+                a = accu h
+                a0 = headP a
+                agmax = lastP a
+                n = normalize a0 agmax a
+                s = scale gmax n
+                img' = apply s img
+            in  img'
+
+        gmax :: Int
+        gmax = 255
+
+        hist :: Image Int -> Hist Int
+        hist = 
+            sparseToDenseP (gmax+1) 0
+            . mapP (\g -> (headP g,lengthP g))
+            . groupP
+            . sortP
+            . concatP
+
+        accu :: Hist Int -> Hist Int
+        accu = scanlP (+) 0
+
+        normalize :: Int -> Int -> Hist Int -> Hist Double
+        normalize a0' agmax' as =
+            let a0 = P.fromIntegral a0'
+                agmax = P.fromIntegral agmax'
+                divisor = agmax D.- a0
+            in  [: (P.fromIntegral freq' D.- a0) D./ divisor | freq' <- as :]
+
+        scale :: Int -> Hist Double -> Hist Int
+        scale gmax as = [: P.floor (a D.* P.fromIntegral gmax) |  a <- as :]
+
+        apply :: Hist Int -> Image Int -> Image Int
+        apply as img = mapP (mapP (as !:)) img
+      \end{lstlisting}
+    
+    \newpage
+    
+    \section{Utilised Functions}
+      
+      \paragraph{}
+        \begin{table}[h]
+          \begin{center}
+          \caption{Utilised function with their type signatures and their work and depth complexity.}
+          \label{timetable}
+          \begin{tabular}{lccl}
+              \toprule
+              Function        & Work & Depth & Type \\
+              \midrule
+              hbalanceBulkd imgs   &  ?   &  ?    & \type{ \Many{\Image{Int}} -> \Many{\Image{Int}} } \\
+              hbalance img   &  ?   &  ?    & \type{ \Image{Int} -> \Image{Int} } \\
+              hist img        &$1 + wh(2 + \log(wh)) + gmax$&  $\log gmax$& \type{ \Image{Int} -> \Hist{Int} } \\
+              accu h          &  $6n-1$   &  $\log n$    & \type{ \Hist{Int} -> \Hist{Int} } \\
+              scale gmax n    &  $2n+1$   &  1    & \type{ Int -> \Hist{Double} -> \Hist{Int} } \\
+              normalize $a_0$ $a_{gmax}$ a &  $2n-1$   &  $1$    & \type{ Int -> Int -> \Hist{Int} -> \Hist{Double} } \\
+              apply s img     &  $1 + w + wh$   &  1    & \type{ \Hist{Int} -> \Image{Int} -> \Image{Int} } \\
+              mapP f xs       &  n   &  1    & \type{ (a -> b) -> \pa{\pa a} -> \pa{\pa b} } \\
+              headP xs        &  1   &  1    & \type{ \pa{\pa a} -> a } \\
+              lastP xs        &  1   &  1   & \type{ \pa{\pa a} -> a } \\
+              concatP xss     &  1   &  1    & \type{ \pa{\pa a} -> \pa a } \\
+              \textit{sortP xs} & $n\log n$ & $\log n$ & \type{ Ord a => \pa a -> \pa a } \\
+              groupP xs       &  $(n + \textrm{groups in xs})\log n$ & $\log n$  & \type{ Eq a => \pa a -> \pa {\pa a} } \\
+              sparseToDenseP xs& $ k\cdot L(\textrm{result})$ &  1    & \type{ Int -> Int -> \pa{(a,Int)} -> \pa a } \\
+              lengthP xs      &  1   &  1    & \type{ \pa a -> Int } \\
+              scanlP f z xs   & $6n-1$ & $\log n$ & \type{ (a -> a -> a) -> a -> \pa a -> \pa a } \\
+              indexP,!: i xs  &  1   &  1    & \type{ \pa a -> Int -> a } \\
+          \end{tabular}
+          \end{center}
+        \end{table}
+        where \textit{p} is the number of processors.
+        Functions in \textit{italics} denote an $O(\cdot)$-class rather than the actual number of steps.
+        Note, that various array class constraints (\lstinline{PAElt a => ...}) on array functions ommitted were omitted.
+        
+    \section{Variation of the number of processors}
+      With $P$ processors and a cross-process communication latency of $L$, a program with work $W$ and depth $D$ will run time $T$ with such that the following holds:
+      
+      $$ \frac{W}{P} \leq T \leq \frac{W}{P} + L \cdot D $$
+      
+      Note that, $W$ and $D$ have to be the exact numbers rather than an $O(\cdot)$-class
+        
+        
+    \section{scanlP}
+      \begin{equation}
+      \begin{split}
+      \W(n) & = n(2+\W(f)) + \W\left( \frac{n}{2} \right)   \\
+        & = n(2 + \W(f))(2-2^{\log_{2} n}) + 1 \\
+        & = (2 + \W(f))(2n-1) + 1 \\
+        & = 6n - 1  \\
+      \D(n) & = \log n \\
+      \end{split}
+      \end{equation}
+    
+    \section{sparseToDenseP}
+      \begin{lstlisting}
+        sparseToDenseP :: Enum e => e -> a -> [: (e,a) :] -> [: a :]
+        sparseToDenseP              many init map            result
+        sparseToDenseP 0 7 9 [: (1,5),(2,4),(6,7) :] == [: 0,5,4,0,0,0,7,0 :]
+      \end{lstlisting}
+        
+      sparseToDense n z map creates an array of length n where the element
+      at the index i has x if (i,x) is in the map, or z otherwise.
+      In effect it turns a sparse vector to a dense one
+      
+    \section{groupP}
+      \begin{equation}
+      \begin{split}
+      \W(n) & = (n + \textrm{unique elements in xs})\log n \\
+      \D(n) & = \log n \\
+      \end{split}
+      \end{equation}
+      
+      
+    \section{hbalance}
+      Let $|img|=w\cdot h$ and $n=\textrm{gmax}$.
+      \begin{equation}
+      \begin{split}
+      \W(w \times h) & \\
+            & = \W(hist) + \W(accu) + \W(headP) + \W(lastP) + \W(normalize) + \W(scale) + \W(apply) \\
+            & = (1 + |img| (2 + \log |img|) + n) + (6n - 1) + 1 + 1 + (2n + 1) + (2n+1) + (1 + w + |img|) \\
+            & = w + |img|(3 + \log(|img|)) + 11n + 5 \\
+            & \in O\left(|img| \log |img| + gmax) \\
+      \D(w \times h) &    \\
+            & = 1 + \max\{\D(hist),\D(accu),\D(headP),\D(lastP),\D(normalize),\D(scale),\D(apply)\} \\
+            & = 1 + \max\{\log |img|,\log gmax\}  \\
+      \end{split}
+      \end{equation}
+      
+      \paragraph{}
+        With $P$ processors we have an expected runtime of $T$ where:
+        \begin{equation}
+        \begin{split}
+          \frac{W}{P} \leq T & \leq \frac{W}{P} + D \\
+          \frac{|img| \log |img| + gmax}{P} \leq T & \leq \frac{|img| \log |img| + gmax}{P} + \max\{\log |img|,\log gmax\} \\
+          \textrm{Fall 1:} |img| > gmax. \textrm{Es gibt mehr}&\textrm{ Bildpixel als es zulässige Grauwerte gibt.}\\
+          \frac{2|img| \log |img|}{P} \leq T & \leq \frac{2|img| \log |img|}{P} + \log |img| \eqdo | \div(2\log |img|) \\
+          \frac{|img|}{P} \leq T & \leq \frac{|img|}{P} + \frac{1}{2} \\
+          \textrm{Fall 2:} gmax > |img|. \textrm{Der Grauwertbereich}&\textrm{ ist größer als die Anzahl der Pixel}\\
+          \frac{2 gmax \log gmax}{P} \leq T & \leq \frac{2 gmax \log gmax}{P} + \log gmax \eqdo | \div(2\log gmax) \\
+          \frac{gmax}{P} \leq T & \leq \frac{gmax}{P} + \frac{1}{2}
+        \end{split}
+        \end{equation}
+        
+      
+    \section{hist}
+      Let $|img|=w\cdot h$ and $n=\textrm{gmax}$.
+      \begin{equation}
+      \begin{split}
+      \W(w \times h) & \\
+            & = \W(concatP) + \W(sortP) + \W(groupP) + 2\W(mapP) + \W(sparseToDenseP) \\
+            & = 1 + |img| \log |img| + 2|img| + n \\
+            & = 1 + |img| (2 + \log |img|) + n  \\
+      \D(w \times h) & = \log |img| \\
+      \end{split}
+      \end{equation}
+      
+    \section{accu}
+      \begin{equation}
+      \begin{split}
+      \W(n) & = \W(scanlP) \\
+            & = 6n - 1 \\
+      \D(n) & = \D(scanlP) \\
+            & = \log n \\
+      \end{split}
+      \end{equation}
+      
+    \section{normalize}
+      \begin{equation}
+      \begin{split}
+      \W(n) & = 2n + 1 \\
+      \D(n) & = 1 \\
+      \end{split}
+      \end{equation}
+      
+    \section{apply}
+      Let $w$ and $h$ be the width and height of the image ($img$).
+      \begin{equation}
+      \begin{split}
+      \W(w \times h) & = 1 + w \cdot \W(\textrm{inner}) \\
+            & = 1 + w(1 + h)  \\
+            & = 1 + w + wh \\
+      \D(w \times h) & = 1 \\
+      \end{split}
+      \end{equation}
+
+    
+\end{document}
+
+
+

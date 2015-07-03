@@ -1,0 +1,129 @@
+\documentclass{article}
+
+% Latex Tutorial beginners: http://www.latex-tutorial.com/tutorials/beginners/
+\newcommand{\comment}[1]{}
+
+\newcommand{\seq}[0]{$P_{s}$}
+\renewcommand{\mp}[0]{$P_{m}$}
+\newcommand{\ndp}[0]{$P_{np}$}
+\newcommand{\note}[1]{{\tiny (#1)}}
+
+\newcommand{\algo}[0]{Split\&Merge-Segmentation}
+
+% Packages explained - Adding more functions to LATEX http://www.latex-tutorial.com/tutorials/beginners/lesson-3/
+\usepackage[utf8]{inputenc}     % Zum verwenden von ä,ü und ö: http://en.wikibooks.org/wiki/LaTeX/Special_Characters
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{hyperref}
+
+\usepackage[margin=1.3in]{geometry}
+
+% Erzeugen des PDF (ohne References):
+% Strg + Alt + 1 in Gedit
+
+% Erzeugen des PDF (mit References):
+% Strg + Alt + 1 in Gedit
+% $ bibtex expose
+% Zweimal: Strg + Alt + 1 in Gedit
+
+% fügt die Literatur auch zum Inhaltsverzeichnis hinzu (ist so nicht default)
+\usepackage[nottoc,notlot,notlof,numbib]{tocbibind}
+
+% Adding a bibliography http://www.latex-tutorial.com/tutorials/beginners/lesson-7/
+\bibliographystyle{apalike}
+
+
+% Nested numbered enumerations, eg. 1.1, 1.2: http://tex.stackexchange.com/questions/78842/nested-enumeration-numbering
+\renewcommand{\labelenumii}{\theenumii}
+\renewcommand{\theenumii}{\theenumi.\arabic{enumii}.}
+
+
+\title{
+    Progress Report 1 \\[7pt]
+    \large Nested Data Parallelism for\\ Image Processing Algorithms
+}
+\date{06.05.2015}
+\author{Chandrakant Swaneet Kumar Sahoo}
+
+
+\begin{document}
+
+  \pagenumbering{arabic}
+  
+  \maketitle
+  
+  
+  \section{Leading question}
+  \paragraph{How can we implement this high-level irregularly-parallel algorithm such that it compiles to efficient mashine level code?}
+  \paragraph{Subquestions}
+      \begin{itemize}
+      \item How much faster is a parallel variant against the sequential one?
+      \item How much faster is a compiled variant to human-written low-level parallel code?
+      \end{itemize}
+  
+  
+  \section{What I have done}
+    I have read further papers on how Nested Data Parallel works.
+    I have also decided to manually transform/vectorize the program, because
+    the generated program is hard to read/too long... and sometimes GHC can't compile.
+    \note{NDP is still work in progress!}
+    
+    I have chosen \href{http://en.wikipedia.org/wiki/Histogram_equalization#Full-sized_image}{Histogram-Balancing} as my algorithm.
+    The algorithm has sufficient opportunities to demonstrate the powers of NDP and
+    is small enough to be manually transformed - as opposed to ShortestPaths, Connected Components Labeling, etc...
+    
+  \section{What I will do next}
+    I will test my implementation and complete the transformations.
+    This will take a while. Then I am ready to do the other two (easier) implementations \seq  and \mp.
+
+  \section{Progress}
+    \begin{itemize}
+      \item[80\%] Read more papers on Nested Data Parallel Haskell
+      \item[60\%] Read more papers on Analysis of Parallel Progrmas
+      \item[100\%] Decide on an algorithm (Histogram Balancing)
+      \item[50\%] Program Transformation:
+        \begin{itemize}
+          \item[100\%] Desugar
+          \item[50\%] Vectorization
+          \item[0\%] Inlining \& Fusioning \note means Optimization
+        \end{itemize}
+      \item[0\%] Implement sequential variant
+      \item[0\%] Implement manually-parallelized variant
+      \item[0\%] Answer first subquestion
+      \item[0\%] Answer second subquestion
+      \item[?\%] \textit{stuff}
+      \item[0\%] Written thesis
+      \item[0\%] Colloquium
+    \end{itemize}
+    
+    \section{Time Table}
+    \begin{table}[h]
+        \begin{center}
+        \caption{Time table} % http://www.latex-tutorial.com/tutorials/beginners/lesson-8/
+        \label{timetable}
+        \begin{tabular}{lrrl}
+            \toprule
+            Current Week & CW & monday & thesis work \\
+            \midrule
+                & 17 & 20.04 & reading remaining papers, reading parallel complexity theory \\
+                & 18 & 27.04 & deciding on an algorithm  \\
+            now & 19 & 4.05  & \textit{implementing \ndp, vectorizing and optimizing \ndp} \\
+                & 20 & 11.05 & implementing \ndp, vectorizing and optimizing \ndp\\
+                & 21 & 18.05 & implementing \seq and \mp \\
+                & 22 & 25.05 & analysis \& comparision \\
+                & 23 & 1.06  & \textit{puffer} \\
+                & 24 & 8.06  & \textit{puffer} \\
+                & 25 & 15.06 & Begin to write down, prepare for exams\\
+                & 26 & 22.06 & Writing..., prepare for exams \\
+                & 27 & 29.06 & Writing..., prepare for exams \\
+                & 28 & 6.07  & Prepare Colloquium, Writing..., exams week 1 \\
+                & 29 & 13.07 & Prepare Colloquium, Finalize writing, exams week 1 \\
+                & 30 & 20.07 & Colloquium and Release \\
+                & 31 & 27.07 & Last week for Colloquium and Release \\
+                & 32 & 3.08  & Fin \texttt{:D} \\
+        \end{tabular}
+        \end{center}
+    \end{table}
+    
+\end{document}
+

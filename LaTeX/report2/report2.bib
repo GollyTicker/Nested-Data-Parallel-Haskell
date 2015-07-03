@@ -1,0 +1,1161 @@
+@article{GenVectorFusion2013,
+    abstract = {Stream fusion is a powerful technique for automatically transforming high-level sequence-processing functions into efficient implementations. It has been used to great effect in Haskell libraries for manipulating byte arrays, Unicode text, and unboxed vectors. However, some operations, like vector append, still do not perform well within the standard stream fusion framework. Others, like {SIMD} computation using the {SSE} and {AVX} instructions available on modern x86 chips, do not seem to fit in the framework at all.  In this paper we introduce generalized stream fusion, which solves these issues. The key insight is to bundle together multiple stream representations, each tuned for a particular class of stream consumer. We also describe a stream representation suited for efficient computation with {SSE} instructions. Our ideas are implemented in modified versions of the {GHC} compiler and vector library. Benchmarks show that high-level Haskell code written using our compiler and libraries can produce code that is faster than both compiler- and hand-vectorized C.},
+    address = {New York, NY, USA},
+    author = {Mainland, Geoffrey and Leshchinskiy, Roman and Jones, Simon P.},
+    citeulike-article-id = {13627076},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2500365.2500601},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/2544174.2500601},
+    doi = {10.1145/2544174.2500601},
+    issn = {0362-1340},
+    journal = {SIGPLAN Not.},
+    keywords = {haskell, parallel},
+    month = sep,
+    number = {9},
+    pages = {37--48},
+    posted-at = {2015-05-25 23:08:59},
+    priority = {2},
+    publisher = {ACM},
+    title = {Exploiting Vector Instructions with Generalized Stream Fusio},
+    url = {http://dx.doi.org/10.1145/2544174.2500601},
+    volume = {48},
+    year = {2013}
+}
+
+@inproceedings{DataFamily2005Chakravarty,
+    abstract = {Haskell's type classes allow ad-hoc overloading, or type-indexing, of functions. A natural generalisation is to allow type-indexing of data types as well. It turns out that this idea directly supports a powerful form of abstraction called associated types, which are available in C++ using traits classes. Associated types are useful in many applications, especially for self-optimising libraries that adapt their data representations and algorithms in a type-directed {manner.In} this paper, we introduce and motivate associated types as a rather natural generalisation of Haskell's existing type classes. Formally, we present a type system that includes a type-directed translation into an explicitly typed target language akin to System F; the existence of this translation ensures that the addition of associated data types to an existing Haskell compiler only requires changes to the front end.},
+    address = {New York, NY, USA},
+    author = {Chakravarty, Manuel M. T. and Keller, Gabriele and Jones, Simon P. and Marlow, Simon},
+    booktitle = {Proceedings of the 32Nd ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+    citeulike-article-id = {100047},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1040306},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/1040305.1040306},
+    doi = {10.1145/1040305.1040306},
+    isbn = {1-58113-830-X},
+    keywords = {haskell, parallel},
+    location = {Long Beach, California, USA},
+    pages = {1--13},
+    posted-at = {2015-05-21 18:11:40},
+    priority = {2},
+    publisher = {ACM},
+    series = {POPL '05},
+    title = {Associated Types with Class},
+    url = {http://dx.doi.org/10.1145/1040305.1040306},
+    year = {2005}
+}
+
+@inproceedings{ParScan1996Gorlatch,
+    abstract = {An abstract is not available.},
+    address = {London, UK, UK},
+    author = {Gorlatch, Sergei},
+    booktitle = {Proceedings of the Second International Euro-Par Conference on Parallel Processing-Volume II},
+    citeulike-article-id = {13618226},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=701094},
+    isbn = {3-540-61627-6},
+    keywords = {haskell, parallel},
+    pages = {401--408},
+    posted-at = {2015-05-18 15:32:39},
+    priority = {2},
+    publisher = {Springer-Verlag},
+    series = {Euro-Par '96},
+    title = {Systematic Efficient Parallelization of Scan and Other List Homomorphisms},
+    url = {http://portal.acm.org/citation.cfm?id=701094},
+    year = {1996}
+}
+
+@article{CostArray2002Leshchinskiy,
+    abstract = {We discuss a language-based cost model for array programs built on the notions of work complexity and parallel depth. The programs operate over data structures comprising nested arrays and recursive product-sum types. In a purely functional setting, such programs can be implemented by way of the flattening transformation that converts codes over nested arrays into vectorised code over flat arrays. Flat arrays lend themselves to a particularly efficient implementation on standard hardware, but the overall efficiency of the approach depends on the flattening transformation preserving the asymptotic complexity of the nested array codes. Blelloch has characterised a class of first-order array programs, called contained programs, for which flattening preserves the asymptotic depth complexity. However, his result is restricted to programs processing only arrays and tuples. In the present paper, we extend Blelloch's result to array programs processing data structures containing arrays as well as arbitrary recursive product-sum types. Moreover, we replace the notion of containment by the more general concept of fold programs.},
+    author = {Leshchinskiy, Roman and Chakravarty, Manuel M. T. and Keller, Gabriele},
+    citeulike-article-id = {13618216},
+    citeulike-linkout-0 = {http://dx.doi.org/10.1142/s0129626402000951},
+    citeulike-linkout-1 = {http://www.worldscientific.com/doi/abs/10.1142/S0129626402000951},
+    day = {1},
+    doi = {10.1142/s0129626402000951},
+    journal = {Parallel Process. Lett.},
+    keywords = {haskell, parallel},
+    month = jun,
+    number = {02},
+    pages = {249--266},
+    posted-at = {2015-05-18 15:23:06},
+    priority = {2},
+    publisher = {World Scientific Publishing Co.},
+    title = {Costing Nested Array Codes},
+    url = {http://dx.doi.org/10.1142/s0129626402000951},
+    volume = {12},
+    year = {2002}
+}
+
+@inproceedings{ArrayFusion2001Chakravarty,
+    abstract = {This paper introduces a new approach to optimizing array algorithms in functional languages. We are specifically aiming at an efficient implementation of irregular array algorithms that are hard to implement in conventional array languages such as Fortran. We optimize the storage layout of arrays containing complex data structures and reduce the running time of functions operating on these arrays by means of equational program transformations. In particular, this paper discusses a novel form of combinator loop fusion, which by removing intermediate structures optimizes the use of the memory hierarchy. We identify a combinator named loop P that provides a general scheme for iterating over an array and that in conjunction with an array constructor replicate P is sufficient to express a wide range of array algorithms. On this basis, we define equational transformation rules that combine traversals of loop P and replicate P as well as sequences of applications of loop P into a single loop P traversal. Our approach naturally generalizes to a parallel implementation and includes facilities for optimizing load balancing and communication. A prototype implementation based on the rewrite rule pragma of the Glasgow Haskell Compiler is significantly faster than standard Haskell arrays and approaches the speed of hand coded C for simple examples.},
+    address = {New York, NY, USA},
+    author = {Chakravarty, Manuel M. T. and Keller, Gabriele},
+    booktitle = {Proceedings of the Sixth ACM SIGPLAN International Conference on Functional Programming},
+    citeulike-article-id = {314213},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=507635.507661},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/507635.507661},
+    doi = {10.1145/507635.507661},
+    isbn = {1-58113-415-0},
+    issn = {0362-1340},
+    keywords = {haskell, parallel},
+    location = {Florence, Italy},
+    month = oct,
+    number = {10},
+    pages = {205--216},
+    posted-at = {2015-05-18 15:08:20},
+    priority = {2},
+    publisher = {ACM},
+    series = {ICFP '01},
+    title = {Functional Array Fusion},
+    url = {http://dx.doi.org/10.1145/507635.507661},
+    volume = {36},
+    year = {2001}
+}
+
+@incollection{FastArr2003Chakravarty,
+    abstract = {Many array-centric algorithms from computational science and engineering, especially those based on dynamic and irregular data structures, can be coded rather elegantly in a purely functional style. The challenge, when compared to imperative array languages, is performance. These lecture notes discuss the shortcomings of Haskell's standard arrays in this context and present an alternative approach that decouples array from list processing and is based on program transformation and generic programming. In particular, we will present (1) an array library that uses type analysis to achieve unboxing and flattening of data structures as well as (2) equational array fusion based on array combinators and compiler-driven rewrite rules. We will make use of a range of advanced language extensions to Haskell, such as multi-parameter type classes, functional dependencies, rewrite rules, unboxed values, and locally state-based computations.},
+    author = {Chakravarty, ManuelM and Keller, Gabriele},
+    booktitle = {Advanced Functional Programming},
+    citeulike-article-id = {13618177},
+    citeulike-linkout-0 = {http://dx.doi.org/10.1007/978-3-540-44833-4\_2},
+    citeulike-linkout-1 = {http://link.springer.com/chapter/10.1007/978-3-540-44833-4\_2},
+    doi = {10.1007/978-3-540-44833-4\_2},
+    editor = {Jeuring, Johan and Jones, SimonL},
+    keywords = {haskell, parallel},
+    pages = {27--58},
+    posted-at = {2015-05-18 14:51:44},
+    priority = {2},
+    publisher = {Springer Berlin Heidelberg},
+    series = {Lecture Notes in Computer Science},
+    title = {An Approach to Fast Arrays in Haskell},
+    url = {http://dx.doi.org/10.1007/978-3-540-44833-4\_2},
+    volume = {2638},
+    year = {2003}
+}
+
+@inproceedings{Simon2001Rewrites,
+    abstract = {We describe a facility for improving optimization of Haskell programs using rewrite rules. Library authors can use rules to express domain-specific optimizations that the compiler cannot discover for itself. The compiler can also generate rules internally to propagate information obtained from automated analyses. The rewrite mechanism is fully implemented in the released Glasgow Haskell Compiler.
+
+Our system is very simple, but can be effective in optimizing real programs. We describe two practical applications involving short-cut deforestation, for lists and for rose trees, and document substantial performance improvements on a range of programs.},
+    author = {Peyton Jones, Simon and Tolmach, Andrew and Hoare, Tony},
+    booktitle = {Proceedings of the 2001 Haskell Workshop},
+    citeulike-article-id = {7953458},
+    keywords = {haskell, parallel},
+    month = sep,
+    pages = {203--233},
+    posted-at = {2015-05-16 14:31:47},
+    priority = {2},
+    title = {Playing by the Rules: Rewriting as a practical optimization technique in {GHC}},
+    year = {2001}
+}
+
+@inproceedings{Harris2005Composable,
+    abstract = {Writing concurrent programs is notoriously difficult, and is of increasing practical importance. A particular source of concern is that even correctly-implemented concurrency abstractions cannot be composed together to form larger abstractions. In this paper we present a new concurrency model, based on transactional memory, that offers far richer composition. All the usual benefits of transactional memory are present (e.g. freedom from deadlock), but in addition we describe new modular forms of blocking and choice that have been inaccessible in earlier work.},
+    address = {New York, NY, USA},
+    author = {Harris, Tim and Marlow, Simon and Jones, Simon P. and Herlihy, Maurice},
+    booktitle = {Proceedings of the Tenth ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming},
+    citeulike-article-id = {421944},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1065952},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/1065944.1065952},
+    doi = {10.1145/1065944.1065952},
+    isbn = {1-59593-080-9},
+    keywords = {haskell, parallel},
+    location = {Chicago, IL, USA},
+    pages = {48--60},
+    posted-at = {2015-05-16 14:10:40},
+    priority = {2},
+    publisher = {ACM},
+    series = {PPoPP '05},
+    title = {Composable Memory Transactions},
+    url = {http://dx.doi.org/10.1145/1065944.1065952},
+    year = {2005}
+}
+
+@article{EffiVect2012Lipp,
+    abstract = {Existing approaches to higher-order vectorisation, also known as flattening nested data parallelism, do not preserve the asymptotic work complexity of the source program. Straightforward examples, such as sparse matrix-vector multiplication, can suffer a severe blow-up in both time and space, which limits the practicality of this method. We discuss why this problem arises, identify the mis-handling of index space transforms as the root cause, and present a solution using a refined representation of nested arrays. We have implemented this solution in Data Parallel Haskell ({DPH}) and present benchmarks showing that realistic programs, which used to suffer the blow-up, now have the correct asymptotic work complexity. In some cases, the asymptotic complexity of the vectorised program is even better than the original.},
+    address = {New York, NY, USA},
+    author = {Lippmeier, Ben and Chakravarty, Manuel M. T. and Keller, Gabriele and Leshchinskiy, Roman and Jones, Simon P.},
+    citeulike-article-id = {12242078},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2364564},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/2398856.2364564},
+    doi = {10.1145/2398856.2364564},
+    issn = {0362-1340},
+    journal = {SIGPLAN Not.},
+    keywords = {haskell, par},
+    month = sep,
+    number = {9},
+    pages = {259--270},
+    posted-at = {2015-05-11 23:06:32},
+    priority = {2},
+    publisher = {ACM},
+    title = {Work Efficient Higher-order Vectorisation},
+    url = {http://dx.doi.org/10.1145/2398856.2364564},
+    volume = {47},
+    year = {2012}
+}
+
+@book{Barr2013,
+    author = {Barr, Michael and Wells, Charles},
+    citeulike-article-id = {13601587},
+    keywords = {and, haskell, phrasescategory, science, theorycomputing, type-theory},
+    number = {22},
+    posted-at = {2015-05-03 22:31:15},
+    priority = {3},
+    title = {{Category Theory for Computing Science}},
+    year = {2013}
+}
+
+@book{Soerensen,
+    author = {Soerensen, Morten H. and Pawel, Urzyczyn},
+    citeulike-article-id = {13601586},
+    keywords = {haskell, type-theory},
+    posted-at = {2015-05-03 22:31:15},
+    priority = {3},
+    title = {{Lectures on the Curry-Howard Isomorphism}}
+}
+
+@book{Pierce2002,
+    address = {Cambridge, Massachusetts, London, England},
+    author = {Pierce, Benjamin C.},
+    citeulike-article-id = {13601585},
+    keywords = {haskell, type-theory},
+    posted-at = {2015-05-03 22:31:15},
+    priority = {3},
+    publisher = {The MIT Press},
+    title = {{Types and Programming Languages}},
+    year = {2002}
+}
+
+@book{Nordstrom1990,
+    author = {Nordstr\"{o}m, Bengt and Petersson, Kent and Smith, Jan M.},
+    citeulike-article-id = {13601584},
+    keywords = {haskell, type-theory},
+    posted-at = {2015-05-03 22:31:15},
+    priority = {3},
+    title = {{Programming in Martin-L\"{o}f ' s Type Theory}},
+    year = {1990}
+}
+
+@article{Milner1978,
+    author = {Milner, Robin},
+    citeulike-article-id = {13601583},
+    keywords = {haskell, type-theory},
+    pages = {348--375},
+    posted-at = {2015-05-03 22:31:15},
+    priority = {3},
+    title = {{Programming, A Theory of Type Polymorphism in Programming}},
+    volume = {375},
+    year = {1978}
+}
+
+@phdthesis{DataAlgo12014Prokopec,
+    abstract = {The data-parallel programming model fits nicely with the existing declarative-style bulk operations that augment collection libraries in many languages today. Data collection operations like reduction, filtering or mapping can be executed by a single processor or many processors at once. However, there are multiple challenges to overcome when parallelizing collection operations.
+
+First, it is challenging to construct a collection in parallel by multiple processors. Traditionally, collections are backed by data structures with thread-safe variants of their update operations. Such data structures are called concurrent data structures. Their update operations require interprocessor synchronization and are generally slower than the corresponding single-threaded update operations. Synchronization costs can easily invalidate performance gains from parallelizing bulk operations such as mapping or filtering. This thesis presents a parallel collection framework with a range of data structures that reduce the need for interprocessor synchronization, effectively boosting data-parallel operation performance. The parallel collection framework is implemented in Scala, but the techniques in this thesis can be applied to other managed runtimes.
+
+Second, most concurrent data structures can only be traversed in the absence of concurrent modifications. We say that such concurrent data structures are quiescently consistent. The task of ensuring quiescence falls on the programmer. This thesis presents a novel, lock-free, scalable concurrent data structure called a Ctrie, which supports a linearizable, lock-free, constant-time snapshot operation. The Ctrie snapshot operation is used to parallelize Ctrie operations without the need for quiescence. We show how the linearizable, lock-free, constant-time snapshot operation can be applied to different concurrent, lock-free tree-like data structures.
+
+Finally, efficiently assigning parts of the computation to different processors, or scheduling, is not trivial. Although most computer systems have several identical {CPUs}, memory hiearchies, cache-coherence protocols and interference with concurrent processes influence the effective speed of a {CPU}. Moreover, some data-parallel operations inherently require more work for some elements of the collection than others – we say that no data-parallel operation has a uniform workload in practice. This thesis presents a novel technique for parallelizing highly irregular computation workloads, called the work-stealing tree scheduling. We show that the work-stealing tree scheduler outperforms other schedulers when parallelizing highly irregular workloads, and retains optimal performance when parallelizing more uniform workloads.
+
+Concurrent algorithms and data structure operations in this thesis are linearizable and lock-free. We present pseudocode with detailed correctness proofs for concurrent data structures and algorithms in this thesis, validating their correctness, identifying linearization points and showing their lock-freedom.},
+    address = {Route Cantonale 1015, Lausanne, Switzerland},
+    author = {Prokopec, Aleksandar},
+    citeulike-article-id = {13601448},
+    editor = {Odersky, Martin},
+    keywords = {haskell, parallel},
+    posted-at = {2015-05-03 16:55:56},
+    priority = {2},
+    school = {\'{E}cole polytechnique f\'{e}d\'{e}rale de Lausanne EPFL},
+    title = {Data Structures and Algorithms for {Data-Parallel} Computing in a Managed Runtime},
+    year = {2014}
+}
+
+@article{Brown1965Mechanics,
+    abstract = {The effect of liquid viscosity on the rate of rise of a large gas bubble through stagnant liquid in a tube is shown to be limited to that on the film flow past the bubble on the wall of the tube. A criterion of similarity between the shapes of bubbles in different liquids is obtained experimentally which enables development of a correlation for the velocities of rise. This correlation is shown to be in good agreement with experimental results for systems in which the effects of surface tension and liquid viscosity on the frontal flow are negligible. On d\'{e}montre que l'effet de la viscosit\'{e} de la phase continue sur le taux d'ascension d'une bulle de gaz dans un liquide stagnant, dans un tube, est limit\'{e} \`{a} l'effet de l'ecoulement du film sur la paroi du tube aupr\`{e}s de la bulle. Un crit\`{e}re de similitude entre la g\'{e}om\'{e}trie des bulles dans divers liquides est obtenu exp\'{e}rimentalement, ce qui permet le d\'{e}veloppement d'une corr\'{e}lation pour les vitesses d'ascension. Cette corr\'{e}lation est en accord avec les r\'{e}sultats exp\'{e}rimentaux pour les syst\'{e}mes dans lesquels les effets de tension superficielle et de viscosit\'{e} du liquide sur l'\'{e}coulement frontal sont n\'{e}gligeables.},
+    author = {Brown, R. A. S.},
+    citeulike-article-id = {13600952},
+    citeulike-linkout-0 = {http://dx.doi.org/10.1002/cjce.5450430501},
+    day = {1},
+    doi = {10.1002/cjce.5450430501},
+    journal = {Can. J. Chem. Eng.},
+    keywords = {taylor},
+    month = oct,
+    number = {5},
+    pages = {217--223},
+    posted-at = {2015-05-02 14:04:54},
+    priority = {2},
+    publisher = {Wiley Subscription Services, Inc., A Wiley Company},
+    title = {The mechanics of large gas bubbles in tubes: I. Bubble velocities in stagnant liquids},
+    url = {http://dx.doi.org/10.1002/cjce.5450430501},
+    volume = {43},
+    year = {1965}
+}
+
+@article{NepaBelloch1993,
+    abstract = {This paper gives an overview of the implementation of {NESL}, a portable nested data-parallel language. This language and its implementation are the first to fully support nested data structures as well as nested data-parallel function calls. These features allow the concise description of parallel algorithms on irregular data, such as sparse matrices and graphs. In addition, they maintain the advantages of data-parallel languages: a simple programming model and portability. The current {NESL} implementation is based on an intermediate language called {VCODE} and a library of vector routines called {CVL}. It runs on the Connection Machine {CM}-2, the Cray {Y-MP} C90, and serial machines. We compare initial benchmark results of {NESL} with those of machine-specific code on these machines for three algorithms: least-squares line-fitting, median finding, and a sparse-matrix vector product. These results show that {NESL}'s performance is competitive with that of machine-specific codes for regular dense data, and is often superior for irregular data.},
+    address = {New York, NY, USA},
+    author = {Blelloch, Guy E. and Hardwick, Jonathan C. and Chatterjee, Siddhartha and Sipelstein, Jay and Zagha, Marco},
+    booktitle = {Proceedings of the fourth ACM SIGPLAN symposium on Principles and practice of parallel programming},
+    citeulike-article-id = {9336501},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=155343},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/155332.155343},
+    doi = {10.1145/155332.155343},
+    isbn = {0-89791-589-5},
+    issn = {0362-1340},
+    journal = {SIGPLAN Not.},
+    keywords = {haskell, parallel},
+    location = {San Diego, California, United States},
+    month = jul,
+    number = {7},
+    pages = {102--111},
+    posted-at = {2015-05-01 21:14:42},
+    priority = {2},
+    publisher = {ACM},
+    series = {PPOPP '93},
+    title = {Implementation of a Portable Nested Data-parallel Language},
+    url = {http://dx.doi.org/10.1145/155332.155343},
+    volume = {28},
+    year = {1993}
+}
+
+@article{Trans1993,
+    abstract = {Efficient parallel execution of a high-level data-parallel language based on nested sequences, higher order functions and generalized iterators can be realized in the vector model using a suitable representation of nested sequences and a small set of transformational rules to distribute iterators through the constructs of the language.},
+    address = {New York, NY, USA},
+    author = {Prins, Jan F. and Palmer, Daniel W.},
+    citeulike-article-id = {13600606},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=155345},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/173284.155345},
+    doi = {10.1145/173284.155345},
+    issn = {0362-1340},
+    journal = {SIGPLAN Not.},
+    keywords = {haskell, parallel},
+    month = jul,
+    number = {7},
+    pages = {119--128},
+    posted-at = {2015-05-01 21:11:57},
+    priority = {2},
+    publisher = {ACM},
+    title = {Transforming High-level Data-parallel Programs into Vector Operations},
+    url = {http://dx.doi.org/10.1145/173284.155345},
+    volume = {28},
+    year = {1993}
+}
+
+@incollection{DistTypes1999,
+    abstract = {A critical component of many data-parallel programming languages are operations that manipulate aggregate data structures as a whole—this includes Fortran 90, Nesl, and languages based on {BMF}. These operations are commonly implemented by a library whose routines operate on a distributed representation of the aggregate structure; the compiler merely generates the control code invoking the library routines and all machine-dependent code is encapsulated in the library. While this approach is convenient, we argue that by breaking the abstraction enforced by the library and by presenting some of internals in the form of a new intermediate language to the compiler back-end, we can optimize on al levels of the memory hierarchy and achieve more flexible data distribution. The new intermediate language allows us to present these optimisations elegantly as program transformations. We report on first results obtained by our approach in the implementation of nested data parallelism on distributed-memory machines.},
+    author = {Keller, Gabriele and Chakravarty, ManuelM},
+    booktitle = {Parallel and Distributed Processing},
+    citeulike-article-id = {13600605},
+    citeulike-linkout-0 = {http://dx.doi.org/10.1007/bfb0097892},
+    citeulike-linkout-1 = {http://link.springer.com/chapter/10.1007/BFb0097892},
+    doi = {10.1007/bfb0097892},
+    editor = {Rolim, Jos\'{e} and Mueller, Frank and Zomaya, AlbertY and Ercal, Fikret and Olariu, Stephan and Ravindran, Binoy and Gustafsson, Jan and Takada, Hiroaki and Olsson, Ron and Kale, LaxmikantV and Beckman, Pete and Haines, Matthew and ElGindy, Hossam and Caromel, Denis and Chaumette, Serge and Fox, Geoffrey and Pan, Yi and Li, Keqin and Yang, Tao and Chiola, G. and Conte, G. and Mancini, L. V. and M\'{e}ry, Domenique and Sanders, Beverly and Bhatt, Devesh and Prasanna, Viktor},
+    keywords = {haskell, parallel},
+    pages = {108--122},
+    posted-at = {2015-05-01 21:05:43},
+    priority = {5},
+    publisher = {Springer Berlin Heidelberg},
+    series = {Lecture Notes in Computer Science},
+    title = {On the distributed implementation of aggregate data structures by program transformation},
+    url = {http://dx.doi.org/10.1007/bfb0097892},
+    volume = {1586},
+    year = {1999}
+}
+
+@article{Gustafson1988,
+    abstract = {An abstract is not available.},
+    address = {New York, NY, USA},
+    author = {Gustafson, John L.},
+    citeulike-article-id = {3732921},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=42411.42415},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/42411.42415},
+    doi = {10.1145/42411.42415},
+    issn = {0001-0782},
+    journal = {Commun. ACM},
+    keywords = {haskell, parallel},
+    month = may,
+    number = {5},
+    pages = {532--533},
+    posted-at = {2015-04-21 17:53:44},
+    priority = {4},
+    publisher = {ACM},
+    title = {Reevaluating Amdahl's Law},
+    url = {http://dx.doi.org/10.1145/42411.42415},
+    volume = {31},
+    year = {1988}
+}
+
+@inproceedings{Amdahl1967,
+    abstract = {For over a decade prophets have voiced the contention that the organization of a single computer has reached its limits and that truly significant advances can be made only by interconnection of a multiplicity of computers in such a manner as to permit cooperative solution. Variously the proper direction has been pointed out as general purpose computers with a generalized interconnection of memories, or as specialized computers with geometrically related memory interconnections and controlled by one or more instruction streams.},
+    address = {New York, NY, USA},
+    author = {Amdahl, Gene M.},
+    booktitle = {Proceedings of the April 18-20, 1967, Spring Joint Computer Conference},
+    citeulike-article-id = {4768607},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1465482.1465560},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/1465482.1465560},
+    doi = {10.1145/1465482.1465560},
+    keywords = {haskell, parallel},
+    location = {Atlantic City, New Jersey},
+    pages = {483--485},
+    posted-at = {2015-04-21 17:51:22},
+    priority = {4},
+    publisher = {ACM},
+    series = {AFIPS '67 (Spring)},
+    title = {Validity of the Single Processor Approach to Achieving Large Scale Computing Capabilities},
+    url = {http://dx.doi.org/10.1145/1465482.1465560},
+    year = {1967}
+}
+
+@inproceedings{TypesNested2000,
+    abstract = {This paper generalises the flattening transformation---a technique for the efficient implementation of nested data parallelism---and reconciles it with main stream functional programming. Nested data parallelism is significantly more expressive and convenient to use than the flat data parallelism typically used in conventional parallel languages like High Performance Fortran and C*. The flattening transformation of Blelloch and Sabot is a key technique for the efficient implementation of nested parallelism via flat parallelism, but originally it was severely restricted, as it did not permit general sum types, recursive types, higher-order functions, and separate compilation. Subsequent work, including some of our own, generalised the transformation and allowed higher-order functions and recursive types. In this paper, we take the final step of generalising flattening to cover the full range of types available in modern languages like Haskell and {ML}; furthermore, we enable the use of separate compilation. In addition, we present a completely new formulation of the transformation, which is based on the standard lambda calculus notation, and replace a previously ad-hoc transformation step by a systematic generic programming technique. First experiments demonstrate the efficiency of our approach.},
+    address = {New York, NY, USA},
+    author = {Chakravarty, Manuel M. T. and Keller, Gabriele},
+    booktitle = {Proceedings of the Fifth ACM SIGPLAN International Conference on Functional Programming},
+    citeulike-article-id = {1652961},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=351249},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/351240.351249},
+    doi = {10.1145/351240.351249},
+    isbn = {1-58113-202-6},
+    keywords = {haskell, parallel},
+    pages = {94--105},
+    posted-at = {2015-04-21 17:35:56},
+    priority = {0},
+    publisher = {ACM},
+    series = {ICFP '00},
+    title = {More Types for Nested Data Parallel Programming},
+    url = {http://dx.doi.org/10.1145/351240.351249},
+    year = {2000}
+}
+
+@inproceedings{Fusion2007,
+    abstract = {This paper presents an automatic deforestation system, stream fusion, based on equational transformations, that fuses a wider range of functions than existing short-cut fusion systems. In particular, stream fusion is able to fuse zips, left folds and functions over nested lists, including list comprehensions. A distinguishing feature of the framework is its simplicity: by transforming list functions to expose their structure, intermediate values are eliminated by general purpose compiler optimisations. We have reimplemented the Haskell standard List library on top of our framework, providing stream fusion for Haskell lists. By allowing a wider range of functions to fuse, we see an increase in the number of occurrences of fusion in typical Haskell programs. We present benchmarks documenting time and space improvements.},
+    address = {New York, NY, USA},
+    author = {Coutts, Duncan and Leshchinskiy, Roman and Stewart, Don},
+    booktitle = {Proceedings of the 12th ACM SIGPLAN International Conference on Functional Programming},
+    citeulike-article-id = {2326693},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1291151.1291199},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/1291151.1291199},
+    doi = {10.1145/1291151.1291199},
+    isbn = {978-1-59593-815-2},
+    issn = {0362-1340},
+    journal = {SIGPLAN Not.},
+    keywords = {haskell, parallel},
+    location = {Freiburg, Germany},
+    month = oct,
+    pages = {315--326},
+    posted-at = {2015-04-21 17:18:55},
+    priority = {3},
+    publisher = {ACM},
+    series = {ICFP '07},
+    title = {Stream Fusion: From Lists to Streams to Nothing at All},
+    url = {http://dx.doi.org/10.1145/1291151.1291199},
+    volume = {42},
+    year = {2007}
+}
+
+@article{Blelloch:1996:PPA:227234.227246,
+    address = {New York, NY, USA},
+    author = {Blelloch, Guy E.},
+    citeulike-article-id = {13584932},
+    citeulike-linkout-0 = {http://dx.doi.org/10.1145/227234.227246},
+    citeulike-linkout-1 = {http://doi.acm.org/10.1145/227234.227246},
+    doi = {10.1145/227234.227246},
+    journal = {Commun. ACM},
+    key = {NESL1996},
+    keywords = {haskell, parallel},
+    month = mar,
+    number = {3},
+    pages = {85--97},
+    posted-at = {2015-04-17 18:35:09},
+    priority = {1},
+    publisher = {ACM},
+    title = {Programming Parallel Algorithms},
+    url = {http://doi.acm.org/10.1145/227234.227246},
+    volume = {39},
+    year = {1996}
+}
+
+@inproceedings{McDonell2013Optimising,
+    abstract = {Purely functional, embedded array programs are a good match for {SIMD} hardware, such as {GPUs}. However, the naive compilation of such programs quickly leads to both code explosion and an excessive use of intermediate data structures. The resulting slow-down is not acceptable on target hardware that is usually chosen to achieve high performance. In this paper, we discuss two optimisation techniques, sharing recovery and array fusion, that tackle code explosion and eliminate superfluous intermediate structures. Both techniques are well known from other contexts, but they present unique challenges for an embedded language compiled for execution on a {GPU}. We present novel methods for implementing sharing recovery and array fusion, and demonstrate their effectiveness on a set of benchmarks.},
+    address = {New York, NY, USA},
+    author = {McDonell, Trevor L. and Chakravarty, Manuel M. T. and Keller, Gabriele and Lippmeier, Ben},
+    booktitle = {Proceedings of the 18th ACM SIGPLAN International Conference on Functional Programming},
+    citeulike-article-id = {13584670},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2500365.2500595},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/2500365.2500595},
+    doi = {10.1145/2500365.2500595},
+    isbn = {978-1-4503-2326-0},
+    keywords = {haskell, parallel},
+    location = {Boston, Massachusetts, USA},
+    pages = {49--60},
+    posted-at = {2015-04-17 14:53:09},
+    priority = {1},
+    publisher = {ACM},
+    series = {ICFP '13},
+    title = {Optimising Purely Functional {GPU} Programs},
+    url = {http://dx.doi.org/10.1145/2500365.2500595},
+    year = {2013}
+}
+
+@article{Bergstrom2012Nested,
+    abstract = {Graphics processing units ({GPUs}) provide both memory bandwidth and arithmetic performance far greater than that available on {CPUs} but, because of their {Single-Instruction}-{Multiple-Data} ({SIMD}) architecture, they are hard to program. Most of the programs ported to {GPUs} thus far use traditional data-level parallelism, performing only operations that operate uniformly over vectors. {NESL} is a first-order functional language that was designed to allow programmers to write irregular-parallel programs - such as parallel divide-and-conquer algorithms - for wide-vector parallel computers. This paper presents our port of the {NESL} implementation to work on {GPUs} and provides empirical evidence that nested data-parallelism ({NDP}) on {GPUs} significantly outperforms {CPU}-based implementations and matches or beats newer {GPU} languages that support only flat parallelism. While our performance does not match that of hand-tuned {CUDA} programs, we argue that the notational conciseness of {NESL} is worth the loss in performance. This work provides the first language implementation that directly supports {NDP} on a {GPU}.},
+    address = {New York, NY, USA},
+    author = {Bergstrom, Lars and Reppy, John},
+    citeulike-article-id = {12042953},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2364563},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/2398856.2364563},
+    doi = {10.1145/2398856.2364563},
+    issn = {0362-1340},
+    journal = {SIGPLAN Not.},
+    keywords = {haskell, parallel},
+    month = sep,
+    number = {9},
+    pages = {247--258},
+    posted-at = {2015-04-17 14:48:37},
+    priority = {1},
+    publisher = {ACM},
+    title = {Nested Data-parallelism on the Gpu},
+    url = {http://dx.doi.org/10.1145/2398856.2364563},
+    volume = {47},
+    year = {2012}
+}
+
+@inproceedings{Marlow2011Monad,
+    abstract = {We present a new programming model for deterministic parallel computation in a pure functional language. The model is monadic and has explicit granularity, but allows dynamic construction of dataflow networks that are scheduled at runtime, while remaining deterministic and pure. The implementation is based on monadic concurrency, which has until now only been used to simulate concurrency in functional languages, rather than to provide parallelism. We present the {API} with its semantics, and argue that parallel execution is deterministic. Furthermore, we present a complete work-stealing scheduler implemented as a Haskell library, and we show that it performs at least as well as the existing parallel programming models in Haskell.},
+    address = {New York, NY, USA},
+    author = {Marlow, Simon and Newton, Ryan and Jones, Simon P.},
+    booktitle = {Proceedings of the 4th ACM Symposium on Haskell},
+    citeulike-article-id = {12605079},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2034675.2034685},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/2034675.2034685},
+    doi = {10.1145/2034675.2034685},
+    isbn = {978-1-4503-0860-1},
+    keywords = {haskell, parallel},
+    location = {Tokyo, Japan},
+    pages = {71--82},
+    posted-at = {2015-04-17 14:46:09},
+    priority = {1},
+    publisher = {ACM},
+    series = {Haskell '11},
+    title = {A Monad for Deterministic Parallelism},
+    url = {http://dx.doi.org/10.1145/2034675.2034685},
+    year = {2011}
+}
+
+@inproceedings{Marlow2012Parallel,
+    abstract = {Haskell provides a rich set of abstractions for parallel and concurrent programming. This tutorial covers the basic concepts involved in writing parallel and concurrent programs in Haskell, and takes a deliberately practical approach: most of the examples are real Haskell programs that you can compile, run, measure, modify and experiment with. We cover parallel programming with the @Eval@ monad, Evaluation Strategies, and the @Par@ monad. On the concurrent side, we cover threads, @{MVar}@s, asynchronous exceptions, Software Transactional Memory, the Foreign Function Interface, and briefly look at the construction of high-speed network servers in Haskell.},
+    address = {Berlin, Heidelberg},
+    author = {Marlow, Simon},
+    booktitle = {Proceedings of the 4th Summer School Conference on Central European Functional Programming School},
+    citeulike-article-id = {13584659},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2363414},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1007/978-3-642-32096-5\_7},
+    doi = {10.1007/978-3-642-32096-5\_7},
+    isbn = {978-3-642-32095-8},
+    keywords = {haskell, parallel},
+    location = {Budapest, Hungary},
+    pages = {339--401},
+    posted-at = {2015-04-17 14:27:43},
+    priority = {1},
+    publisher = {Springer-Verlag},
+    series = {CEFP'11},
+    title = {Parallel and Concurrent Programming in Haskell},
+    url = {http://dx.doi.org/10.1007/978-3-642-32096-5\_7},
+    year = {2012}
+}
+
+@misc{Khl2012Expose,
+    author = {K\"{o}hler-Bu{\ss}meier, Michael},
+    citeulike-article-id = {13584639},
+    citeulike-linkout-0 = {http://www.informatik.uni-hamburg.de/TGI/lehre/abschlussarbeiten/expose-checklist.pdf},
+    howpublished = {\url{http://www.informatik.uni-hamburg.de/TGI/lehre/abschlussarbeiten/expose-checklist.pdf}},
+    keywords = {academia},
+    month = oct,
+    posted-at = {2015-04-17 14:00:04},
+    priority = {0},
+    title = {Checkliste f\"{u}r ein Expose},
+    url = {http://www.informatik.uni-hamburg.de/TGI/lehre/abschlussarbeiten/expose-checklist.pdf},
+    year = {2012}
+}
+
+@inproceedings{Chakravarty2008Partial,
+    abstract = {Vectorisation for functional programs, also called the flattening transformation, relies on drastically reordering computations and restructuring the representation of data types. As a result, it only applies to the purely functional core of a fully-fledged functional language, such as Haskell or {ML}. A concrete implementation needs to apply vectorisation selectively and integrate vectorised with unvectorised code. This is challenging, as vectorisation alters the data representation, which must be suitably converted between vectorised and unvectorised code. In this paper, we present an approach to partial vectorisation that selectively vectorises sub-expressions and data types, and also, enables linking vectorised with unvectorised modules.},
+    author = {Chakravarty, Manuel M. T. and Leshchinskiy, Roman and Jones, Simon P. and Keller, Gabriele},
+    booktitle = {Standalone Paper},
+    citeulike-article-id = {13580144},
+    citeulike-linkout-0 = {https://encrypted.google.com/search?hl=en\&\#38;q=parital\%20vectorization\%20of\%20haskell\%20programs\#q=partial+vectorization+of+haskell+programs\&\#38;hl=en\&\#38;start=10},
+    keywords = {haskell, parallel},
+    month = jan,
+    posted-at = {2015-04-12 13:18:33},
+    priority = {1},
+    school = {University of South New Wales, Microsoft Research Cambridge},
+    title = {Partial Vectorization of Haskell programs},
+    url = {https://encrypted.google.com/search?hl=en\&\#38;q=parital\%20vectorization\%20of\%20haskell\%20programs\#q=partial+vectorization+of+haskell+programs\&\#38;hl=en\&\#38;start=10},
+    year = {2008}
+}
+
+@article{Keller2010Regular,
+    abstract = {We present a novel approach to regular, multi-dimensional arrays in Haskell. The main highlights of our approach are that it (1) is purely functional, (2) supports reuse through shape polymorphism, (3) avoids unnecessary intermediate structures rather than relying on subsequent loop fusion, and (4) supports transparent parallelisation. We show how to embed two forms of shape polymorphism into Haskell's type system using type classes and type families. In particular, we discuss the generalisation of regular array transformations to arrays of higher rank, and introduce a type-safe specification of array slices. We discuss the runtime performance of our approach for three standard array algorithms. We achieve absolute performance comparable to handwritten C code. At the same time, our implementation scales well up to 8 processor cores.},
+    address = {New York, NY, USA},
+    author = {Keller, Gabriele and Chakravarty, Manuel M. T. and Leshchinskiy, Roman and Jones, Simon P. and Lippmeier, Ben},
+    citeulike-article-id = {12046245},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1863582},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/1932681.1863582},
+    doi = {10.1145/1932681.1863582},
+    issn = {0362-1340},
+    journal = {SIGPLAN Not.},
+    keywords = {haskell, parallel},
+    month = sep,
+    number = {9},
+    pages = {261--272},
+    posted-at = {2015-04-12 13:10:12},
+    priority = {1},
+    publisher = {ACM},
+    title = {Regular, Shape-polymorphic, Parallel Arrays in Haskell},
+    url = {http://dx.doi.org/10.1145/1932681.1863582},
+    volume = {45},
+    year = {2010}
+}
+
+@inproceedings{Svensson2012Parallel,
+    abstract = {Nowadays, performance in processors is increased by adding more cores or wider vector units, or by combining accelerators like {GPUs} and traditional cores on a chip. Programming for these diverse architectures is a challenge. We would like to exploit all the resources at hand without putting too much burden on the programmer. Ideally, the programmer should be presented with a machine model abstracted from the specific number of cores, {SIMD} width or the existence of a {GPU} or not. Intel's Array Building Blocks ({ArBB}) is a system that takes on these challenges. {ArBB} is a language for data parallel and nested data parallel programming, embedded in C++. By offering a retargetable dynamic compilation framework, it provides vectorisation and threading to programmers without the need to write highly architecture specific code. We aim to bring the same benefits to the Haskell programmer by implementing a Haskell frontend (embedding) of the {ArBB} system. We call this embedding {EmbArBB}. We use standard Haskell embedded language procedures to provide an interface to the {ArBB} functionality in Haskell. {EmbArBB} is work in progress and does not currently support all of the {ArBB} functionality. Some small programming examples illustrate how the Haskell embedding is used to write programs. {ArBB} code is short and to the point in both C++ and Haskell. Matrix multiplication has been benchmarked in sequential C++, {ArBB} in C++, {EmbArBB} and the Repa library. The C++ and the Haskell embeddings have almost identical performance, showing that the Haskell embedding does not impose any large extra overheads. Two image processing algorithms have also been benchmarked against Repa. In these benchmarks at least, {EmbArBB} performance is much better than that of the Repa library, indicating that building on {ArBB} may be a cheap and easy approach to exploiting data parallelism in Haskell.},
+    address = {New York, NY, USA},
+    author = {Svensson, Bo J. and Sheeran, Mary},
+    booktitle = {Proceedings of the 1st ACM SIGPLAN Workshop on Functional High-performance Computing},
+    citeulike-article-id = {13576540},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2364477},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/2364474.2364477},
+    doi = {10.1145/2364474.2364477},
+    isbn = {978-1-4503-1577-7},
+    keywords = {haskell, image\_processing, parallel},
+    location = {Copenhagen, Denmark},
+    pages = {3--14},
+    posted-at = {2015-04-07 19:38:51},
+    priority = {1},
+    publisher = {ACM},
+    series = {FHPC '12},
+    title = {Parallel Programming in Haskell Almost for Free: An Embedding of Intel's Array Building Blocks},
+    url = {http://dx.doi.org/10.1145/2364474.2364477},
+    year = {2012}
+}
+
+@inproceedings{HighOrdFlat2006,
+    abstract = {We extend the flattening transformation, which turns nested into flat data parallelism, to the full higher-order case, including lambda abstractions and data parallel arrays of functions. Our central observation is that flattening needs to transform the closures used to represent functional values. Thus, we use closure conversion before flattening and introduce array closures to represent arrays of functional values.},
+    address = {Berlin, Heidelberg},
+    author = {Leshchinskiy, Roman and Chakravarty, Manuel M. T. and Keller, Gabriele},
+    booktitle = {Proceedings of the 6th International Conference on Computational Science - Volume Part II},
+    citeulike-article-id = {13567489},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2171018},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1007/11758525\_122},
+    doi = {10.1007/11758525\_122},
+    isbn = {3-540-34381-4, 978-3-540-34381-3},
+    keywords = {functional-programming, haskell, parallel},
+    location = {Reading, UK},
+    pages = {920--928},
+    posted-at = {2015-04-01 13:37:23},
+    priority = {3},
+    publisher = {Springer-Verlag},
+    series = {ICCS'06},
+    title = {Higher Order Flattening},
+    url = {http://dx.doi.org/10.1007/11758525\_122},
+    year = {2006}
+}
+
+@misc{Simon2010Video,
+    abstract = {There are many approaches to exploiting multi-cores, but a particularly promising one is the "data-parallel" paradigm, because it combines massive parallelism (on both shared and distributed memory) with a simple, single-control-flow programming model. Indeed, I think that data parallelism is the only way we will be able to exploit tens or hundreds of processors effectively.
+
+Alas, data-parallel programming is usually restricted to "flat" data parallelism, which is good for implementers but bad for programmers. Instead, I'll describe the "nested" data parallel programming model, first developed in the 90's by Blelloch and Sabot. It is great for programmers but much harder to implement; as a result, it's virtually unknown in practice. It's really only feasible to support nested data parallelism in a purely functional language, so we are building a high-performance implementation in Haskell.},
+    author = {Jones, Simon P.},
+    citeulike-article-id = {13566876},
+    citeulike-linkout-0 = {https://www.youtube.com/watch?v=NWSZ4c9yqW8},
+    howpublished = {\url{https://www.youtube.com/watch?v=NWSZ4c9yqW8}},
+    journal = {Youtube},
+    keywords = {haskell, parallel},
+    posted-at = {2015-03-31 17:08:19},
+    priority = {0},
+    school = {ACM Student Chapter of Northeastern University's College of Computer and Information Science},
+    title = {Data Parallel Haskell - 2010 Video - {S.P}. Jones},
+    url = {https://www.youtube.com/watch?v=NWSZ4c9yqW8},
+    year = {2010}
+}
+
+@inproceedings{Harness2008,
+    abstract = {If you want to program a parallel computer, a purely functional language like Haskell is a promising starting point. Since the language is pure, it is by-default safe for parallel evaluation, whereas imperative languages are by-default unsafe. But that doesn't make it easy! Indeed it has proved quite difficult to get robust, scalable performance increases through parallel functional programming, especially as the number of processors increases. A particularly promising and well-studied approach to employing large numbers of processors is to use data parallelism. Blelloch's pioneering work on {NESL} showed that it was possible to combine a rather flexible programming model (nested data parallelism) with a fast, scalable execution model (flat data parallelism). In this talk I will describe Data Parallel Haskell, which embodies nested data parallelism in a modern, general-purpose language, implemented in a state-of-the-art compiler, {GHC}. I will focus particularly on the vectorisation transformation, which transforms nested to flat data parallelism, and I hope to present performance numbers.},
+    address = {Berlin, Heidelberg},
+    author = {Jones, Simon P.},
+    booktitle = {Proceedings of the 6th Asian Symposium on Programming Languages and Systems},
+    citeulike-article-id = {10450318},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1485356},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1007/978-3-540-89330-1\_10},
+    doi = {10.1007/978-3-540-89330-1\_10},
+    isbn = {978-3-540-89329-5},
+    keywords = {haskell, parallel},
+    location = {Bangalore, India},
+    pages = {138},
+    posted-at = {2015-03-31 17:07:07},
+    priority = {0},
+    publisher = {Springer-Verlag},
+    series = {APLAS '08},
+    title = {Harnessing the Multicores: Nested Data Parallelism in Haskell},
+    url = {http://dx.doi.org/10.1007/978-3-540-89330-1\_10},
+    year = {2008}
+}
+
+@misc{Simon2013DPHpapers,
+    author = {Jones, Simon P.},
+    citeulike-article-id = {13566874},
+    citeulike-linkout-0 = {http://research.microsoft.com/en-us/um/people/simonpj/papers/ndp/},
+    howpublished = {\url{http://research.microsoft.com/en-us/um/people/simonpj/papers/ndp/}},
+    journal = {Personal Website},
+    keywords = {haskell, parallel},
+    posted-at = {2015-03-31 17:05:04},
+    priority = {3},
+    title = {Simon Peyton Jones - Data Parallel Haskell papers},
+    url = {http://research.microsoft.com/en-us/um/people/simonpj/papers/ndp/},
+    year = {2013}
+}
+
+@article{Trinder1998Algorithm,
+    abstract = {The process of writing large parallel programs is complicated by the need to specify both the parallel behaviour of the program and the algorithm that is to be used to compute its result. This paper introduces evaluation strategies: lazy higher-order functions that control the parallel evaluation of non-strict functional languages. Using evaluation strategies, it is possible to achieve a clean separation between algorithmic and behavioural code. The result is enhanced clarity and shorter parallel programs. Evaluation strategies are a very general concept: this paper shows how they can be used to model a wide range of commonly used programming paradigms, including divide-and-conquer parallelism, pipeline parallelism, producer/consumer parallelism, and data-oriented parallelism. Because they are based on unrestricted higher-order functions, they can also capture irregular parallel structures. Evaluation strategies are not just of theoretical interest: they have evolved out of our experience in parallelising several large-scale parallel applications, where they have proved invaluable in helping to manage the complexities of parallel behaviour. Some of these applications are described in detail here. The largest application we have studied to date, Lolita, is a 40,000 line natural language engineering system. Initial results show that for these programs we can achieve acceptable parallel performance, for relatively little programming effort.},
+    address = {New York, NY, USA},
+    author = {Trinder, P. W. and Hammond, K. and Loidl, H. W. and Jones, S. L. Peyton},
+    citeulike-article-id = {2174024},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=969618},
+    citeulike-linkout-1 = {http://journals.cambridge.org/action/displayAbstract?fromPage=online\&aid=44147},
+    citeulike-linkout-2 = {http://dx.doi.org/10.1017/s0956796897002967},
+    doi = {10.1017/s0956796897002967},
+    issn = {0956-7968},
+    journal = {J. Funct. Program.},
+    keywords = {haskell, parallel},
+    month = jan,
+    number = {1},
+    pages = {23--60},
+    posted-at = {2015-03-31 17:01:15},
+    priority = {0},
+    publisher = {Cambridge University Press},
+    title = {Algorithm + Strategy = Parallelism},
+    url = {http://dx.doi.org/10.1017/s0956796897002967},
+    volume = {8},
+    year = {1998}
+}
+
+@inproceedings{DPHStatus2007,
+    abstract = {We describe the design and current status of our effort to implement the programming model of nested data parallelism into the Glasgow Haskell Compiler. We extended the original programming model and its implementation, both of which were first popularised by the {NESL} language, in terms of expressiveness as well as efficiency. Our current aim is to provide a convenient programming environment for {SMP} parallelism, and especially multicore architectures. Preliminary benchmarks show that we are, at least for some programs, able to achieve good absolute performance and excellent speedups.},
+    address = {New York, NY, USA},
+    author = {Chakravarty, Manuel M. T. and Leshchinskiy, Roman and Jones, Simon P. and Keller, Gabriele and Marlow, Simon},
+    booktitle = {Proceedings of the 2007 Workshop on Declarative Aspects of Multicore Programming},
+    citeulike-article-id = {1652960},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1248652},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/1248648.1248652},
+    doi = {10.1145/1248648.1248652},
+    isbn = {978-1-59593-690-5},
+    keywords = {haskell, parallel},
+    location = {Nice, France},
+    pages = {10--18},
+    posted-at = {2015-03-31 16:56:56},
+    priority = {0},
+    publisher = {ACM},
+    series = {DAMP '07},
+    title = {Data Parallel Haskell: A Status Report},
+    url = {http://dx.doi.org/10.1145/1248648.1248652},
+    year = {2007}
+}
+
+@article{GHCData,
+    citeulike-article-id = {13566869},
+    citeulike-linkout-0 = {https://wiki.haskell.org/GHC/Data\_Parallel\_Haskell},
+    keywords = {haskell, parallel},
+    posted-at = {2015-03-31 16:56:08},
+    priority = {3},
+    title = {{GHC}/Data Parallel Haskell - {HaskellWiki}},
+    url = {https://wiki.haskell.org/GHC/Data\_Parallel\_Haskell}
+}
+
+@inproceedings{Brown2012ParaForming,
+    abstract = {Enabling programmers to "think parallel" is critical if we are to be able to effectively exploit future multicore/manycore architectures. This paper introduces paraforming: a new approach to constructing parallel functional programs using formally-defined refactoring transformations. We introduce a number of new refactorings for Parallel Haskell that capture common parallel abstractions, such as divide-and-conquer and data parallelism, and show how these can be used by {HaRe}, the Haskell Refactorer. Using a paraforming approach, we are able to easily obtain significant and scalable speedups (up to 7.8 on an 8-core machine).},
+    address = {Berlin, Heidelberg},
+    author = {Brown, Christopher and Loidl, Hans W. and Hammond, Kevin},
+    booktitle = {Proceedings of the 12th International Conference on Trends in Functional Programming},
+    citeulike-article-id = {13566865},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2362963.2362972},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1007/978-3-642-32037-8\_6},
+    doi = {10.1007/978-3-642-32037-8\_6},
+    isbn = {978-3-642-32036-1},
+    keywords = {haskell, parallel},
+    location = {Madrid, Spain},
+    pages = {82--97},
+    posted-at = {2015-03-31 16:54:16},
+    priority = {1},
+    publisher = {Springer-Verlag},
+    series = {TFP'11},
+    title = {{ParaForming}: Forming Parallel Haskell Programs Using Novel Refactoring Techniques},
+    url = {http://dx.doi.org/10.1007/978-3-642-32037-8\_6},
+    year = {2012}
+}
+
+@article{Mathics,
+    citeulike-article-id = {13561290},
+    citeulike-linkout-0 = {http://www.mathics.net/},
+    keywords = {resources},
+    posted-at = {2015-03-24 20:54:05},
+    priority = {2},
+    title = {Mathics},
+    url = {http://www.mathics.net/}
+}
+
+@article{Mobius,
+    citeulike-article-id = {13554097},
+    citeulike-linkout-0 = {https://en.wikipedia.org/wiki/M\%C3\%B6bius\_transformation\#Projective\_matrix\_representations},
+    keywords = {computing, quantum},
+    posted-at = {2015-03-18 22:34:36},
+    priority = {2},
+    title = {M\"{o}bius transformation - Wikipedia, the free encyclopedia},
+    url = {https://en.wikipedia.org/wiki/M\%C3\%B6bius\_transformation\#Projective\_matrix\_representations}
+}
+
+@electronic{Wadler2000Proofs,
+    abstract = {As the 19th century drew to a close, logicians formalized an ideal notion of proof. They were driven
+by nothing other than an abiding interest in truth, and their proofs were as ethereal as the mind of God.
+Yet within decades these mathematical abstractions were realized by the hand of man, in the digital
+stored-program computer. How it came to be recognized that proofs and programs are the same thing is
+a story that spans a century, a chase with as many twists and turns as a thriller. At the end of the story
+is a new principle for designing programming languages that will guide computers into the 21st century.
+For my money, Gentzen's natural deduction and Church's lambda calculus are on a par with Einstein's
+relativity and Dirac's quantum physics for elegance and insight. And the maths are a lot simpler. I want
+to show you the essence of these ideas. I'll need a few symbols, but not too many, and I'll explain as I go
+along.
+To simplify, I'll present the story as we understand it now, with some asides to fill in the history.
+First, I'll introduce Gentzen's natural deduction, a formalism for proofs. Next, I'll introduce Church's
+lambda calculus, a formalism for programs. Then I'll explain why proofs and programs are really the
+same thing, and how simplifying a proof corresponds to executing a program. Finally, I'll conclude with
+a look at how these principles are being applied to design a new generation of programming languages,
+particularly mobile code for the Internet.},
+    author = {Wadler, Philip},
+    citeulike-article-id = {2105310},
+    citeulike-linkout-0 = {http://www.cs.princeton.edu/courses/archive/fall04/cos441/web/resources/frege.pdf},
+    keywords = {curry-howard, functional-programming, theory},
+    month = nov,
+    posted-at = {2015-03-15 16:25:58},
+    priority = {2},
+    title = {Proofs are Programs: 19th Century Logic and 21st Century Computing},
+    url = {http://www.cs.princeton.edu/courses/archive/fall04/cos441/web/resources/frege.pdf},
+    year = {2000}
+}
+
+@article{Sheeran2005Hardware,
+    abstract = {This is a slightly odd paper that explains why I am still as fascinated by the combination of functional programming and hardware design as I have ever been. It includes some looking back over my own research and that of others, and contains 60 references. It explains what kinds of research I am doing now, and why, and also presents some neat new results about parallel prefix circuits. It ends by posing lots of hard questions that we need to answer if we are to be able to design and verify circuits successfully in the future.},
+    author = {Sheeran, M.},
+    citeulike-article-id = {2943543},
+    citeulike-linkout-0 = {http://www.jucs.org/jucs\_11\_7/hardware\_design\_and\_functional/jucs\_11\_7\_1135\_1158\_sheeran.pdf},
+    keywords = {functional, hardware, haskell, meng, programming, vhdl},
+    posted-at = {2015-03-15 16:25:29},
+    priority = {2},
+    title = {Hardware Design and Functional Programming: a Perfect Match},
+    url = {http://www.jucs.org/jucs\_11\_7/hardware\_design\_and\_functional/jucs\_11\_7\_1135\_1158\_sheeran.pdf},
+    year = {2005}
+}
+
+@article{Donelan2015Social,
+    abstract = {The research reported on in this article explores the use of social media for work-related or professional purposes. In particular, it focuses on the perceptions and use of social media by academics in the {UK}. The purpose of the research was to explore the potential social media has to facilitate the changing landscape of higher education and support the individual academic in their role. Of particular interest is how specific social media tools are being used to enhance networking opportunities and contribute to career progression. The use of social media was explored in detail through interviews and a survey. Typical activities that are currently being undertaken were identified and user group profiles developed that articulate different levels of engagement with these tools and the motivations that each group of users have for using social media. The study found that, with increasing levels of activity, the number of motivations for using social media increase, as does the perceived number of successful outcomes, including contributions towards career progression. The main barriers to using social media were identified as a lack of time and skills to undertake these activities, as well as a negative perception of social media. Recommendations for increasing participation are to provide practical training, including the sharing of good practice, and to initiate dialogues within institutions regarding the potential career progression opportunities that social media may afford.},
+    author = {Donelan, Helen},
+    citeulike-article-id = {13546854},
+    citeulike-linkout-0 = {http://dx.doi.org/10.1080/0309877x.2015.1014321},
+    citeulike-linkout-1 = {http://www.tandfonline.com/doi/abs/10.1080/0309877X.2015.1014321},
+    day = {3},
+    doi = {10.1080/0309877x.2015.1014321},
+    journal = {Journal of Further and Higher Education},
+    keywords = {academia, career, social-media},
+    month = mar,
+    pages = {1--24},
+    posted-at = {2015-03-15 16:21:31},
+    priority = {2},
+    publisher = {Routledge},
+    title = {Social media for professional development and networking opportunities in academia},
+    url = {http://dx.doi.org/10.1080/0309877x.2015.1014321},
+    year = {2015}
+}
+
+@book{homeister2013quantum,
+    author = {Homeister, Matthias},
+    citeulike-article-id = {13549409},
+    comment = {(private-note)Empfohlen:
+Kap 1,2,3,5,7},
+    keywords = {computing, quantum},
+    posted-at = {2015-03-15 15:41:19},
+    priority = {5},
+    publisher = {Springer-Verlag},
+    title = {Quantum Computing verstehen: {Grundlagen-Anwendungen}-Perspektiven},
+    year = {2013}
+}
+
+@article{Selinger2004Towards,
+    abstract = {We propose the design of a programming language for quantum computing. Traditionally, quantum algorithms are frequently expressed at the hardware level, for instance in terms of the quantum circuit model or quantum Turing machines. These approaches do not encourage structured programming or abstractions such as data types. In this paper, we describe the syntax and semantics of a simple quantum programming language with high-level features such as loops, recursive procedures, and structured data types. The language is functional in nature, statically typed, free of run-time errors, and has an interesting denotational semantics in terms of complete partial orders of superoperators.},
+    address = {New York, NY, USA},
+    author = {Selinger, Peter},
+    citeulike-article-id = {13549400},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1014330},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1017/s0960129504004256},
+    doi = {10.1017/s0960129504004256},
+    issn = {0960-1295},
+    journal = {Mathematical. Structures in Comp. Sci.},
+    keywords = {computing, language, quantum, survey},
+    month = aug,
+    number = {4},
+    pages = {527--586},
+    posted-at = {2015-03-15 14:16:51},
+    priority = {2},
+    publisher = {Cambridge University Press},
+    title = {Towards a Quantum Programming Language},
+    url = {http://dx.doi.org/10.1017/s0960129504004256},
+    volume = {14},
+    year = {2004}
+}
+
+@misc{Selinger2004Brief,
+    abstract = {This article is a brief and subjective survey of quantum programming languages.},
+    author = {Selinger, Peter},
+    citeulike-article-id = {13549399},
+    citeulike-linkout-0 = {http://www.mscs.dal.ca/\~{}selinger/papers/flops04.pdf},
+    keywords = {computing, language, quantum},
+    posted-at = {2015-03-15 14:14:54},
+    priority = {4},
+    school = {University of Ottawa},
+    title = {A brief survey of Quantum Programming Languages},
+    url = {http://www.mscs.dal.ca/\~{}selinger/papers/flops04.pdf},
+    year = {2004}
+}
+
+@misc{Gupta2014Functional,
+    abstract = {This book is a compilation of notes from a two-week international workshop on
+the "The Functional Analysis of Quantum Information Theory" that was held at
+the Institute of Mathematical Sciences during 26/12/2011-06/01/2012. The
+workshop was devoted to the mathematical framework of quantized functional
+analysis ({QFA}), and aimed at illustrating its applications to problems in
+quantum communication. The lectures were given by Gilles Pisier (Pierre and
+Marie Curie University and Texas {A\&amp;M}), {K.R}. Parthasarathy ({ISI} Delhi), Vern
+Paulsen (University of Houston), and Andreas Winter (Universitat Autonoma de
+Barcelona). Topics discussed include Operator Spaces and Completely bounded
+maps, Schmidt number and Schmidt rank of bipartite entangled states, Operator
+Systems and Completely Positive Maps, and, Operator Methods in Quantum
+Information.},
+    archivePrefix = {arXiv},
+    author = {Gupta, Ved P. and Mandayam, Prabha and Sunder, V. S.},
+    citeulike-article-id = {13417624},
+    citeulike-linkout-0 = {http://arxiv.org/abs/1410.7188},
+    citeulike-linkout-1 = {http://arxiv.org/pdf/1410.7188},
+    day = {3},
+    eprint = {1410.7188},
+    keywords = {analysis, functinal, information, quantum},
+    month = nov,
+    posted-at = {2015-03-15 14:08:42},
+    priority = {3},
+    title = {The Functional Analysis of Quantum Information Theory},
+    url = {http://arxiv.org/abs/1410.7188},
+    year = {2014}
+}
+
+@phdthesis{Grattage2006QML,
+    abstract = {This thesis introduces the language {QML}, a functional language for quantum computations on finite types. {QML} exhibits quantum data and control structures, and integrates reversible and irreversible quantum computations.
+
+The design of {QML} is guided by the categorical semantics: {QML} programs are interpreted by morphisms in the category {FQC} of finite quantum computations, which provides a constructive operational semantics of irreversible quantum computations, realisable as quantum circuits. The quantum circuit model is also given a formal categorical definition via the category {FQC}.
+
+{QML} integrates reversible and irreversible quantum computations in one language, using first order strict linear logic to make weakenings, which may lead to the collapse of the quantum wavefunction, explicit. Strict programs are free from measurement, and hence preserve superpositions and entanglement.
+
+A denotational semantics of {QML} programs is presented, which maps {QML} terms into superoperators, via the operational semantics, made precise by the category Q. Extensional equality for {QML} programs is also presented, via a mapping from {FQC} morphisms into the category Q.},
+    author = {Grattage, Jonathan J.},
+    citeulike-article-id = {13549398},
+    citeulike-linkout-0 = {http://eprints.nottingham.ac.uk/10250/},
+    editor = {Altenkirch, Thorsten and Belavkin, Viacheslav},
+    keywords = {analysis, computing, functional, information, quantum},
+    posted-at = {2015-03-15 13:59:32},
+    priority = {4},
+    school = {University of Nottingham},
+    title = {{QML} - A functional quantum programming language},
+    url = {http://eprints.nottingham.ac.uk/10250/},
+    year = {2006}
+}
+
+@article{Altenkirch2005Functional,
+    abstract = {We introduce the language {QML}, a functional language for quantum computations
+on finite types. Its design is guided by its categorical semantics: {QML}
+programs are interpreted by morphisms in the category {FQC} of finite quantum
+computations, which provides a constructive semantics of irreversible quantum
+computations realisable as quantum gates. {QML} integrates reversible and
+irreversible quantum computations in one language, using first order strict
+linear logic to make weakenings explicit. Strict programs are free from
+decoherence and hence preserve superpositions and entanglement - which is
+essential for quantum parallelism.},
+    archivePrefix = {arXiv},
+    author = {Altenkirch, Thorsten and Grattage, Jonathan},
+    booktitle = {20th Annual IEEE Symposium on Logic in Computer Science (LICS' 05)},
+    citeulike-article-id = {900891},
+    citeulike-linkout-0 = {http://arxiv.org/abs/quant-ph/0409065},
+    citeulike-linkout-1 = {http://arxiv.org/pdf/quant-ph/0409065},
+    citeulike-linkout-2 = {http://dx.doi.org/10.1109/lics.2005.1},
+    citeulike-linkout-3 = {http://ieeexplore.ieee.org/xpls/abs\_all.jsp?arnumber=1509229},
+    day = {19},
+    doi = {10.1109/lics.2005.1},
+    eprint = {quant-ph/0409065},
+    institution = {Sch. of Comput. Sci. \& IT, Nottingham Univ., UK},
+    isbn = {0-7695-2266-1},
+    issn = {1043-6871},
+    keywords = {computing, functional, language, quantum},
+    location = {Chicago, IL, USA},
+    month = apr,
+    pages = {249--258},
+    posted-at = {2015-03-15 13:55:06},
+    priority = {5},
+    publisher = {IEEE},
+    title = {A functional quantum programming language},
+    url = {http://dx.doi.org/10.1109/lics.2005.1},
+    year = {2005}
+}
+
+@misc{Sofge2008Survey,
+    abstract = {Quantum computer programming is emerging as a new subject domain from
+multidisciplinary research in quantum computing, computer science, mathematics
+(especially quantum logic, lambda calculi, and linear logic), and engineering
+attempts to build the first non-trivial quantum computer. This paper briefly
+surveys the history, methods, and proposed tools for programming quantum
+computers circa late 2007. It is intended to provide an extensive but
+non-exhaustive look at work leading up to the current state-of-the-art in
+quantum computer programming. Further, it is an attempt to analyze the needed
+programming tools for quantum programmers, to use this analysis to predict the
+direction in which the field is moving, and to make recommendations for further
+development of quantum programming language tools.},
+    archivePrefix = {arXiv},
+    author = {Sofge, Donald A.},
+    citeulike-article-id = {13549395},
+    citeulike-linkout-0 = {http://arxiv.org/abs/0804.1118.pdf},
+    citeulike-linkout-1 = {http://arxiv.org/pdf/0804.1118.pdf},
+    day = {7},
+    eprint = {0804.1118.pdf},
+    keywords = {computing, languages, quantum, survey},
+    month = apr,
+    posted-at = {2015-03-15 13:53:42},
+    priority = {4},
+    title = {A Survey of Quantum Programming Languages: History, Methods, and Tools},
+    url = {http://arxiv.org/abs/0804.1118.pdf},
+    year = {2008}
+}
+
+@misc{EZeitschriftenBibliotheken,
+    citeulike-article-id = {13547901},
+    citeulike-linkout-0 = {http://www.haw-hamburg.de/hibs/recherche/e-zeitschriften.html},
+    keywords = {access, resources},
+    posted-at = {2015-03-12 20:52:59},
+    priority = {5},
+    title = {{E-Zeitschriften}: Bibliotheken / {HIBS}: {HAW} Hamburg},
+    url = {http://www.haw-hamburg.de/hibs/recherche/e-zeitschriften.html}
+}
+
+@misc{Springer,
+    citeulike-article-id = {13547900},
+    citeulike-linkout-0 = {http://www.haw-hamburg.de/hibs/recherche/e-books/springer.html},
+    keywords = {access, resources},
+    posted-at = {2015-03-12 20:52:35},
+    priority = {5},
+    title = {Springer {E-Books}: Bibliotheken / {HIBS}: {HAW} Hamburg},
+    url = {http://www.haw-hamburg.de/hibs/recherche/e-books/springer.html}
+}
+
+@misc{Dahl2012Simuquant,
+    abstract = {Current implementations of quantum computers are in an experimental stage, and are generelly
+not accessible to the public. Therefore, software simulations are in general the only way to
+explore quantum algorithms experimentally. This bachelor thesis deals with the design and
+implementation of a simulator for quantum circuits with a graphical user interface. In addition
+to an extensive introduction to the basics of quantum computation, which allows for non-
+experts to follow the topic, this thesis presents the developement process of the simulator,
+implemented in Scala.},
+    author = {Dahl, Leonhard},
+    citeulike-article-id = {13547899},
+    keywords = {computing, quantum},
+    month = aug,
+    posted-at = {2015-03-12 20:51:59},
+    priority = {2},
+    school = {Hamburg University of Applied Sciences},
+    title = {Simuquant: Ein Simulator f\"{u}r Quantenschaltkreise},
+    year = {2012}
+}
+
+@article{Shor,
+    citeulike-article-id = {13547894},
+    citeulike-linkout-0 = {http://www.cs.nott.ac.uk/\~{}txa/publ/qio.pdf},
+    keywords = {computing, functional, language, quantum},
+    posted-at = {2015-03-12 20:47:20},
+    priority = {5},
+    title = {Shor in Haskell - The Quantum {IO} Monad, Quantum Computing, {QIO}},
+    url = {http://www.cs.nott.ac.uk/\~{}txa/publ/qio.pdf}
+}
+
+@unpublished{QuantenprogrammiersprachenGI,
+    citeulike-article-id = {13547892},
+    citeulike-linkout-0 = {https://www.gi.de/service/informatiklexikon/detailansicht/article/quantenprogrammiersprachen.html},
+    keywords = {computing, language, quantum, survey},
+    posted-at = {2015-03-12 20:45:56},
+    priority = {2},
+    title = {Quantenprogrammiersprachen - {GI} - Gesellschaft f\"{u}r Informatik {e.V}.},
+    url = {https://www.gi.de/service/informatiklexikon/detailansicht/article/quantenprogrammiersprachen.html}
+}
+
+@misc{Stanford,
+    citeulike-article-id = {10160804},
+    citeulike-linkout-0 = {http://plato.stanford.edu/},
+    keywords = {resources},
+    posted-at = {2015-03-12 20:40:27},
+    priority = {5},
+    title = {Stanford Encyclopedia of Philosophy},
+    url = {http://plato.stanford.edu/}
+}
+
+@misc{What,
+    citeulike-article-id = {13547890},
+    citeulike-linkout-0 = {http://www.tricki.org/article/What\_kind\_of\_problem\_am\_I\_trying\_to\_solve},
+    keywords = {resources},
+    posted-at = {2015-03-12 20:39:13},
+    priority = {5},
+    title = {What kind of problem am I trying to solve? | Tricki},
+    url = {http://www.tricki.org/article/What\_kind\_of\_problem\_am\_I\_trying\_to\_solve}
+}
+
+@article{Bettelli2003Toward,
+    abstract = {It is becoming increasingly clear that, if a useful device for quantum
+computation will ever be built, it will be embodied by a classical computing
+machine with control over a truly quantum subsystem, this apparatus performing
+a mixture of classical and quantum computation.
+
+
+This paper investigates a possible approach to the problem of programming
+such machines: a template high level quantum language is presented which
+complements a generic general purpose classical language with a set of quantum
+primitives. The underlying scheme involves a run-time environment which
+calculates the byte-code for the quantum operations and pipes it to a quantum
+device controller or to a simulator.
+
+
+This language can compactly express existing quantum algorithms and reduce
+them to sequences of elementary operations; it also easily lends itself to
+automatic, hardware independent, circuit simplification. A publicly available
+preliminary implementation of the proposed ideas has been realized using the
+C++ language.},
+    archivePrefix = {arXiv},
+    author = {Bettelli, S. and Serafini, L. and Calarco, T.},
+    citeulike-article-id = {13546065},
+    citeulike-linkout-0 = {http://arxiv.org/abs/cs/0103009v3.pdf},
+    citeulike-linkout-1 = {http://arxiv.org/pdf/cs/0103009v3.pdf},
+    citeulike-linkout-2 = {http://dx.doi.org/10.1140/epjd/e2003-00242-2},
+    day = {27},
+    doi = {10.1140/epjd/e2003-00242-2},
+    eprint = {cs/0103009v3.pdf},
+    issn = {1434-6060},
+    journal = {The European Physical Journal D - Atomic, Molecular and Optical Physics},
+    keywords = {bachelorthesis},
+    month = mar,
+    number = {2},
+    pages = {181--200},
+    posted-at = {2015-03-10 19:41:23},
+    priority = {2},
+    title = {Toward an architecture for quantum programming},
+    url = {http://dx.doi.org/10.1140/epjd/e2003-00242-2},
+    volume = {25},
+    year = {2003}
+}
+

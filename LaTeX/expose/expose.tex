@@ -1,0 +1,369 @@
+\documentclass{article}
+
+% Latex Tutorial beginners: http://www.latex-tutorial.com/tutorials/beginners/
+\newcommand{\comment}[1]{}
+
+\newcommand{\seq}[0]{$P_{s}$}
+\renewcommand{\mp}[0]{$P_{m}$}
+\newcommand{\ndp}[0]{$P_{np}$}
+\newcommand{\note}[1]{{\tiny (#1)}}
+
+\newcommand{\algo}[0]{Split\&Merge-Segmentation}
+
+% Packages explained - Adding more functions to LATEX http://www.latex-tutorial.com/tutorials/beginners/lesson-3/
+\usepackage[utf8]{inputenc}     % Zum verwenden von ä,ü und ö: http://en.wikibooks.org/wiki/LaTeX/Special_Characters
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{hyperref}
+
+\usepackage[margin=1.3in]{geometry}
+
+% Erzeugen des PDF (ohne References):
+% Strg + Alt + 1 in Gedit
+
+% Erzeugen des PDF (mit References):
+% Strg + Alt + 1 in Gedit
+% $ bibtex expose
+% Zweimal: Strg + Alt + 1 in Gedit
+
+% fügt die Literatur auch zum Inhaltsverzeichnis hinzu (ist so nicht default)
+\usepackage[nottoc,notlot,notlof,numbib]{tocbibind}
+
+% Adding a bibliography http://www.latex-tutorial.com/tutorials/beginners/lesson-7/
+\bibliographystyle{apalike}
+
+
+% Nested numbered enumerations, eg. 1.1, 1.2: http://tex.stackexchange.com/questions/78842/nested-enumeration-numbering
+\renewcommand{\labelenumii}{\theenumii}
+\renewcommand{\theenumii}{\theenumi.\arabic{enumii}.}
+
+
+\title{
+    Nested Data Parallelism for\\ Image Processing Algorithms \\[7pt]
+    \large An exposé for a bachelor thesis
+}
+\date{17.04.2015}
+\author{Chandrakant Swaneet Kumar Sahoo}
+
+
+\begin{document}
+
+    \pagenumbering{arabic}
+    
+    \maketitle
+    
+    \paragraph{Summary}
+    
+    This exposé describes my motivation, the contents and the goal
+    for my bachelor thesis on the application of the Nested Data Parallel approach
+    on Image Processing Algorithms. The contents of this document are guided
+    by the checklist \cite{Khl2012Expose}.
+    
+    \paragraph{Contact} \texttt{swaneet06@hotmail.com}
+    
+    \paragraph{Location} Hochschule für Angewandte Wissenschaften Hamburg
+    \paragraph{Department} Dept. Informatik
+    \paragraph{Examiner} Prof. Dr. Michael Köhler-Bußmeier
+    \paragraph{Second examiner} Prof. Dr. Andreas Meisel
+    
+    \newpage
+    
+    \tableofcontents
+    
+    \newpage
+    
+    \section{Introduction}
+    
+    \subsection{Context}
+    In the past few decades the raw processing power of CPUs has not increased by any significant portion.
+    Instead, we are presented with hardware with an exponentially increasing
+    number of processors - each of them as fast as the previous generation.
+    A natural objective is adapting our programs to make the most of the availible
+    processors. A few questions arise:
+    \begin{itemize}
+        \item How can we effectively exploit the higher number of processors to keep increasing performance?
+        \item How can we write programs which can run on varying number of processors?
+    \end{itemize}
+    Research and Development in this field is generally referred to as Parallel Computing.
+    For my thesis, I have further reduced the context to the programming language Haskell and Image Processing. An explanation is given next.
+    
+    \subsection{Haskell}
+    I am fascinated by the language as it enables
+    high-level abstract programming without sacrifising efficiency.
+    Throughout the years I have learned a lot in Haskell.
+    The abstractions (Monads, GADTs, Type Classes, Lawful-Thinking,...) exceed the level I have encountered in other languages
+    whereas other elements (Stream Fusion, Lazyness, ...) enable optimiziations which are difficult or entirely missing in conventional languages.
+    Haskell has become popular language for research in functional programming.
+    Choosing Haskell for my thesis additionally enables me to demonstrate my experience and knowledge on it.
+    
+    \subsection{Image Processing}
+    Image Processing is a topic of high personal interest.
+    I particularly liked the elective course "Robot Vision" (Prof. Dr. Meisel).
+    Image Processing Algorithms have a natural tendency to be applicable in Parallel Computing (as many algorithms end up on high-performance GPUs).
+    Therefore, I think such a focus is adequate.
+    I am also focusing on Image Processing Algorithms because I want to express my interest on it.
+     
+    \subsection{General approaches in Parallel computing}
+    Generally recognized approaches are:
+    \begin{itemize}
+        \item Concurrent programming (threads \& locks)
+        \item Flat data Parallelism (\texttt{map/reduce})
+        \item GPU Parallelism (CUDA,OpenCL, mainly matrix/vector operations)
+        \item and in the Haskell world: \cite{Marlow2012Parallel}
+        \begin{itemize}
+            \item Algorithm + Strategy = Parallelism, a task-based approach \cite{Trinder1998Algorithm}
+            \item The Par Monad, a dataflow approch, \cite{Marlow2011Monad}
+            \item Repa, a regular-array data-parallel approach, \cite{Keller2010Regular}
+            \item Accelerate, a GPU approach, \cite{McDonell2013Optimising}           
+            \item Nested Data Parallel, a parametric nested-data-parallel approach, \cite{Chakravarty2007Data}
+        \end{itemize}
+    \end{itemize}
+    
+    
+    \subsection{Leading question}
+    \paragraph{}
+        Given an image processing algorithm (e.g. \algo), the leading question for this thesis is:
+    
+    \paragraph{How can we implement this high-level irregularly-parallel algorithm such that it compiles to efficient mashine level code?}
+    
+    \paragraph{}
+    Subquestions arising are:
+        \begin{itemize}
+        \item How much faster is a parallel variant against the sequential one?
+        \item How much faster is a compiled variant to human-written low-level parallel code?
+        \end{itemize}
+    
+    \subsection{Specific Approaches in Haskell and a comparision}
+    The following is a brief comparision of the candidate approaches for my thesis.
+    \begin{itemize}
+    \item \textbf{Repa: Regular, shape-polymorphic Parallel Arrays}
+        \begin{itemize}
+            \item[+] Retains high level of abstraction
+            \item[+] Highly efficient mashine-code (e.g. fusioning)
+            \item[+] Feels like conventional functional programming
+            \item[+] Can compile to OpenCL/CUDE for high performance GPU execution
+            \item[+] Multi-dimensional regular arrays (e.g. matrices)
+            \item[-] No support for irregular data structures (e.g. sparse-matrices, trees, graphs, recursion)
+            \item[\textbullet] Recommended for matrix-/pixel-algorithms 
+        \end{itemize}
+        
+    \item \textbf{ Algorithm + Strategy = Parallelism}
+        \begin{itemize}
+            \item[+] Algorithm and Parallel evaluation strategy are entirely independent
+            \item[+] (Therefore) Highly irregular algorithms can be paralellized
+            \item[+] Feels like conventional functional programming
+            \item[+] Very easy to use 
+            \item[-] The programmer has to ensure subtle pre-/post-conditions for successful parallelization
+            \item[-] Cannot compile to OpenCL/CUDE for high performance GPU execution
+            \item[\textbullet] Recommended as simple-parallization approach
+        \end{itemize}
+        
+    \item \textbf{Nested Data Parallel}
+        \begin{itemize}
+            \item[+] Retains high level of abstraction
+            \item[+] Feels like conventional functional programming
+            \item[+] Supports irregular data and program flows (e.g. sparse-matrices, trees, graphs, recursion)
+            \item[+] Highly efficient mashine code (fusioning \& flattening)
+            \item[-] Work in progress / experimental \note{setting up Data Parallel Haskell was tiresome ...}
+            \item[+/-] GPU support in future
+            \item[\textbullet] Recommended for irregular algorithms
+        \end{itemize}
+    
+    \end{itemize}
+    
+    \subsection{Deciding on an approach}
+    
+    I have decided for Nested Data Parallelism. My choice will be explained now:
+    \paragraph{Nested Data Parallel}
+        Nested Data Parallelism is an extension to conventional Flat Data Paralellism.
+        Flat data parallelism is characterized by parallel implementations of \texttt{map/reduce} functions and
+        is widely used in industry and already heavily developed.
+        However is it only limitedly applicable - as the programmer has to transform the algorithm to make use of these constructs.
+        Out algorithms however usually operate on nested data (e.g. nested lists/arrays, trees, recursion,...).
+        This is a discrepancy - a flat data parallel program is efficient to run, but hard to write
+        - and a nested data algorithm (like they appear in books or papers) are easy to write, but run inefficiently.
+        The Nested Data Parallel approach \cite{Chakravarty2007Data} combines the best of both.
+        It enables us to write our algorithms as we like them and applies a non-trivial transformation to
+        produce efficient flat data parallel code.
+        I choose this topic, because its an excellent example of high level programming compiling to highly performant low level code
+        - which is why I discarded all other apporaches expect for Repa.
+        I chose NDP rather than Repa, because it spreads a wiedly undeveloped/unknown approach on parallelism - that is the
+        idea of allowing nested data for parallel programs.
+        
+    
+
+    \subsection{What is novel in this approach?}
+    It implements a non-trivial flattening transformation (also called vectorization) and takes a large amount of workload off the programmer.
+    By this, it follows the general idiom 'let the compiler do the hard work for you'.
+    
+    \subsection{When is the thesis regarded as completed?}
+    The thesis is considered finished, once various strategies of
+    implementing a chosen algorithm (e.g. \algo) have been
+    implemented and compared in effectiveness/efficiency/human-workload.
+    
+    \subsection{Which tasks have to be completed for this thesis?}
+    My work is defined by creating the programs \seq, \mp and \ndp and comparing them.
+    The focus is on showing the various transformations applied in NDP, which the programmer would have had done manually.
+    
+        $A_{K} :=$ A conceptional Problem \note{e.g. Sorting}
+        
+        $A_{S} :=$ A sequential Algorithm to $A_{K}$ \note{e.g. Mergesort}
+        
+        $P_{P} :=$ A parallel Algorithm to $A_{K}$ \note{e.g Parallel Mergesort}
+        
+        \seq $:=$ An ordinary Haskell implementation of $A_{S}$ \note{e.g. using Lists}
+
+        \mp $:=$ A manually-parallelized implementation of $A_{P}$ \note{e.g using explicit threads}
+        
+        \ndp $:=$ A Nested-Data-Parallel implementation of $A_{P}$ \note{using parallel arrays}
+        
+    \paragraph{Additional tasks}
+        \begin{itemize}
+            \item Read further papers on how NDP is implemented (especially. vectorization and fusioning)
+            \item Read futher literature on how to make quantified comparisions of the programs (e.g. parallel complexity, benchmarks, etc...)
+            \item Decide whether I will work with the true Haskell-Core code generated in \ndp or apply the flattening and fusioning transformations manually.
+                The first variant is the actual source code that will later be executed - but it is hard to read. \footnote[1]{See \texttt{DotP.hs} and \texttt{DotP.vect.hs} at \href{https://github.com/GollyTicker/Nested-Data-Parallel-Haskell/tree/0e8d3df0d8084a01b007b27debda2b64247a254d}{my github repo}. }
+                The implementation of DPH is less developed than its theoretical background.
+                The second variant is easier to work with and simpler to present, however it will almost certainly be less optimized than the actual code.
+            \item Decide which algorithm(s) is/are to be used as examples. They should be easily visualizable and should have irregular behaviour.
+                Connected-Components-Labeling on images is such an candidate. Combining multiple algorithms into
+                a pipeline is also attractive, since cross-algorithm fusionsing and optimization is where Haskell can shine truely.
+            \item Learn how make benchmarks/create runtime statistics
+        \end{itemize}
+        
+    \subsection{Which tasks are realistic to be accomplished within the scope of this thesis?}
+    I am optimistic that these task can be accomplished in a timeframe of 2 months. However, I might need to keep a tight focus or
+    choose a simple (and small) algorithm to keep the task accomplishable.
+    
+    \subsection{Time plan}
+    My time plan is visible at table \ref{timetable}.
+    \begin{table}[h]
+        \begin{center}
+        \caption{Time table} % http://www.latex-tutorial.com/tutorials/beginners/lesson-8/
+        \label{timetable}
+        \begin{tabular}{rrl}
+            \toprule
+            CW & monday & thesis work \\
+            \midrule
+            17 & 20.04 & reading remaining papers, reading parallel complexity theory \\
+            18 & 27.04 & deciding on an algorithm, learning benchmarking  \\
+            19 & 4.05  & implementing \seq and \mp \\
+            20 & 11.05 & implementing \ndp \\
+            21 & 18.05 & vectorizing and optimizing \ndp / understanding generated core \\
+            22 & 25.05 & analysis and benchmarking \\
+            23 & 1.06  & \textit{puffer} \\
+            24 & 8.06  & \textit{puffer} \\
+            25 & 15.06 & Begin to write down, prepare for exams\\
+            26 & 22.06 & Writing..., prepare for exams \\
+            27 & 29.06 & Writing..., prepare for exams \\
+            28 & 6.07  & Prepare Colloquium, Writing..., exams week 1 \\
+            29 & 13.07 & Prepare Colloquium, Finalize writing, exams week 1 \\
+            30 & 20.07 & Colloquium and Release \\
+            31 & 27.07 & Last week for Colloquium and Release \\
+            32 & 3.08  & Fin \texttt{:D} \\
+        \end{tabular}
+        \end{center}
+    \end{table}
+    
+    \section{Draft - Contents}
+    
+        The following presents a draft structure of my thesis.
+        Since the algorithm I am going to implement is not decided yet, I am using "\algo" as its placeholder.
+    
+        \begin{enumerate}
+        
+        \item Introduction
+            \begin{enumerate}
+            \item Context
+            \item Goal
+            \item Structure
+            \end{enumerate}
+            
+        \item Basics
+            \begin{enumerate}
+            \item Parallel Computing and Complexity
+            \item Haskell
+            \item Nested Data Parallelism
+                \begin{enumerate}
+                \item Parallel Arrays
+                \item Sparse Matrices - An Example
+                \item Execution model
+                \end{enumerate}
+            \item $A_{K}$: \algo
+            \end{enumerate}
+        
+        \item \seq: Sequential \algo
+            \begin{enumerate}
+            \item Implementation
+            \item Runtime analysis {\tiny (e.g. sequential/parallel complexity)}
+            \item Benchmark
+            \end{enumerate}
+        
+        \item \mp: Manually-parallel \algo
+            \begin{enumerate}
+            \item Implementation
+            \item Runtime analysis {\tiny (e.g. sequential/parallel complexity)}
+            \item Benchmark
+            \end{enumerate}
+            
+        \item \ndp: Nested-Data-Parallel \algo
+            \begin{enumerate}
+            \item High-level Implementation
+            \item Transformations
+                \begin{enumerate}
+                \item Non-Parametric representation
+                \item Lifting
+                \item Vectorization
+                \item Fusioning
+                \end{enumerate}
+            \item Final low-level form
+            \item Runtime analysis {\tiny (e.g. sequential/parallel complexity)}
+            \item Benchmark
+            \end{enumerate}
+            
+        \item Evaluation
+            \begin{enumerate}
+            \item Sequential vs. Parallel   
+            \item Manually-Parallel vs. Nested-Data-Parallel
+            \end{enumerate}
+        
+        \item Conclusion
+            \begin{enumerate}
+            \item Effectivenesss of Nested Data Parallel
+            \item Related work {\tiny (on parallel computing in Haskell)}
+            \item Future work
+                \begin{enumerate}
+                    \item Alternate Algorithms
+                    \item Best of Repa and NDP
+                    \item Distributed NDP
+                    \item NDP on GPUs
+                \end{enumerate}
+            \end{enumerate}
+        \end{enumerate}
+            
+    \newpage
+    
+    \bibliography{expose}    % reference to expose.bib
+    
+    \newpage
+    
+    \section{Personal notes}
+    
+    \begin{itemize}
+        \item Zeitplan für 2.5 Monate
+        \item English als Ausarbeitungssprache
+        \item Wahl eines Bildverarbeitungsalgorithmus welcher nicht offensichtlich parallelisierbar ist
+        \item A collection of image processing algorithms with varying degree of parallization: \note{from a discussion with Prof. Meisel}
+            \begin{enumerate}
+                \item 99\%: Median, Faltungsmasken
+                \item 80\%: Parallele Kantenverfolgung, $\mu$-Momente
+                \item 70\%: Rekursive Algorithmen (Connected Components Labeling, Split&Merge Segmentierungsverfahren,...)
+                \item 60\%: Shortest Paths (e.g. Seam Carving)
+                \item 10\%: Sequentielle Kantenverfolgung
+                \item 0\%: Zufallsgenerator
+            \end{enumerate}
+    \end{itemize}
+    
+    
+\end{document}
+

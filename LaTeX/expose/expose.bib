@@ -1,0 +1,692 @@
+@article{Blelloch:1996:PPA:227234.227246,
+    address = {New York, NY, USA},
+    author = {Blelloch, Guy E.},
+    citeulike-article-id = {13584932},
+    citeulike-linkout-0 = {http://dx.doi.org/10.1145/227234.227246},
+    citeulike-linkout-1 = {http://doi.acm.org/10.1145/227234.227246},
+    doi = {10.1145/227234.227246},
+    journal = {Commun. ACM},
+    keywords = {haskell, parallel},
+    month = mar,
+    number = {3},
+    pages = {85--97},
+    posted-at = {2015-04-17 18:35:09},
+    priority = {2},
+    publisher = {ACM},
+    title = {Programming Parallel Algorithms},
+    url = {http://doi.acm.org/10.1145/227234.227246},
+    volume = {39},
+    year = {1996}
+}
+
+@inproceedings{McDonell2013Optimising,
+    abstract = {Purely functional, embedded array programs are a good match for {SIMD} hardware, such as {GPUs}. However, the naive compilation of such programs quickly leads to both code explosion and an excessive use of intermediate data structures. The resulting slow-down is not acceptable on target hardware that is usually chosen to achieve high performance. In this paper, we discuss two optimisation techniques, sharing recovery and array fusion, that tackle code explosion and eliminate superfluous intermediate structures. Both techniques are well known from other contexts, but they present unique challenges for an embedded language compiled for execution on a {GPU}. We present novel methods for implementing sharing recovery and array fusion, and demonstrate their effectiveness on a set of benchmarks.},
+    address = {New York, NY, USA},
+    author = {McDonell, Trevor L. and Chakravarty, Manuel M. T. and Keller, Gabriele and Lippmeier, Ben},
+    booktitle = {Proceedings of the 18th ACM SIGPLAN International Conference on Functional Programming},
+    citeulike-article-id = {13584670},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2500365.2500595},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/2500365.2500595},
+    doi = {10.1145/2500365.2500595},
+    isbn = {978-1-4503-2326-0},
+    keywords = {haskell, parallel},
+    location = {Boston, Massachusetts, USA},
+    pages = {49--60},
+    posted-at = {2015-04-17 14:53:09},
+    priority = {2},
+    publisher = {ACM},
+    series = {ICFP '13},
+    title = {Optimising Purely Functional {GPU} Programs},
+    url = {http://dx.doi.org/10.1145/2500365.2500595},
+    year = {2013}
+}
+
+@article{Bergstrom2012Nested,
+    abstract = {Graphics processing units ({GPUs}) provide both memory bandwidth and arithmetic performance far greater than that available on {CPUs} but, because of their {Single-Instruction}-{Multiple-Data} ({SIMD}) architecture, they are hard to program. Most of the programs ported to {GPUs} thus far use traditional data-level parallelism, performing only operations that operate uniformly over vectors. {NESL} is a first-order functional language that was designed to allow programmers to write irregular-parallel programs - such as parallel divide-and-conquer algorithms - for wide-vector parallel computers. This paper presents our port of the {NESL} implementation to work on {GPUs} and provides empirical evidence that nested data-parallelism ({NDP}) on {GPUs} significantly outperforms {CPU}-based implementations and matches or beats newer {GPU} languages that support only flat parallelism. While our performance does not match that of hand-tuned {CUDA} programs, we argue that the notational conciseness of {NESL} is worth the loss in performance. This work provides the first language implementation that directly supports {NDP} on a {GPU}.},
+    address = {New York, NY, USA},
+    author = {Bergstrom, Lars and Reppy, John},
+    citeulike-article-id = {12042953},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2364563},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/2398856.2364563},
+    doi = {10.1145/2398856.2364563},
+    issn = {0362-1340},
+    journal = {SIGPLAN Not.},
+    keywords = {haskell, parallel},
+    month = sep,
+    number = {9},
+    pages = {247--258},
+    posted-at = {2015-04-17 14:48:37},
+    priority = {2},
+    publisher = {ACM},
+    title = {Nested Data-parallelism on the Gpu},
+    url = {http://dx.doi.org/10.1145/2398856.2364563},
+    volume = {47},
+    year = {2012}
+}
+
+@inproceedings{Marlow2011Monad,
+    abstract = {We present a new programming model for deterministic parallel computation in a pure functional language. The model is monadic and has explicit granularity, but allows dynamic construction of dataflow networks that are scheduled at runtime, while remaining deterministic and pure. The implementation is based on monadic concurrency, which has until now only been used to simulate concurrency in functional languages, rather than to provide parallelism. We present the {API} with its semantics, and argue that parallel execution is deterministic. Furthermore, we present a complete work-stealing scheduler implemented as a Haskell library, and we show that it performs at least as well as the existing parallel programming models in Haskell.},
+    address = {New York, NY, USA},
+    author = {Marlow, Simon and Newton, Ryan and Jones, Simon P.},
+    booktitle = {Proceedings of the 4th ACM Symposium on Haskell},
+    citeulike-article-id = {12605079},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2034675.2034685},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/2034675.2034685},
+    doi = {10.1145/2034675.2034685},
+    isbn = {978-1-4503-0860-1},
+    keywords = {haskell, parallel},
+    location = {Tokyo, Japan},
+    pages = {71--82},
+    posted-at = {2015-04-17 14:46:09},
+    priority = {2},
+    publisher = {ACM},
+    series = {Haskell '11},
+    title = {A Monad for Deterministic Parallelism},
+    url = {http://dx.doi.org/10.1145/2034675.2034685},
+    year = {2011}
+}
+
+@inproceedings{Marlow2012Parallel,
+    abstract = {Haskell provides a rich set of abstractions for parallel and concurrent programming. This tutorial covers the basic concepts involved in writing parallel and concurrent programs in Haskell, and takes a deliberately practical approach: most of the examples are real Haskell programs that you can compile, run, measure, modify and experiment with. We cover parallel programming with the @Eval@ monad, Evaluation Strategies, and the @Par@ monad. On the concurrent side, we cover threads, @{MVar}@s, asynchronous exceptions, Software Transactional Memory, the Foreign Function Interface, and briefly look at the construction of high-speed network servers in Haskell.},
+    address = {Berlin, Heidelberg},
+    author = {Marlow, Simon},
+    booktitle = {Proceedings of the 4th Summer School Conference on Central European Functional Programming School},
+    citeulike-article-id = {13584659},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2363414},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1007/978-3-642-32096-5\_7},
+    doi = {10.1007/978-3-642-32096-5\_7},
+    isbn = {978-3-642-32095-8},
+    keywords = {haskell, parallel},
+    location = {Budapest, Hungary},
+    pages = {339--401},
+    posted-at = {2015-04-17 14:27:43},
+    priority = {2},
+    publisher = {Springer-Verlag},
+    series = {CEFP'11},
+    title = {Parallel and Concurrent Programming in Haskell},
+    url = {http://dx.doi.org/10.1007/978-3-642-32096-5\_7},
+    year = {2012}
+}
+
+@misc{Khl2012Expose,
+    author = {K\"{o}hler-Bu{\ss}meier, Michael},
+    citeulike-article-id = {13584639},
+    citeulike-linkout-0 = {http://www.informatik.uni-hamburg.de/TGI/lehre/abschlussarbeiten/expose-checklist.pdf},
+    howpublished = {\url{http://www.informatik.uni-hamburg.de/TGI/lehre/abschlussarbeiten/expose-checklist.pdf}},
+    keywords = {academia},
+    month = oct,
+    posted-at = {2015-04-17 14:00:04},
+    priority = {0},
+    title = {Checkliste f\"{u}r ein Expose},
+    url = {http://www.informatik.uni-hamburg.de/TGI/lehre/abschlussarbeiten/expose-checklist.pdf},
+    year = {2012}
+}
+
+@inproceedings{Chakravarty2008Partial,
+    abstract = {Vectorisation for functional programs, also called the flattening transformation, relies on drastically reordering computations and restructuring the representation of data types. As a result, it only applies to the purely functional core of a fully-fledged functional language, such as Haskell or {ML}. A concrete implementation needs to apply vectorisation selectively and integrate vectorised with unvectorised code. This is challenging, as vectorisation alters the data representation, which must be suitably converted between vectorised and unvectorised code. In this paper, we present an approach to partial vectorisation that selectively vectorises sub-expressions and data types, and also, enables linking vectorised with unvectorised modules.},
+    author = {Chakravarty, Manuel M. T. and Leshchinskiy, Roman and Jones, Simon P. and Keller, Gabriele},
+    citeulike-article-id = {13580144},
+    citeulike-linkout-0 = {https://encrypted.google.com/search?hl=en\&\#38;q=parital\%20vectorization\%20of\%20haskell\%20programs\#q=partial+vectorization+of+haskell+programs\&\#38;hl=en\&\#38;start=10},
+    keywords = {haskell, parallel},
+    month = jan,
+    posted-at = {2015-04-12 13:18:33},
+    priority = {2},
+    school = {University of South New Wales, Microsoft Research Cambridge},
+    title = {Partial Vectorization of Haskell programs},
+    url = {https://encrypted.google.com/search?hl=en\&\#38;q=parital\%20vectorization\%20of\%20haskell\%20programs\#q=partial+vectorization+of+haskell+programs\&\#38;hl=en\&\#38;start=10},
+    year = {2008}
+}
+
+@article{Keller2010Regular,
+    abstract = {We present a novel approach to regular, multi-dimensional arrays in Haskell. The main highlights of our approach are that it (1) is purely functional, (2) supports reuse through shape polymorphism, (3) avoids unnecessary intermediate structures rather than relying on subsequent loop fusion, and (4) supports transparent parallelisation. We show how to embed two forms of shape polymorphism into Haskell's type system using type classes and type families. In particular, we discuss the generalisation of regular array transformations to arrays of higher rank, and introduce a type-safe specification of array slices. We discuss the runtime performance of our approach for three standard array algorithms. We achieve absolute performance comparable to handwritten C code. At the same time, our implementation scales well up to 8 processor cores.},
+    address = {New York, NY, USA},
+    author = {Keller, Gabriele and Chakravarty, Manuel M. T. and Leshchinskiy, Roman and Jones, Simon P. and Lippmeier, Ben},
+    citeulike-article-id = {12046245},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1863582},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/1932681.1863582},
+    doi = {10.1145/1932681.1863582},
+    issn = {0362-1340},
+    journal = {SIGPLAN Not.},
+    keywords = {haskell, parallel},
+    month = sep,
+    number = {9},
+    pages = {261--272},
+    posted-at = {2015-04-12 13:10:12},
+    priority = {2},
+    publisher = {ACM},
+    title = {Regular, Shape-polymorphic, Parallel Arrays in Haskell},
+    url = {http://dx.doi.org/10.1145/1932681.1863582},
+    volume = {45},
+    year = {2010}
+}
+
+@inproceedings{Svensson2012Parallel,
+    abstract = {Nowadays, performance in processors is increased by adding more cores or wider vector units, or by combining accelerators like {GPUs} and traditional cores on a chip. Programming for these diverse architectures is a challenge. We would like to exploit all the resources at hand without putting too much burden on the programmer. Ideally, the programmer should be presented with a machine model abstracted from the specific number of cores, {SIMD} width or the existence of a {GPU} or not. Intel's Array Building Blocks ({ArBB}) is a system that takes on these challenges. {ArBB} is a language for data parallel and nested data parallel programming, embedded in C++. By offering a retargetable dynamic compilation framework, it provides vectorisation and threading to programmers without the need to write highly architecture specific code. We aim to bring the same benefits to the Haskell programmer by implementing a Haskell frontend (embedding) of the {ArBB} system. We call this embedding {EmbArBB}. We use standard Haskell embedded language procedures to provide an interface to the {ArBB} functionality in Haskell. {EmbArBB} is work in progress and does not currently support all of the {ArBB} functionality. Some small programming examples illustrate how the Haskell embedding is used to write programs. {ArBB} code is short and to the point in both C++ and Haskell. Matrix multiplication has been benchmarked in sequential C++, {ArBB} in C++, {EmbArBB} and the Repa library. The C++ and the Haskell embeddings have almost identical performance, showing that the Haskell embedding does not impose any large extra overheads. Two image processing algorithms have also been benchmarked against Repa. In these benchmarks at least, {EmbArBB} performance is much better than that of the Repa library, indicating that building on {ArBB} may be a cheap and easy approach to exploiting data parallelism in Haskell.},
+    address = {New York, NY, USA},
+    author = {Svensson, Bo J. and Sheeran, Mary},
+    booktitle = {Proceedings of the 1st ACM SIGPLAN Workshop on Functional High-performance Computing},
+    citeulike-article-id = {13576540},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2364477},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/2364474.2364477},
+    doi = {10.1145/2364474.2364477},
+    isbn = {978-1-4503-1577-7},
+    keywords = {haskell, image\_processing, parallel},
+    location = {Copenhagen, Denmark},
+    pages = {3--14},
+    posted-at = {2015-04-07 19:38:51},
+    priority = {3},
+    publisher = {ACM},
+    series = {FHPC '12},
+    title = {Parallel Programming in Haskell Almost for Free: An Embedding of Intel's Array Building Blocks},
+    url = {http://dx.doi.org/10.1145/2364474.2364477},
+    year = {2012}
+}
+
+@inproceedings{Leshchinskiy2006Higher,
+    abstract = {We extend the flattening transformation, which turns nested into flat data parallelism, to the full higher-order case, including lambda abstractions and data parallel arrays of functions. Our central observation is that flattening needs to transform the closures used to represent functional values. Thus, we use closure conversion before flattening and introduce array closures to represent arrays of functional values.},
+    address = {Berlin, Heidelberg},
+    author = {Leshchinskiy, Roman and Chakravarty, Manuel M. T. and Keller, Gabriele},
+    booktitle = {Proceedings of the 6th International Conference on Computational Science - Volume Part II},
+    citeulike-article-id = {13567489},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2171018},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1007/11758525\_122},
+    doi = {10.1007/11758525\_122},
+    isbn = {3-540-34381-4, 978-3-540-34381-3},
+    keywords = {functional-programming, haskell, parallel},
+    location = {Reading, UK},
+    pages = {920--928},
+    posted-at = {2015-04-01 13:37:23},
+    priority = {4},
+    publisher = {Springer-Verlag},
+    series = {ICCS'06},
+    title = {Higher Order Flattening},
+    url = {http://dx.doi.org/10.1007/11758525\_122},
+    year = {2006}
+}
+
+@article{Data,
+    citeulike-article-id = {13566876},
+    citeulike-linkout-0 = {https://www.youtube.com/watch?v=NWSZ4c9yqW8},
+    keywords = {haskell, parallel},
+    posted-at = {2015-03-31 17:08:19},
+    priority = {0},
+    title = {Data Parallel Haskell - 2010 Video - {S.P}. Jones},
+    url = {https://www.youtube.com/watch?v=NWSZ4c9yqW8}
+}
+
+@inproceedings{Jones2008Harnessing,
+    abstract = {If you want to program a parallel computer, a purely functional language like Haskell is a promising starting point. Since the language is pure, it is by-default safe for parallel evaluation, whereas imperative languages are by-default unsafe. But that doesn't make it easy! Indeed it has proved quite difficult to get robust, scalable performance increases through parallel functional programming, especially as the number of processors increases. A particularly promising and well-studied approach to employing large numbers of processors is to use data parallelism. Blelloch's pioneering work on {NESL} showed that it was possible to combine a rather flexible programming model (nested data parallelism) with a fast, scalable execution model (flat data parallelism). In this talk I will describe Data Parallel Haskell, which embodies nested data parallelism in a modern, general-purpose language, implemented in a state-of-the-art compiler, {GHC}. I will focus particularly on the vectorisation transformation, which transforms nested to flat data parallelism, and I hope to present performance numbers.},
+    address = {Berlin, Heidelberg},
+    author = {Jones, Simon P.},
+    booktitle = {Proceedings of the 6th Asian Symposium on Programming Languages and Systems},
+    citeulike-article-id = {10450318},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1485356},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1007/978-3-540-89330-1\_10},
+    doi = {10.1007/978-3-540-89330-1\_10},
+    isbn = {978-3-540-89329-5},
+    keywords = {haskell, parallel},
+    location = {Bangalore, India},
+    pages = {138},
+    posted-at = {2015-03-31 17:07:07},
+    priority = {4},
+    publisher = {Springer-Verlag},
+    series = {APLAS '08},
+    title = {Harnessing the Multicores: Nested Data Parallelism in Haskell},
+    url = {http://dx.doi.org/10.1007/978-3-540-89330-1\_10},
+    year = {2008}
+}
+
+@article{Simon,
+    citeulike-article-id = {13566874},
+    citeulike-linkout-0 = {http://research.microsoft.com/en-us/um/people/simonpj/papers/ndp/},
+    keywords = {haskell, parallel},
+    posted-at = {2015-03-31 17:05:04},
+    priority = {3},
+    title = {Simon Peyton Jones - Data Parallel Haskell papers},
+    url = {http://research.microsoft.com/en-us/um/people/simonpj/papers/ndp/}
+}
+
+@article{Trinder1998Algorithm,
+    abstract = {The process of writing large parallel programs is complicated by the need to specify both the parallel behaviour of the program and the algorithm that is to be used to compute its result. This paper introduces evaluation strategies: lazy higher-order functions that control the parallel evaluation of non-strict functional languages. Using evaluation strategies, it is possible to achieve a clean separation between algorithmic and behavioural code. The result is enhanced clarity and shorter parallel programs. Evaluation strategies are a very general concept: this paper shows how they can be used to model a wide range of commonly used programming paradigms, including divide-and-conquer parallelism, pipeline parallelism, producer/consumer parallelism, and data-oriented parallelism. Because they are based on unrestricted higher-order functions, they can also capture irregular parallel structures. Evaluation strategies are not just of theoretical interest: they have evolved out of our experience in parallelising several large-scale parallel applications, where they have proved invaluable in helping to manage the complexities of parallel behaviour. Some of these applications are described in detail here. The largest application we have studied to date, Lolita, is a 40,000 line natural language engineering system. Initial results show that for these programs we can achieve acceptable parallel performance, for relatively little programming effort.},
+    address = {New York, NY, USA},
+    author = {Trinder, P. W. and Hammond, K. and Loidl, H. W. and Jones, S. L. Peyton},
+    citeulike-article-id = {2174024},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=969618},
+    citeulike-linkout-1 = {http://journals.cambridge.org/action/displayAbstract?fromPage=online\&aid=44147},
+    citeulike-linkout-2 = {http://dx.doi.org/10.1017/s0956796897002967},
+    doi = {10.1017/s0956796897002967},
+    issn = {0956-7968},
+    journal = {J. Funct. Program.},
+    keywords = {haskell, parallel},
+    month = jan,
+    number = {1},
+    pages = {23--60},
+    posted-at = {2015-03-31 17:01:15},
+    priority = {2},
+    publisher = {Cambridge University Press},
+    title = {Algorithm + Strategy = Parallelism},
+    url = {http://dx.doi.org/10.1017/s0956796897002967},
+    volume = {8},
+    year = {1998}
+}
+
+@inproceedings{Chakravarty2007Data,
+    abstract = {We describe the design and current status of our effort to implement the programming model of nested data parallelism into the Glasgow Haskell Compiler. We extended the original programming model and its implementation, both of which were first popularised by the {NESL} language, in terms of expressiveness as well as efficiency. Our current aim is to provide a convenient programming environment for {SMP} parallelism, and especially multicore architectures. Preliminary benchmarks show that we are, at least for some programs, able to achieve good absolute performance and excellent speedups.},
+    address = {New York, NY, USA},
+    author = {Chakravarty, Manuel M. T. and Leshchinskiy, Roman and Jones, Simon P. and Keller, Gabriele and Marlow, Simon},
+    booktitle = {Proceedings of the 2007 Workshop on Declarative Aspects of Multicore Programming},
+    citeulike-article-id = {1652960},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1248652},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1145/1248648.1248652},
+    doi = {10.1145/1248648.1248652},
+    isbn = {978-1-59593-690-5},
+    keywords = {haskell, parallel},
+    location = {Nice, France},
+    pages = {10--18},
+    posted-at = {2015-03-31 16:56:56},
+    priority = {0},
+    publisher = {ACM},
+    series = {DAMP '07},
+    title = {Data Parallel Haskell: A Status Report},
+    url = {http://dx.doi.org/10.1145/1248648.1248652},
+    year = {2007}
+}
+
+@article{GHCData,
+    citeulike-article-id = {13566869},
+    citeulike-linkout-0 = {https://wiki.haskell.org/GHC/Data\_Parallel\_Haskell},
+    keywords = {haskell, parallel},
+    posted-at = {2015-03-31 16:56:08},
+    priority = {3},
+    title = {{GHC}/Data Parallel Haskell - {HaskellWiki}},
+    url = {https://wiki.haskell.org/GHC/Data\_Parallel\_Haskell}
+}
+
+@inproceedings{Brown2012ParaForming,
+    abstract = {Enabling programmers to "think parallel" is critical if we are to be able to effectively exploit future multicore/manycore architectures. This paper introduces paraforming: a new approach to constructing parallel functional programs using formally-defined refactoring transformations. We introduce a number of new refactorings for Parallel Haskell that capture common parallel abstractions, such as divide-and-conquer and data parallelism, and show how these can be used by {HaRe}, the Haskell Refactorer. Using a paraforming approach, we are able to easily obtain significant and scalable speedups (up to 7.8 on an 8-core machine).},
+    address = {Berlin, Heidelberg},
+    author = {Brown, Christopher and Loidl, Hans W. and Hammond, Kevin},
+    booktitle = {Proceedings of the 12th International Conference on Trends in Functional Programming},
+    citeulike-article-id = {13566865},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=2362963.2362972},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1007/978-3-642-32037-8\_6},
+    doi = {10.1007/978-3-642-32037-8\_6},
+    isbn = {978-3-642-32036-1},
+    keywords = {haskell, parallel},
+    location = {Madrid, Spain},
+    pages = {82--97},
+    posted-at = {2015-03-31 16:54:16},
+    priority = {3},
+    publisher = {Springer-Verlag},
+    series = {TFP'11},
+    title = {{ParaForming}: Forming Parallel Haskell Programs Using Novel Refactoring Techniques},
+    url = {http://dx.doi.org/10.1007/978-3-642-32037-8\_6},
+    year = {2012}
+}
+
+@article{Mathics,
+    citeulike-article-id = {13561290},
+    citeulike-linkout-0 = {http://www.mathics.net/},
+    keywords = {resources},
+    posted-at = {2015-03-24 20:54:05},
+    priority = {2},
+    title = {Mathics},
+    url = {http://www.mathics.net/}
+}
+
+@article{Mobius,
+    citeulike-article-id = {13554097},
+    citeulike-linkout-0 = {https://en.wikipedia.org/wiki/M\%C3\%B6bius\_transformation\#Projective\_matrix\_representations},
+    keywords = {computing, quantum},
+    posted-at = {2015-03-18 22:34:36},
+    priority = {2},
+    title = {M\"{o}bius transformation - Wikipedia, the free encyclopedia},
+    url = {https://en.wikipedia.org/wiki/M\%C3\%B6bius\_transformation\#Projective\_matrix\_representations}
+}
+
+@electronic{Wadler2000Proofs,
+    abstract = {As the 19th century drew to a close, logicians formalized an ideal notion of proof. They were driven
+by nothing other than an abiding interest in truth, and their proofs were as ethereal as the mind of God.
+Yet within decades these mathematical abstractions were realized by the hand of man, in the digital
+stored-program computer. How it came to be recognized that proofs and programs are the same thing is
+a story that spans a century, a chase with as many twists and turns as a thriller. At the end of the story
+is a new principle for designing programming languages that will guide computers into the 21st century.
+For my money, Gentzen's natural deduction and Church's lambda calculus are on a par with Einstein's
+relativity and Dirac's quantum physics for elegance and insight. And the maths are a lot simpler. I want
+to show you the essence of these ideas. I'll need a few symbols, but not too many, and I'll explain as I go
+along.
+To simplify, I'll present the story as we understand it now, with some asides to fill in the history.
+First, I'll introduce Gentzen's natural deduction, a formalism for proofs. Next, I'll introduce Church's
+lambda calculus, a formalism for programs. Then I'll explain why proofs and programs are really the
+same thing, and how simplifying a proof corresponds to executing a program. Finally, I'll conclude with
+a look at how these principles are being applied to design a new generation of programming languages,
+particularly mobile code for the Internet.},
+    author = {Wadler, Philip},
+    citeulike-article-id = {2105310},
+    citeulike-linkout-0 = {http://www.cs.princeton.edu/courses/archive/fall04/cos441/web/resources/frege.pdf},
+    keywords = {curry-howard, functional-programming, theory},
+    month = nov,
+    posted-at = {2015-03-15 16:25:58},
+    priority = {2},
+    title = {Proofs are Programs: 19th Century Logic and 21st Century Computing},
+    url = {http://www.cs.princeton.edu/courses/archive/fall04/cos441/web/resources/frege.pdf},
+    year = {2000}
+}
+
+@article{Sheeran2005Hardware,
+    abstract = {This is a slightly odd paper that explains why I am still as fascinated by the combination of functional programming and hardware design as I have ever been. It includes some looking back over my own research and that of others, and contains 60 references. It explains what kinds of research I am doing now, and why, and also presents some neat new results about parallel prefix circuits. It ends by posing lots of hard questions that we need to answer if we are to be able to design and verify circuits successfully in the future.},
+    author = {Sheeran, M.},
+    citeulike-article-id = {2943543},
+    citeulike-linkout-0 = {http://www.jucs.org/jucs\_11\_7/hardware\_design\_and\_functional/jucs\_11\_7\_1135\_1158\_sheeran.pdf},
+    keywords = {functional, hardware, haskell, meng, programming, vhdl},
+    posted-at = {2015-03-15 16:25:29},
+    priority = {2},
+    title = {Hardware Design and Functional Programming: a Perfect Match},
+    url = {http://www.jucs.org/jucs\_11\_7/hardware\_design\_and\_functional/jucs\_11\_7\_1135\_1158\_sheeran.pdf},
+    year = {2005}
+}
+
+@article{Donelan2015Social,
+    abstract = {The research reported on in this article explores the use of social media for work-related or professional purposes. In particular, it focuses on the perceptions and use of social media by academics in the {UK}. The purpose of the research was to explore the potential social media has to facilitate the changing landscape of higher education and support the individual academic in their role. Of particular interest is how specific social media tools are being used to enhance networking opportunities and contribute to career progression. The use of social media was explored in detail through interviews and a survey. Typical activities that are currently being undertaken were identified and user group profiles developed that articulate different levels of engagement with these tools and the motivations that each group of users have for using social media. The study found that, with increasing levels of activity, the number of motivations for using social media increase, as does the perceived number of successful outcomes, including contributions towards career progression. The main barriers to using social media were identified as a lack of time and skills to undertake these activities, as well as a negative perception of social media. Recommendations for increasing participation are to provide practical training, including the sharing of good practice, and to initiate dialogues within institutions regarding the potential career progression opportunities that social media may afford.},
+    author = {Donelan, Helen},
+    citeulike-article-id = {13546854},
+    citeulike-linkout-0 = {http://dx.doi.org/10.1080/0309877x.2015.1014321},
+    citeulike-linkout-1 = {http://www.tandfonline.com/doi/abs/10.1080/0309877X.2015.1014321},
+    day = {3},
+    doi = {10.1080/0309877x.2015.1014321},
+    journal = {Journal of Further and Higher Education},
+    keywords = {academia, career, social-media},
+    month = mar,
+    pages = {1--24},
+    posted-at = {2015-03-15 16:21:31},
+    priority = {2},
+    publisher = {Routledge},
+    title = {Social media for professional development and networking opportunities in academia},
+    url = {http://dx.doi.org/10.1080/0309877x.2015.1014321},
+    year = {2015}
+}
+
+@book{homeister2013quantum,
+    author = {Homeister, Matthias},
+    citeulike-article-id = {13549409},
+    keywords = {computing, quantum},
+    posted-at = {2015-03-15 15:41:19},
+    priority = {5},
+    publisher = {Springer-Verlag},
+    title = {Quantum Computing verstehen: {Grundlagen-Anwendungen}-Perspektiven},
+    year = {2013}
+}
+
+@article{Selinger2004Towards,
+    abstract = {We propose the design of a programming language for quantum computing. Traditionally, quantum algorithms are frequently expressed at the hardware level, for instance in terms of the quantum circuit model or quantum Turing machines. These approaches do not encourage structured programming or abstractions such as data types. In this paper, we describe the syntax and semantics of a simple quantum programming language with high-level features such as loops, recursive procedures, and structured data types. The language is functional in nature, statically typed, free of run-time errors, and has an interesting denotational semantics in terms of complete partial orders of superoperators.},
+    address = {New York, NY, USA},
+    author = {Selinger, Peter},
+    citeulike-article-id = {13549400},
+    citeulike-linkout-0 = {http://portal.acm.org/citation.cfm?id=1014330},
+    citeulike-linkout-1 = {http://dx.doi.org/10.1017/s0960129504004256},
+    doi = {10.1017/s0960129504004256},
+    issn = {0960-1295},
+    journal = {Mathematical. Structures in Comp. Sci.},
+    keywords = {computing, language, quantum, survey},
+    month = aug,
+    number = {4},
+    pages = {527--586},
+    posted-at = {2015-03-15 14:16:51},
+    priority = {2},
+    publisher = {Cambridge University Press},
+    title = {Towards a Quantum Programming Language},
+    url = {http://dx.doi.org/10.1017/s0960129504004256},
+    volume = {14},
+    year = {2004}
+}
+
+@misc{Selinger2004Brief,
+    abstract = {This article is a brief and subjective survey of quantum programming languages.},
+    author = {Selinger, Peter},
+    citeulike-article-id = {13549399},
+    citeulike-linkout-0 = {http://www.mscs.dal.ca/\~{}selinger/papers/flops04.pdf},
+    keywords = {computing, language, quantum},
+    posted-at = {2015-03-15 14:14:54},
+    priority = {4},
+    school = {University of Ottawa},
+    title = {A brief survey of Quantum Programming Languages},
+    url = {http://www.mscs.dal.ca/\~{}selinger/papers/flops04.pdf},
+    year = {2004}
+}
+
+@misc{Gupta2014Functional,
+    abstract = {This book is a compilation of notes from a two-week international workshop on
+the "The Functional Analysis of Quantum Information Theory" that was held at
+the Institute of Mathematical Sciences during 26/12/2011-06/01/2012. The
+workshop was devoted to the mathematical framework of quantized functional
+analysis ({QFA}), and aimed at illustrating its applications to problems in
+quantum communication. The lectures were given by Gilles Pisier (Pierre and
+Marie Curie University and Texas {A\&amp;M}), {K.R}. Parthasarathy ({ISI} Delhi), Vern
+Paulsen (University of Houston), and Andreas Winter (Universitat Autonoma de
+Barcelona). Topics discussed include Operator Spaces and Completely bounded
+maps, Schmidt number and Schmidt rank of bipartite entangled states, Operator
+Systems and Completely Positive Maps, and, Operator Methods in Quantum
+Information.},
+    archivePrefix = {arXiv},
+    author = {Gupta, Ved P. and Mandayam, Prabha and Sunder, V. S.},
+    citeulike-article-id = {13417624},
+    citeulike-linkout-0 = {http://arxiv.org/abs/1410.7188},
+    citeulike-linkout-1 = {http://arxiv.org/pdf/1410.7188},
+    day = {3},
+    eprint = {1410.7188},
+    keywords = {analysis, functinal, information, quantum},
+    month = nov,
+    posted-at = {2015-03-15 14:08:42},
+    priority = {3},
+    title = {The Functional Analysis of Quantum Information Theory},
+    url = {http://arxiv.org/abs/1410.7188},
+    year = {2014}
+}
+
+@phdthesis{Grattage2006QML,
+    abstract = {This thesis introduces the language {QML}, a functional language for quantum computations on finite types. {QML} exhibits quantum data and control structures, and integrates reversible and irreversible quantum computations.
+
+The design of {QML} is guided by the categorical semantics: {QML} programs are interpreted by morphisms in the category {FQC} of finite quantum computations, which provides a constructive operational semantics of irreversible quantum computations, realisable as quantum circuits. The quantum circuit model is also given a formal categorical definition via the category {FQC}.
+
+{QML} integrates reversible and irreversible quantum computations in one language, using first order strict linear logic to make weakenings, which may lead to the collapse of the quantum wavefunction, explicit. Strict programs are free from measurement, and hence preserve superpositions and entanglement.
+
+A denotational semantics of {QML} programs is presented, which maps {QML} terms into superoperators, via the operational semantics, made precise by the category Q. Extensional equality for {QML} programs is also presented, via a mapping from {FQC} morphisms into the category Q.},
+    author = {Grattage, Jonathan J.},
+    citeulike-article-id = {13549398},
+    citeulike-linkout-0 = {http://eprints.nottingham.ac.uk/10250/},
+    editor = {Altenkirch, Thorsten and Belavkin, Viacheslav},
+    keywords = {analysis, computing, functional, information, quantum},
+    posted-at = {2015-03-15 13:59:32},
+    priority = {4},
+    school = {University of Nottingham},
+    title = {{QML} - A functional quantum programming language},
+    url = {http://eprints.nottingham.ac.uk/10250/},
+    year = {2006}
+}
+
+@article{Altenkirch2005Functional,
+    abstract = {We introduce the language {QML}, a functional language for quantum computations
+on finite types. Its design is guided by its categorical semantics: {QML}
+programs are interpreted by morphisms in the category {FQC} of finite quantum
+computations, which provides a constructive semantics of irreversible quantum
+computations realisable as quantum gates. {QML} integrates reversible and
+irreversible quantum computations in one language, using first order strict
+linear logic to make weakenings explicit. Strict programs are free from
+decoherence and hence preserve superpositions and entanglement - which is
+essential for quantum parallelism.},
+    archivePrefix = {arXiv},
+    author = {Altenkirch, Thorsten and Grattage, Jonathan},
+    booktitle = {20th Annual IEEE Symposium on Logic in Computer Science (LICS' 05)},
+    citeulike-article-id = {900891},
+    citeulike-linkout-0 = {http://arxiv.org/abs/quant-ph/0409065},
+    citeulike-linkout-1 = {http://arxiv.org/pdf/quant-ph/0409065},
+    citeulike-linkout-2 = {http://dx.doi.org/10.1109/lics.2005.1},
+    citeulike-linkout-3 = {http://ieeexplore.ieee.org/xpls/abs\_all.jsp?arnumber=1509229},
+    day = {19},
+    doi = {10.1109/lics.2005.1},
+    eprint = {quant-ph/0409065},
+    institution = {Sch. of Comput. Sci. \& IT, Nottingham Univ., UK},
+    isbn = {0-7695-2266-1},
+    issn = {1043-6871},
+    keywords = {computing, functional, language, quantum},
+    location = {Chicago, IL, USA},
+    month = apr,
+    pages = {249--258},
+    posted-at = {2015-03-15 13:55:06},
+    priority = {5},
+    publisher = {IEEE},
+    title = {A functional quantum programming language},
+    url = {http://dx.doi.org/10.1109/lics.2005.1},
+    year = {2005}
+}
+
+@misc{Sofge2008Survey,
+    abstract = {Quantum computer programming is emerging as a new subject domain from
+multidisciplinary research in quantum computing, computer science, mathematics
+(especially quantum logic, lambda calculi, and linear logic), and engineering
+attempts to build the first non-trivial quantum computer. This paper briefly
+surveys the history, methods, and proposed tools for programming quantum
+computers circa late 2007. It is intended to provide an extensive but
+non-exhaustive look at work leading up to the current state-of-the-art in
+quantum computer programming. Further, it is an attempt to analyze the needed
+programming tools for quantum programmers, to use this analysis to predict the
+direction in which the field is moving, and to make recommendations for further
+development of quantum programming language tools.},
+    archivePrefix = {arXiv},
+    author = {Sofge, Donald A.},
+    citeulike-article-id = {13549395},
+    citeulike-linkout-0 = {http://arxiv.org/abs/0804.1118.pdf},
+    citeulike-linkout-1 = {http://arxiv.org/pdf/0804.1118.pdf},
+    day = {7},
+    eprint = {0804.1118.pdf},
+    keywords = {computing, languages, quantum, survey},
+    month = apr,
+    posted-at = {2015-03-15 13:53:42},
+    priority = {4},
+    title = {A Survey of Quantum Programming Languages: History, Methods, and Tools},
+    url = {http://arxiv.org/abs/0804.1118.pdf},
+    year = {2008}
+}
+
+@misc{EZeitschriftenBibliotheken,
+    citeulike-article-id = {13547901},
+    citeulike-linkout-0 = {http://www.haw-hamburg.de/hibs/recherche/e-zeitschriften.html},
+    keywords = {access, resources},
+    posted-at = {2015-03-12 20:52:59},
+    priority = {5},
+    title = {{E-Zeitschriften}: Bibliotheken / {HIBS}: {HAW} Hamburg},
+    url = {http://www.haw-hamburg.de/hibs/recherche/e-zeitschriften.html}
+}
+
+@misc{Springer,
+    citeulike-article-id = {13547900},
+    citeulike-linkout-0 = {http://www.haw-hamburg.de/hibs/recherche/e-books/springer.html},
+    keywords = {access, resources},
+    posted-at = {2015-03-12 20:52:35},
+    priority = {5},
+    title = {Springer {E-Books}: Bibliotheken / {HIBS}: {HAW} Hamburg},
+    url = {http://www.haw-hamburg.de/hibs/recherche/e-books/springer.html}
+}
+
+@misc{Dahl2012Simuquant,
+    abstract = {Current implementations of quantum computers are in an experimental stage, and are generelly
+not accessible to the public. Therefore, software simulations are in general the only way to
+explore quantum algorithms experimentally. This bachelor thesis deals with the design and
+implementation of a simulator for quantum circuits with a graphical user interface. In addition
+to an extensive introduction to the basics of quantum computation, which allows for non-
+experts to follow the topic, this thesis presents the developement process of the simulator,
+implemented in Scala.},
+    author = {Dahl, Leonhard},
+    citeulike-article-id = {13547899},
+    keywords = {computing, quantum},
+    month = aug,
+    posted-at = {2015-03-12 20:51:59},
+    priority = {2},
+    school = {Hamburg University of Applied Sciences},
+    title = {Simuquant: Ein Simulator f\"{u}r Quantenschaltkreise},
+    year = {2012}
+}
+
+@article{Shor,
+    citeulike-article-id = {13547894},
+    citeulike-linkout-0 = {http://www.cs.nott.ac.uk/\~{}txa/publ/qio.pdf},
+    keywords = {computing, functional, language, quantum},
+    posted-at = {2015-03-12 20:47:20},
+    priority = {5},
+    title = {Shor in Haskell - The Quantum {IO} Monad, Quantum Computing, {QIO}},
+    url = {http://www.cs.nott.ac.uk/\~{}txa/publ/qio.pdf}
+}
+
+@unpublished{QuantenprogrammiersprachenGI,
+    citeulike-article-id = {13547892},
+    citeulike-linkout-0 = {https://www.gi.de/service/informatiklexikon/detailansicht/article/quantenprogrammiersprachen.html},
+    keywords = {computing, language, quantum, survey},
+    posted-at = {2015-03-12 20:45:56},
+    priority = {2},
+    title = {Quantenprogrammiersprachen - {GI} - Gesellschaft f\"{u}r Informatik {e.V}.},
+    url = {https://www.gi.de/service/informatiklexikon/detailansicht/article/quantenprogrammiersprachen.html}
+}
+
+@misc{Stanford,
+    citeulike-article-id = {10160804},
+    citeulike-linkout-0 = {http://plato.stanford.edu/},
+    keywords = {resources},
+    posted-at = {2015-03-12 20:40:27},
+    priority = {5},
+    title = {Stanford Encyclopedia of Philosophy},
+    url = {http://plato.stanford.edu/}
+}
+
+@misc{What,
+    citeulike-article-id = {13547890},
+    citeulike-linkout-0 = {http://www.tricki.org/article/What\_kind\_of\_problem\_am\_I\_trying\_to\_solve},
+    keywords = {resources},
+    posted-at = {2015-03-12 20:39:13},
+    priority = {5},
+    title = {What kind of problem am I trying to solve? | Tricki},
+    url = {http://www.tricki.org/article/What\_kind\_of\_problem\_am\_I\_trying\_to\_solve}
+}
+
+@article{Bettelli2003Toward,
+    abstract = {It is becoming increasingly clear that, if a useful device for quantum
+computation will ever be built, it will be embodied by a classical computing
+machine with control over a truly quantum subsystem, this apparatus performing
+a mixture of classical and quantum computation.
+
+
+This paper investigates a possible approach to the problem of programming
+such machines: a template high level quantum language is presented which
+complements a generic general purpose classical language with a set of quantum
+primitives. The underlying scheme involves a run-time environment which
+calculates the byte-code for the quantum operations and pipes it to a quantum
+device controller or to a simulator.
+
+
+This language can compactly express existing quantum algorithms and reduce
+them to sequences of elementary operations; it also easily lends itself to
+automatic, hardware independent, circuit simplification. A publicly available
+preliminary implementation of the proposed ideas has been realized using the
+C++ language.},
+    archivePrefix = {arXiv},
+    author = {Bettelli, S. and Serafini, L. and Calarco, T.},
+    citeulike-article-id = {13546065},
+    citeulike-linkout-0 = {http://arxiv.org/abs/cs/0103009v3.pdf},
+    citeulike-linkout-1 = {http://arxiv.org/pdf/cs/0103009v3.pdf},
+    citeulike-linkout-2 = {http://dx.doi.org/10.1140/epjd/e2003-00242-2},
+    day = {27},
+    doi = {10.1140/epjd/e2003-00242-2},
+    eprint = {cs/0103009v3.pdf},
+    issn = {1434-6060},
+    journal = {The European Physical Journal D - Atomic, Molecular and Optical Physics},
+    keywords = {bachelorthesis},
+    month = mar,
+    number = {2},
+    pages = {181--200},
+    posted-at = {2015-03-10 19:41:23},
+    priority = {2},
+    title = {Toward an architecture for quantum programming},
+    url = {http://dx.doi.org/10.1140/epjd/e2003-00242-2},
+    volume = {25},
+    year = {2003}
+}
+
