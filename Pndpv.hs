@@ -31,7 +31,7 @@ hbalance img =
       normScale = floorDouble . (flip multDouble) gmax' . (flip divDouble) divisor . (flip minusDouble) a0 . int2Double -- 0, body of normalize and scale
       
       as :: Hist                                          -- final mapping array
-      as = joinD . mapD (mapS normScale) $ a              -- 4, normalize and scale applied
+      as = joinD . mapD (mapS normScale) . splitD $ a              -- 4, normalize and scale applied
       
       pixelReplicate :: Hist -> PA (PA Hist)
       pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)                                 -- 0, artifact of NDP

@@ -410,6 +410,7 @@ V[hbalance] $: img :: PA (PA Int)
                     ( replD n . int2Double $ gmax )
                     ( replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a )
                     ( replD n . int2Double . headPS $ a )
+              . splitD
              $ a
     in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
          unconcatPS xs
@@ -443,6 +444,7 @@ V[hbalance] $: img :: PA (PA Int)
                     ( replD n . int2Double $ gmax )
                     ( replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a )
                     ( replD n . int2Double . headPS $ a )
+              . splitD
              $ a
         pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)
     in unconcatPS img

@@ -43,6 +43,7 @@ V[hbalance] $: img :: PA (PA Int)
                     ( replD n . int2Double $ gmax )       -- gmax
                     ( replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a )    -- divisor
                     ( replD n . int2Double . headPS $ a )    -- a0
+              . splitD
              $ a
         pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)
     in unconcatPS img
@@ -196,6 +197,7 @@ V[hbalance] $: img :: PA (PA Int)
                 ) ( replD n . int2Double $ gmax )
                   ( replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a )
                   ( replD n . int2Double . headPS $ a )
+              . splitD
              $ a
         pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)
     in unconcatPS img
@@ -216,6 +218,7 @@ V[hbalance] $: img :: PA (PA Int)
                           (stream . replD n . minusDouble (int2Double (lastPS a)) . int2Double . headPS $ a)
                           (stream . replD n . int2Double $ gmax)
                 )
+             . splitD
              $ a
              
         "zipWith argument flipping. stream $ d wird zum Ende gebracht und verschwindet durch currying"
@@ -231,6 +234,7 @@ V[hbalance] $: img :: PA (PA Int)
                     (stream . replD n . int2Double $ gmax)
                  . stream
                 )
+             . splitD
              $ a
         
         "verallgemeinerung vom folgenden rewrite rule zum float-in einer Konstante in ein zipWithSt wird angewendet"
@@ -247,6 +251,7 @@ V[hbalance] $: img :: PA (PA Int)
                         (int2Double $ gmax)
                  . stream
                 )
+             . splitD
              $ a
              
          "mapSt/mapSt rule fires, extract lambda args into a let, flip arguments into point-free-style"
@@ -263,6 +268,7 @@ V[hbalance] $: img :: PA (PA Int)
                    . mapSt ( floorDouble . (flip multDouble) gmax' . (flip divDouble) divisor . (flip minusDouble) a0 . int2Double ) -- normalize and scale
                    . stream
                   )
+               . splitD
                $ a
          
          "zurück zum Code"
@@ -291,6 +297,7 @@ V[hbalance] $: img :: PA (PA Int)
                  . mapSt ( floorDouble . (flip multDouble) gmax' . (flip divDouble) divisor . (flip minusDouble) a0 . int2Double ) -- normalize and scale
                  . stream
                 )
+             . splitD
              $ a
         pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)
     in unconcatPS img
@@ -322,7 +329,7 @@ V[hbalance] $: img :: PA (PA Int)
         gmax'   = int2Double $ gmax
         normScale = floorDouble . (flip multDouble) gmax' . (flip divDouble) divisor . (flip minusDouble) a0 . int2Double -- 0, body of normalize and scale
         
-        as = joinD . mapD (mapS normScale) $ a              -- 4, normalize and scale applied
+        as = joinD . mapD (mapS normScale) . splitD $ a              -- 4, normalize and scale applied
         
         pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)                                 -- 0
         
