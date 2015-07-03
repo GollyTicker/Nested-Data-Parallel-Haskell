@@ -4,6 +4,7 @@ module ListHistogramBalance (main,hbalance,hbalanceBulk,img) where
 
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
+import Data.Maybe (fromJust)
 import Prelude hiding (scanl,concat)
 import qualified Data.List as L (intercalate,concat)
 import qualified Data.Vector as V
@@ -52,7 +53,7 @@ hbalance img =
   in img'
 
 gmax :: Int
-gmax = 255
+gmax = 7
 
 hist :: Image Int -> Hist Int
 hist = V.foldr (\i -> M.insertWith (+) i 1) M.empty . concat
@@ -71,13 +72,9 @@ scale :: Int -> Hist Double -> Hist Int
 scale gmax = M.map (\d -> floor (d * fromIntegral gmax))
 
 apply :: Hist Int -> Image Int -> Image Int
-apply as img = V.map (V.map (as M.!)) img
+apply as img = V.map (V.map (lookupLessEqual as)) img
 
-
--- Utilities
-
-TODO: findWithDefault instead of M.!
-M.! causes an error when looking for values the image was not defined for.
+lookupLessEqual as = (\i -> snd . fromJust $ M.lookupLE i as)
 
 {-
 mapAccum :: (a -> b -> (a,c)) -> a -> Map k b -> (a, Map k c)

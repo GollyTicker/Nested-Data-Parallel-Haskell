@@ -7,6 +7,7 @@ module ExplainedListHistogramBalance (
 
 import qualified Data.Map.Strict as M
 import Data.Map.Strict (Map)
+import Data.Maybe (fromJust)
 import Prelude hiding (scanl)
 import Data.List (intercalate)
 
@@ -88,9 +89,9 @@ scale :: Int -> Hist Double -> Hist Int
 scale gmax = M.map (\d -> floor (d * fromIntegral gmax))
 
 apply :: Hist Int -> Image Int -> Image Int
-apply as img = map (map (as M.!)) img
+apply as img = map (map (lookupLessEqual as)) img
 
---
+lookupLessEqual as = (\i -> snd . fromJust $ M.lookupLE i as)
 
 {-
 mapAccum :: (a -> b -> (a,c)) -> a -> Map k b -> (a, Map k c)
