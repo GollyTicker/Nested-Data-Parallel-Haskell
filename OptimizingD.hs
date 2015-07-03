@@ -468,6 +468,8 @@ multS, divDoubleS, ... :: Unboxed a => Vector a -> Vector a -> Vector a
 -- primitive arithmetic operations
 mult, div, ... :: a -> a -> a
 
+replD :: Int -> a -> Dist (PA a)
+
 -}
 
 "nächster Schritt. Fusioning mit stream/unstream-Funktionen (z.B. streamS)"
