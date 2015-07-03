@@ -8,14 +8,13 @@
 
 * Distributed Types und Fusioning durchführen (e.g myFuncPS = joinD . mapD myFuncS . splitD)
 
-* specify execution oder with a let
+
 
 * Twofold interpretation: divL = <built-in parallel divL> OR < mapD divS> with distributed types and extended library optimization
 
-* Überall: floor -> round?
-
 DONE: Konkreter Algorithmus von Pndpn
-* Konkreter Algorithmus und Laufzeiteinschätzung von Pndpv
+DONE: Konkreter Algorithmus von Pndpv
+* Laufzeiteinschätzung von Pndpv
 
 * Genau erläuteren und präzisieren wie Work&Depth mit der Anzahl der Prozessoren in den distributed Types zusammenhängen.
   * Die tatsächliche Parallelität steck in der Anzahl der PUs (Processing Units) und den verteilten Algorithmen
@@ -29,10 +28,16 @@ OK Pseudocode, Divide&Conquer Parallel Histogram Balancing
 
 * Vergleich Divide&Conquer vs Data-Parallel
 
-* Was tun über PNested und Replikation?
+OK Was tun über PNested und Replikation?
+    "Kommt nur einmal am Ende bei der Replikation des Histograms vor."
+    "Es mag wie eine Laufzeitexplosion vorkommen, aber das ist es aufgrund einer klugen Replikation"
+    "von Nested Arrays nicht. Darauf wird aber nicht länger eingegangen, denn es verschlimmert weder die Laufzeit"
+    "noch bringt das konkrete Wissen darüber weitere Erkenntnisse."
 
+DONE: specify execution oder with a let
 VERFERFEN: rewrites and special semantics of accumulator calculation
-Abgelehnt: P_man mit CountingSort unter Berücksichtigung des Kontextes
+FALSCH: Überall: floor -> round?
+VERWORFEN: P_man mit CountingSort unter Berücksichtigung des Kontextes
 
 " ************  Fragen"
 * Work Efficient Vectorization genauer durchgehen. wie die Replikation von Nested Arrays effizienter gemacht werden kann.
@@ -73,7 +78,6 @@ Abgelehnt: P_man mit CountingSort unter Berücksichtigung des Kontextes
 * Codeerklärungen lieber stückweise - Code für Menschen!
 
 
-
 " ************ Sonstiges"
 
 VERWERFEN: lifted hBalance verwerfen
@@ -85,6 +89,5 @@ NENNEN hbalanceBulk? Verwerfen oder nennen?
 next: replication of an array: replPS n a = AArr (cycleVector n a) [(0,n),(n,n),...,(n*n-n,n)]
                cycleVector :: Int -> Vector a -> Vector a
                cycleVector 3 [a,b,c] = [a,b,c,a,b,c,a,b,c]
-next: inline replPS
 
 

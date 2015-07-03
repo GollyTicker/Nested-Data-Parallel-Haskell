@@ -1,9 +1,12 @@
 
-"Final optimized code"
+"Pndpv: Vectorized, optimised and distributed Code created from Pndpvby the compiler"
 
-hbalanceV :: PA (PA Int) -> PA (PA Int)
-hbalanceV img =
-  let a :: PA Int -- Histogram
+type Image = PA (PA Int)    -- which is represneted as AArr { length :: Int, segd :: Segd, data :: AInt { length :: Int, data :: Vector Int} }
+type Hist  = PA Int         -- which is represented as AInt { length :: Int, data :: Vector Int } 
+
+hbalance :: Image -> Image
+hbalance img =
+  let a :: Hist                                           -- Histogram
       a = joinD                                           -- accu end
           . mapD (\(as,a) -> mapS (plusInt a) as)
           . propagateD plusInt 0
@@ -27,10 +30,10 @@ hbalanceV img =
       normScale :: Int -> Int
       normScale = floorDouble . (flip multDouble) gmax' . (flip divDouble) divisor . (flip minusDouble) a0 . int2Double -- 0, body of normalize and scale
       
-      as :: PA Int                                        -- final mapping array
+      as :: Hist                                          -- final mapping array
       as = joinD . mapD (mapS normScale) $ a              -- 4, normalize and scale applied
       
-      pixelReplicate :: PA Int -> PA (PA (PA Int))
+      pixelReplicate :: Hist -> PA (PA Hist)
       pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)                                 -- 0, artifact of NDP
       
   in unconcatPS img
