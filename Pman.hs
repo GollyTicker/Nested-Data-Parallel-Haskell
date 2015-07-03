@@ -28,15 +28,23 @@ parAccuHist xs  =
   in  parZipWith (+) leftRes rightRes
 
 {-
+
+n sei die Anzahl der Bildpixel
+w sei die Bildbreite
+h sei die Bildhöhe
+
        f          O(W)       O(D)
 --------------------------------
   hbalance        n*gmax      log n
-  parAccuHist     n*gmax      log n
+  parAccuHist     n*gmax      log n   (durch geometrische Folge oder Master-Theorem)
+  apply           n           1
+  parMap sclNrm   gmax        1
+  
   splitMid        1           1
-  zipWith         gmax        1
+  parZipWith      gmax        1
   replicate       gmax        1
   generate        gmax        1
-  parMap          n           1
+  parMap f xs     W(f,x)*size(xs)     1
   apply           n           1
   arr[i]          1           1
   

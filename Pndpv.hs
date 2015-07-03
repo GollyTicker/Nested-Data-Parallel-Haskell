@@ -41,6 +41,39 @@ hbalance img =
      . concatPS
      $ img
 
+ mapP (mapP (as !:)) img
+
+{-
+
+n sei die Anzahl der Bildpixel
+w sei die Bildbreite
+h sei die Bildhöhe
+
+  Konkrete low  level Laufzeiteinschätzung
+  
+       f            O(W)                  O(D)
+----------------------------------------------------------------
+  hbalance          ?                     ?
+  
+  eval(a)           ?                     ?
+  sparseToDenseP    ?                     ?
+  groupP            ?                     ?
+  sortP             ?                     ?
+  concatP           ?                     ?
+  
+  accu              ?                     ?
+  scanlP            ?                     ?
+  
+  normalize         ?                     ?
+  scale             ?                     ?
+  
+  apply             ?                     ?
+  
+  mapP f xs         ?                     ?
+  headP/lastP       ?                     ?
+  indexP, !:        ?                     ?
+-}
+
 
 {-
 
