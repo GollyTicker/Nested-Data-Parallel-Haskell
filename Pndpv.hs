@@ -13,12 +13,13 @@ hbalance img =
           . mapD (scanlS plusInt 0)                       -- accu begin
           . sparseToDenseD (plusInt gmax 1) 0             -- hist end
           . splitSparseD (plusInt gmax 1)
-          . (\as -> let g = AArr as (convert (split 0 as))
-                    in  ATup2 (headPL g) (lengthPL g)
-            )
+          . joinD
+          . mapD tripletToATup2
+          . segdSplitMerge 0
           . sortPS
           . concatPS                                      -- hist begin
           $ img                                           -- 1
+              
       n :: Int
       n = lengthPS a                                      -- 2
       
@@ -33,7 +34,7 @@ hbalance img =
       as :: Hist                                          -- final mapping array
       as = joinD . mapD (mapS normScale) . splitD $ a              -- 4, normalize and scale applied
       
-      pixelReplicate :: Hist -> PA (PA Hist)
+      pixelReplicate :: Hist -> PA Hist
       pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)                                 -- 0, artifact of NDP
       
   in unconcatPS img
@@ -41,38 +42,12 @@ hbalance img =
      . concatPS
      $ img
 
- mapP (mapP (as !:)) img
 
 {-
+ Einschätzung im pdf
 
-n sei die Anzahl der Bildpixel
-w sei die Bildbreite
-h sei die Bildhöhe
-
-  Konkrete low  level Laufzeiteinschätzung
-  
-       f            O(W)                  O(D)
-----------------------------------------------------------------
-  hbalance          ?                     ?
-  
-  eval(a)           ?                     ?
-  sparseToDenseP    ?                     ?
-  groupP            ?                     ?
-  sortP             ?                     ?
-  concatP           ?                     ?
-  
-  accu              ?                     ?
-  scanlP            ?                     ?
-  
-  normalize         ?                     ?
-  scale             ?                     ?
-  
-  apply             ?                     ?
-  
-  mapP f xs         ?                     ?
-  headP/lastP       ?                     ?
-  indexP, !:        ?                     ?
 -}
+
 
 
 {-
@@ -85,7 +60,8 @@ replD             :: forall a.    Int -> a -> Dist (PA a)
 
 sparseToDenseD    :: forall a.    Int -> Int -> Dist (PA (Int,a)) -> Dist (PA a)
 splitSparseD      :: forall a.    PA (Int,a) -> Dist (PA (Int,a)
-
+tripletToATup2    ::              LinkedList (Int,Int,Int) -> PA (Int,Int)
+segdSplitMerge    ::              Int -> PA Int -> Dist (LinkedList (Int,Int,Int))
 
 
 split             :: forall a.    Int -> PA a -> PA (a,Int,Int)         functions implementing the distributed groupP on the segment-descriptor
@@ -123,3 +99,4 @@ sortPS            :: forall a => Int.           PA Int -> PA Int
 
 
 -}
+

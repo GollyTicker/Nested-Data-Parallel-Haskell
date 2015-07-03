@@ -7,6 +7,8 @@ propagateD :: Dist (PA a) -> Dist (PA a, a)
 sparseToDenseD :: Int -> Int -> Dist (PA (Int,a)) -> Dist (PA a)
 splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
 
+tripletToATup2 :: (LinkedList (Int,Int,Int)) -> (PA (Int,Int))
+segdSplitMerge :: Int -> PA Int -> Dist (LinkedList (Int,Int,Int))
 split :: Int -> PA a -> PA (a,Int,Int)        functions implementing the distributed groupP on the segment-descriptor
 convert :: PA (a,Int,Int) -> PA (Int,Int)
 
@@ -30,9 +32,9 @@ V[hbalance] $: img :: PA (PA Int)
             . mapD (scanlS plusInt 0)
             . sparseToDenseD (plusInt gmax 1) 0 -- hist end
             . splitSparseD (plusInt gmax 1)
-            . (\as -> let g = AArr as (convert (split 0 as))
-                      in  ATup2 (headPL g) (lengthPL g)
-              )
+            . joinD
+            . mapD tripletToATup2
+            . segdSplitMerge 0
             . sortPS
             . concatPS                                   -- hist begin
             $ img
@@ -177,9 +179,9 @@ V[hbalance] $: img :: PA (PA Int)
             . mapD (scanlS plusInt 0)
             . sparseToDenseD (plusInt gmax 1) 0 -- hist end
             . splitSparseD (plusInt gmax 1)
-            . (\as -> let g = AArr as (convert (split 0 as))
-                      in  ATup2 (headPL g) (lengthPL g)
-              )
+            . joinD
+            . mapD tripletToATup2
+            . segdSplitMerge 0
             . sortPS
             . concatPS                                   -- hist begin
             $ img
@@ -281,9 +283,9 @@ V[hbalance] $: img :: PA (PA Int)
             . mapD (scanlS plusInt 0)
             . sparseToDenseD (plusInt gmax 1) 0 -- hist end
             . splitSparseD (plusInt gmax 1)
-            . (\as -> let g = AArr as (convert (split 0 as))
-                      in  ATup2 (headPL g) (lengthPL g)
-              )
+            . joinD
+            . mapD tripletToATup2
+            . segdSplitMerge 0
             . sortPS
             . concatPS                                   -- hist begin
             $ img
@@ -314,10 +316,10 @@ V[hbalance] $: img :: PA (PA Int)
             . propagateD plusInt 0
             . mapD (scanlS plusInt 0)                       -- accu begin
             . sparseToDenseD (plusInt gmax 1) 0             -- hist end
-            . splitSparseD (plusInt gmax 1)
-            . (\as -> let g = AArr as (convert (split 0 as))
-                      in  ATup2 (headPL g) (lengthPL g)
-              )
+            . joinD
+            . mapD tripletToATup2
+            . segdSplitMerge 0
+            . groupPS
             . sortPS
             . concatPS                                      -- hist begin
             $ img                                           -- 1
@@ -349,7 +351,8 @@ replD             :: forall a.    Int -> a -> Dist (PA a)
 
 sparseToDenseD    :: forall a.    Int -> Int -> Dist (PA (Int,a)) -> Dist (PA a)
 splitSparseD      :: forall a.    PA (Int,a) -> Dist (PA (Int,a)
-
+tripletToATup2 ::              LinkedList (Int,Int,Int) -> PA (Int,Int)
+segdSplitMerge    ::              Int -> PA Int -> Dist (LinkedList (Int,Int,Int))
 
 
 split             :: forall a.    Int -> PA a -> PA (a,Int,Int)         functions implementing the distributed groupP on the segment-descriptor

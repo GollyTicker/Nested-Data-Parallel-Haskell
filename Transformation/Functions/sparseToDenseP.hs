@@ -23,7 +23,7 @@ Depth: 1
 Work: many + lengthP map
 
 
-splitSparseD :: Int -> PA (Int,a) -> Dist (PA (Int,a)
+splitSparseD :: Int -> PA (Int,a) -> Dist (PA (Int,a))
 
 "splitSparseD" splits a sparse vector into its distributed chunks
 in such a way, that each gang member contains those elements of the sparse-vector

@@ -15,7 +15,7 @@ replPS n fv $:L a
   = fl (replPS n ()) a    -- definition of repl for () 
   = fl' a -- fl' is the direct lifted-version of the function
 
-Note: indexPL :: PA a -> PA i -> PA a
+Note: indexPL :: PA (PA a) -> PA i -> PA a
 
 
 V[hbalance] $: img :: PA (PA Int)
