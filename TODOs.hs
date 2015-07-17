@@ -3,54 +3,10 @@
       "  ************ TODOs *************   "
 
 
-
-"  ************  Kernarbeit"
-
-* Distributed Types und Fusioning durchführen (e.g myFuncPS = joinD . mapD myFuncS . splitD)
-
-
-
-* Twofold interpretation: divL = <built-in parallel divL> OR < mapD divS> with distributed types and extended library optimization
-
-DONE: Konkreter Algorithmus von Pndpn
-DONE: Konkreter Algorithmus von Pndpv
-* Laufzeiteinschätzung von Pndpv
-
-* Genau erläuteren und präzisieren wie Work&Depth mit der Anzahl der Prozessoren in den distributed Types zusammenhängen.
-  * Die tatsächliche Parallelität steck in der Anzahl der PUs (Processing Units) und den verteilten Algorithmen
-    zwischen den einzelnen PUs. Damit wird sum auf D(log n) gedrückt. Damit wird ebenfalls 
-
-OK ParAccuHist >=> Normalize >=> Scale >=> Apply als P_man Algorithmus
-
-OK Pseudocode, Divide&Conquer Parallel Histogram Balancing
-
-* Größenvergleiche: n vs. gmax, n*log n vs. gmax
-  Am besten zweidimensionaler Graph!
-
-* Vergleich Divide&Conquer vs Data-Parallel
-
-OK Was tun über PNested und Replikation?
-    "Kommt nur einmal am Ende bei der Replikation des Histograms vor."
-    "Es mag wie eine Laufzeitexplosion vorkommen, aber das ist es aufgrund einer klugen Replikation"
-    "von Nested Arrays nicht. Darauf wird aber nicht länger eingegangen, denn es verschlimmert weder die Laufzeit"
-    "noch bringt das konkrete Wissen darüber weitere Erkenntnisse."
-
-DONE: specify execution oder with a let
-VERFERFEN: rewrites and special semantics of accumulator calculation
-FALSCH: Überall: floor -> round?
-VERWORFEN: P_man mit CountingSort unter Berücksichtigung des Kontextes
-
-" ************  Fragen"
-* Work Efficient Vectorization genauer durchgehen. wie die Replikation von Nested Arrays effizienter gemacht werden kann.
-
-" ************  Organisation"
-* Der Algorithmus soll "sinngemäß" implementiert werden
-
-
 " ************  Schriftliche Thesis"
 * Kapitel über Algorithmuserklärung und Implementierungen kann so etwa bleiben, braucht aber mehr Erklärungen.
 
-* Einleitung muss geschrieben weredn (die Papers werden eher nicht gelesen!)
+* Einleitung muss geschrieben werden (die Papers werden eher nicht gelesen!)
   * Basic: Parallel, Haskell functional Programming
   * Special: Nested Data Parallelsim, Histogram Balancing
 
@@ -63,6 +19,12 @@ VERWORFEN: P_man mit CountingSort unter Berücksichtigung des Kontextes
   4. Vergleich
 
 * Es geht um den Kerngedanken! Und nicht um einen Technical Report mit Reproduzierbarkeit.
+
+* Genau erläuteren und präzisieren wie Work&Depth mit der Anzahl der Prozessoren in den distributed Types zusammenhängen.
+  * Die tatsächliche Parallelität steck in der Anzahl der PUs (Processing Units) und den verteilten Algorithmen
+    zwischen den einzelnen PUs. Damit wird sum auf D(log n) gedrückt. Damit wird ebenfalls 
+
+* Twofold interpretation: divL = <built-in parallel divL> OR < mapD divS> with distributed types and extended library optimization
 
 * sumP implementierung als Beispiel für Laufzeiteinschätung mit Work/Depth und Anzahl von Prozessoren #17
 
@@ -78,12 +40,47 @@ VERWORFEN: P_man mit CountingSort unter Berücksichtigung des Kontextes
 
 * Codeerklärungen lieber stückweise - Code für Menschen!
 
+" ************  Fragen"
+* Work Efficient Vectorization genauer durchgehen. wie die Replikation von Nested Arrays effizienter gemacht werden kann.
+
+" ************  Organisation"
+OK Der Algorithmus soll "sinngemäß" implementiert werden
+
 
 " ************ Sonstiges"
 
 VERWERFEN: lifted hBalance verwerfen
 
 NENNEN hbalanceBulk? Verwerfen oder nennen?
+
+
+"  ************  Kernarbeit"
+
+OK Distributed Types und Fusioning durchführen (e.g myFuncPS = joinD . mapD myFuncS . splitD)
+
+DONE: Konkreter Algorithmus von Pndpn
+DONE: Konkreter Algorithmus von Pndpv
+* Laufzeiteinschätzung von Pndpv
+
+OK ParAccuHist >=> Normalize >=> Scale >=> Apply als P_man Algorithmus
+
+OK Pseudocode, Divide&Conquer Parallel Histogram Balancing
+
+* Größenvergleiche: n vs. gmax, n*log n vs. gmax
+  Am besten zweidimensionaler Graph!
+
+OK Vergleich Divide&Conquer vs Data-Parallel
+
+OK Was tun über PNested und Replikation?
+    "Kommt nur einmal am Ende bei der Replikation des Histograms vor."
+    "Es mag wie eine Laufzeitexplosion vorkommen, aber das ist es aufgrund einer klugen Replikation"
+    "von Nested Arrays nicht. Darauf wird aber nicht länger eingegangen, denn es verschlimmert weder die Laufzeit"
+    "noch bringt das konkrete Wissen darüber weitere Erkenntnisse."
+
+DONE: specify execution oder with a let
+VERFERFEN: rewrites and special semantics of accumulator calculation
+FALSCH: Überall: floor -> round?
+VERWORFEN: P_man mit CountingSort unter Berücksichtigung des Kontextes
 
 
 " ************ ???? "

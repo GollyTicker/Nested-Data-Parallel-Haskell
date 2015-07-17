@@ -1,6 +1,7 @@
 
 # Gedit Temp
 *~
+*.ini
 
 # Haskell
 dist
@@ -21,6 +22,9 @@ cabal.sandbox.config
 *.hp
 
 # LaTeX
+*.lol
+*.nlo
+*.pdf
 *.aux
 *.glo
 *.idx
