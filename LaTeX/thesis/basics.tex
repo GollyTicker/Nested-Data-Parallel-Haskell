@@ -1,4 +1,6 @@
 
+% Zitat: Auf den Schultern von Riesen.
+
 \section{Haskell}
   introduction into syntax, immutability, and higher-order functions, lambdas, currying
   polymorphic types (PA a, Dist a, Vector a)
@@ -39,6 +41,18 @@
    (und zeigen, dass naives stream fusioning die parallelität verliert)
 \section{\algo}
   Introductipn into Histogram Balancing.
+  
+  Prefix sum is a very common operation in computer science. It is a special
+    case of scanning through a ordered container from left ro right applying a binary
+    associative function \c{f}.
+    It is defined as:
+      $$ scanl(f,z,[a_1,a_2,...,a_n])
+         := [f(z,a_1),f(f(z,a_1),a_2),...,f(f(...f(f(z,a_1),a_2)...,a_{n-1}),a_n)]
+      $$
+    An example shall be $scanl(+,0,[1,2,2,3,-2]) = [1,3,5,8,6]$. In some definitions
+    the first element is $z$. This is however not the definition we need here.
+    
+  
   Uses thereof and overview of an algorithm.
   Wird z.B im Zusammenhang mit \mu-Momenten zur Erkennung
     affin-transformierter Bildpaare verwendet.

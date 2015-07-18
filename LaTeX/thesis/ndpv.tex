@@ -1,4 +1,6 @@
 
+  % TINA - There is no alterative.
+  %   - Angela Merkel
 
   After building up momentum and viewing a few implementations of \algo
   we are now ready to tackle the core transformation and optimisations
@@ -33,7 +35,7 @@ mapP (mapP f) xss = unconcatPS xss
     
     The transformation is going to make use of plenty functions. Most of them will are going to be
     introduced when they first appear - others are more frequent and require a summary. They are explained in table \ref{mapPs}.
-    The table also holds for other functions with equal suffix - e.g. the \texttt{mapP} row also applies to \textt{scanlP}, \texttt{groupP} etc.
+    The table also holds for other functions with same suffix - e.g. the \c{mapP} row also applies to \c{scanlP}, \c{groupP} etc.
     
     \begin{table}[h]
       \caption{Table of functions}
@@ -54,22 +56,22 @@ mapP (mapP f) xss = unconcatPS xss
            & mapD: all PUs & Each PU applies \c{f} on it's chunk of the \\
            & f: local per PU & \textbf{d}istributed value. True parallelsim here! \\
           mapS f xs & Communication Fusion & \type{(a -> b) -> Vector a -> Vector b}\\
-           & a local PU & Applies a mapping \textbf{s}equentially. \\
+           & local PU & Applies a mapping \textbf{s}equentially. \\
            & & \c{Vector} is the Haskell implementation of \\
            & & conventional local in-memory arrays. They are \\
            & & the chunks used to distribute \pad. \\
-          mapSt f xs & Stream Fusion & \type{(a -> b) -> Stream a -> Stream b}\\
-           & not executed & Applies a function on a \textbf{st}ream of values \\
           splitD & Communication Fusion & \type{PA -> Dist (PA a)}\\
-           & allPUs & splits an array into chunks and \\
+           & all PUs & splits an array into chunks and \\
            & & distributes them to each of the PUs \\
           joinD & Communication Fusion & \type{Dist (PA a) -> PA a}\\
-           & allPUs & joins local chunks into a global array \\
+           & all PUs & joins local chunks into a global array \\
+          mapSt f xs & Stream Fusion & \type{(a -> b) -> Stream a -> Stream b}\\
+           & not executed & Applies a function on a \textbf{st}ream of values \\
       \end{tabular}
     \end{table}
     
     Most of the functions are only simply inlined lateron - therefore they don't exist anymore at runtime and
-    are marked 'not-executed'. Besides theese functions, we will also need a handful rewrite rules.
+    are marked 'not-executed'. Besides these functions, we will also need handful rewrite rules.
     The most important of them are described in table \ref{rules}.
     
     \begin{table}[h]
@@ -84,23 +86,22 @@ mapP (mapP f) xss = unconcatPS xss
           & & it is equivalent to doing nothing. \\
           
           mapD/replD & mapD f . replD n & Replicating a value and mapping \\
-          & = replD n . f & all values is equvalent to \\
+          & = replD n . f & all values is equivalent to \\
           & & directly applying the function and \\
           & & subsequently replicating it. \\
           
           splitD/replPS & splitD . replPS n & Replicating and spliting a value \\
-          & = replD n & is equivalent to creating the local chunk directly. \\
-          & & replD does that and knows which chunk \\
-          & & of the global array the PU is responsible for. \\
+          & = replD n & is equivalent to creating the local chunks\\
+          & & directly. ReplD implements this and knows \\
+          & & which chunk its PU is responsible for. \\
           
-          zipWithD/replD/splitD & zipWithD f (replD a) & Zipping with a newly created array \\
-          &  . splitD  & that only consists of the replication of a value \\
-          & = mapD (f a)& already in scope - is equivalent to - applying \\
-          & & the mapping with the value \\
+          ZipReplSplit & zipWithD f (replD a) & Zipping with a replicated value\\
+          & . splitD  & already in scope - is equivalent to - applying \\
+          & = mapD (f a) & the mapping with the value \\
           & & curried into the function.\\
           
-          mapD/zipWithD & mapD f . zipWithD g xs & A map operation after a zip operation \\
-          & = zipWithD (\x y -> f (g x y)) xs & is equivalent to a single zip operation \\
+          mapD/zipWithD & mapD f . zipWithD g xs = & A map operation after a zip operation \\
+          & zipWithD (\lam x y -> f (g x y)) xs & is equivalent to a single zip operation \\
           & & which applies both \c{f} and \c{g}. \\
           
           unstream/stream & unstream . stream = id & Converting back and fourth is \\
@@ -256,7 +257,7 @@ multDoubleL as = joinD . zipWithD multDoubleS (splitD as) . splitD
       
       After that, a cascade of rewrite rules fire and propagate the normalisation and scaling
       constants towards inside the lifting operations. A sophisticated combination of the rules
-      "mapD/zipWithD", "splitD,replPS", "mapD/replD" and "zipWith4D/replD/splitD" results in
+      "mapD/zipWithD", "splitD,replPS", "mapD/replD" and "ZipReplSplit" results in
       the code we currently have.
       
       Operationally, there an important change in the normalisation and scaling.
@@ -357,7 +358,7 @@ hbalance img =
     On the surface - the algorithm works quite similar to a direct
     implementation of \ndpn.
     First the histogram is calculated (lines 18 to 11) and accumulated (lines 10 - 7).
-    Then the constants \c{a0},\c{divisor} and \c{gmax'} is globally calculated and distributed
+    Then the constants \c{a0},\c{divisor} and \c{gmax'} are calculated globally and distributed
     to each PU (lines 22 to 33). After that, each PU applies the normalisation and scaling transformations(line 36).
     The mapping array \c{gs} is then finally used to map
     each gray tone to its new value (lines 41 to 38). It happens by using the
@@ -371,7 +372,7 @@ hbalance img =
       \item We implemented normalisation and scaling separately, but inlining
               and optimisation still was able to fuse them together. We didn't
               manually need to fuse it - as we had to do in \man
-      \item After writing \ndpn, there is no more work involved for the programer
+      \item After writing \ndpn, there is no more work involved for the programer in generating this optimised code.
     \end{itemize}
     Having transformed \ndpn into \ndpv, we are now ready to give a complexity analysis thereof.
     
@@ -382,16 +383,16 @@ hbalance img =
     \begin{equation}
     \begin{split}
     \W(w \times h,gmax)
-          & = \W(hist) + \W(accu) + \W(gs) + \W(pixelReplicate) + \W(img') \\
+          & = \W(hist) + \W(accu) + \W(gs) + \W(expandPS) + \W(img') \\
           & = O( \max(n \log n, gmax) + gmax + gmax + 1 + n) \\
           & \in O(\max(n \log n, gmax)) \\
     \D(w \times h,gmax)
-        & = \max \{ hist, accu, as, pixelReplicate, img'\} \\
+        & = \max \{ hist, accu, gs, expandPS, img'\} \\
         & = \max \{\log n, \log gmax \} \\
         & \in O(\log \max(n,gmax)) \\
     \end{split}
     \end{equation}
-    The use of the plentyful new functions doesn't change the overall situation.
+    The use of the plentyful new functions doesn't change the overall situation compared to \ndpn.
     A full overview of all the functions an their complexities can be found in the table \ref{complexities_ndpv} in the appendix.
     
     
