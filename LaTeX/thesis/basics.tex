@@ -1,13 +1,16 @@
 
 \section{Haskell}
   introduction into syntax, immutability, and higher-order functions, lambdas,
+  polymorphic types (PA a, Dist a, Vector a)
   evaluation, record syntax, naming conventions functions f,g,h, vars x,y,z,a,b,c, arrays of x -> xs -> xss
 \section{Nested Data Parallelism}
   Contrast Nested vs Flat data parallelism,
   Nested Data Parallelism in Haskell, an ongoing project.
   This work uses many ideas from their work.
   Show functions used to program in NDPH.
-  Overview of transformation and explain main types (#25 in Notizblock).
+  Example transformation and explain main types (#25 in Notizblock).
+  "Explicit calls to AArr and ATup2 and such mean global communication"
+  "Types of PAs are global. Types of Dist are local."
   
   mapPS (mapPS f) xss = unconcatPS xss . $f^$ (expandPS xss $ATupK a_1 a_2 ... a_k$) . concatPS \$ xss
   
@@ -18,6 +21,7 @@
   Explain Work and Depth Complexity measures
    (and their definitions?)
    sumP implementierung als Beispiel für Laufzeiteinschätung mit Work/Depth und Anzahl von Prozessoren #1
+   (und zeigen, dass naives stream fusioning die parallelität verliert)
 \section{\algo}
   Introductipn into Histogram Balancing.
   Uses thereof and overview of an algorithm.

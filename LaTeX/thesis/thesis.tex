@@ -15,15 +15,21 @@
 \usepackage[colorlinks=true]{hyperref}
 \usepackage{lipsum} %% for sample text
 \usepackage[nottoc,notlot,notlof,numbib]{tocbibind}
+\usepackage{xspace}
 
 % My Commands
 \newcommand{\comment}[1]{}
 
-\newcommand{\seq}[0]{$P_{seq}$\,}
-\newcommand{\man}[0]{$P_{man}$\,}
-\newcommand{\ndpn}[0]{$P_{nest}$\,}
-\newcommand{\ndpv}[0]{$P_{vect}$\,}
-\newcommand{\algo}[0]{Histogram Balancing}
+\newcommand{\seq}[0]{$P_{seq}$\xspace}
+\newcommand{\man}[0]{$P_{man}$\xspace}
+\newcommand{\ndpn}[0]{$P_{nest}$\xspace}
+\newcommand{\ndpv}[0]{$P_{vect}$\xspace}
+\newcommand{\algo}[0]{Histogram Balancing\xspace}
+\newcommand{\pav}[1][a]{\c{PA #1}}
+\newcommand{\pan}[1][a]{\c{[:#1:]}}
+\newcommand{\pad}[1][a]{\c{Dist (PA #1)}}
+\newcommand{\type}[1]{\texttt{\footnotesize{#1}}}
+\renewcommand{\c}[1]{\type{#1}\xspace}
 
 
 % My Packages
@@ -39,7 +45,7 @@
 \colorlet{HeadColor}{gray!60}
 \colorlet{Color1}{blue!10}
 \colorlet{Color2}{white}
-
+  
 %% configure colors
 \HAWifprinter{
   \colorlet{BackgroundColor}{gray!20}
