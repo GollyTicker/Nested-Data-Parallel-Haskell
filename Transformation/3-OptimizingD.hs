@@ -44,14 +44,14 @@ STATTDESSEN: "Folgende Otimierung die sich die unnöötige Kommunikation dazwisc
 f xs =                                   -- (Value,StartIdx,Count)     (Value,Count)
   let tripletToATup2 :: Dist (LinkedList (Int,Int,Int)) -> Dist (PA (Int,Int))
       tripletToATup2 ts = DATup2 (toPA . mapLL fst) (toPA . mapLL thr) -- mapLL is for mapping over the local linked lists chunks
-  in joinD . mapD localSegdToTup2 . segdSplitMerge 0
+  in joinD . mapD tripletToATup2 . segdSplitMerge 0
 
 
 V[hbalance] $: img :: PA (PA Int)
   = let a = scanlPS plusInt 0    -- accu
             . sparseToDensePS (plusInt gmax 1) 0   -- hist end
             . joinD
-            . mapD localSegdToTup2
+            . mapD tripletToATup2
             . segdSplitMerge 0
             . sortPS
             . concatPS                              -- hist begin
@@ -100,7 +100,7 @@ V[hbalance] $: img :: PA (PA Int)
             . sparseToDenseD (plusInt gmax 1) 0
             . splitSparseD (plusInt gmax 1)      -- splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
             . joinD
-            . mapD localSegdToTup2
+            . mapD tripletToATup2
             . segdSplitMerge 0
             . sortPS
             . concatPS                                   -- hist begin
@@ -129,7 +129,7 @@ let a =
   . sparseToDenseD (plusInt gmax 1) 0 -- hist end
   . splitSparseD (plusInt gmax 1)      -- splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
   . joinD
-  . mapD localSegdToTup2
+  . mapD tripletToATup2
   . segdSplitMerge 0
   . sortPS
   . concatPS                                   -- hist begin
@@ -146,7 +146,7 @@ V[hbalance] $: img :: PA (PA Int)
             . sparseToDenseD (plusInt gmax 1) 0 -- hist end
             . splitSparseD (plusInt gmax 1)        -- splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
             . joinD
-            . mapD localSegdToTup2
+            . mapD tripletToATup2
             . segdSplitMerge 0
             . sortPS
             . concatPS                                   -- hist begin
@@ -364,7 +364,7 @@ V[hbalance] $: img :: PA (PA Int)
             . sparseToDenseD (plusInt gmax 1) 0 -- hist end
             . splitSparseD (plusInt gmax 1)        -- splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
             . joinD
-            . mapD localSegdToTup2
+            . mapD tripletToATup2
             . segdSplitMerge 0
             . sortPS
             . concatPS                                   -- hist begin
@@ -398,7 +398,7 @@ V[hbalance] $: img :: PA (PA Int)
             . sparseToDenseD (plusInt gmax 1) 0 -- hist end
             . splitSparseD (plusInt gmax 1)        -- splitSparseD :: PA (Int,a) -> Dist (PA (Int,a)
             . joinD
-            . mapD localSegdToTup2
+            . mapD tripletToATup2
             . segdSplitMerge 0
             . sortPS
             . concatPS                                   -- hist begin
@@ -433,7 +433,7 @@ V[hbalance] $: img :: PA (PA Int)
             . sparseToDenseD (plusInt gmax 1) 0 -- hist end
             . splitSparseD (plusInt gmax 1)
             . joinD
-            . mapD localSegdToTup2
+            . mapD tripletToATup2
             . segdSplitMerge 0
             . sortPS
             . concatPS                                   -- hist begin

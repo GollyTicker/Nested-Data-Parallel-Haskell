@@ -155,15 +155,14 @@ V[hbalance] $: img :: PA (PA Int)
             . concatPS                              -- hist begin
             $ img
         n = length a
-        as = replPS (lengthPS img)            -- replicate width
-             . floorDoubleL                                     -- normalize and scale
+        gs = floorDoubleL                                     -- normalize and scale
              . multDoubleL (int2DoubleL (replPS n gmax))
              . divL
                  (minusL (int2DoubleL a) (  replPS n (int2Double (headPS a))  ))
              . replPS n
              $ minusDouble (int2Double (lastPS a)) (int2Double (headPS a))
-    in (\xs -> -- apply on every pixel -- core of nested data parallelism here!
-         unconcatPS xs . indexPL (concatPS . replPL (lengths (getSegd xs)) $ as) . concatPS $ xs
+    in (\xss -> -- apply on every pixel -- core of nested data parallelism here!
+         unconcatPS xs . indexPL (expandPS xss gs) . concatPS $ xss
        ) img
 
 note:

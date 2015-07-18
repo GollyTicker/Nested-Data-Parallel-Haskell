@@ -6,10 +6,6 @@
 " ************  Schriftliche Thesis"
 * Kapitel über Algorithmuserklärung und Implementierungen kann so etwa bleiben, braucht aber mehr Erklärungen.
 
-* Einleitung muss geschrieben werden (die Papers werden eher nicht gelesen!)
-  * Basic: Parallel, Haskell functional Programming
-  * Special: Nested Data Parallelsim, Histogram Balancing
-
 * Verständlich auf dem Punkt!
 
 * Struktur
@@ -20,16 +16,6 @@
 
 * Es geht um den Kerngedanken! Und nicht um einen Technical Report mit Reproduzierbarkeit.
 
-* Genau erläuteren und präzisieren wie Work&Depth mit der Anzahl der Prozessoren in den distributed Types zusammenhängen.
-  * Die tatsächliche Parallelität steck in der Anzahl der PUs (Processing Units) und den verteilten Algorithmen
-    zwischen den einzelnen PUs. Damit wird sum auf D(log n) gedrückt. Damit wird ebenfalls 
-
-* Twofold interpretation: divL = <built-in parallel divL> OR < mapD divS> with distributed types and extended library optimization
-
-* sumP implementierung als Beispiel für Laufzeiteinschätung mit Work/Depth und Anzahl von Prozessoren #17
-
-* Erklärung der Types: # 25
-
 * Ab jetzt, Details lieber weglassen.
 
 * Seitenanzahl:
@@ -39,6 +25,12 @@
   * Summe: 65 "Seiten bereits!"
 
 * Codeerklärungen lieber stückweise - Code für Menschen!
+
+OK Erklärung der Types: # 25
+
+OK Einleitung muss geschrieben werden (die Papers werden eher nicht gelesen!)
+  * Basic: Parallel, Haskell functional Programming
+  * Special: Nested Data Parallelsim, Histogram Balancing
 
 " ************  Fragen"
 * Work Efficient Vectorization genauer durchgehen. wie die Replikation von Nested Arrays effizienter gemacht werden kann.

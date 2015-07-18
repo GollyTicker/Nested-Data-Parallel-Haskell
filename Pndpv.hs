@@ -40,7 +40,7 @@ hbalance img =
       as = joinD . mapD (mapS normScale) . splitD $ a              -- 4, normalize and scale applied
       
       pixelReplicate :: Hist -> PA Hist
-      pixelReplicate = concatPS . replPL (lengths (getSegd xs)) . replPS (lengthPS img)                                 -- 0, artifact of NDP
+      pixelReplicate = expandPS img                                 -- 0, artifact of NDP
       
   in unconcatPS img
      . indexPL (pixelReplicate as)  -- 5, apply. core of nested data parallelism here!

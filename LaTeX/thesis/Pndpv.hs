@@ -24,7 +24,7 @@ hbalance img =
       a0      = int2Double . headPS $ a
       divisor = minusDouble (int2Double (lastPS a))
                 . int2Double . headPS $ a
-      gmax'   = int2Double $ gmax
+      gmax'   = int2Double gmax
       
       normScale :: Int -> Int
       normScale = 
@@ -34,16 +34,11 @@ hbalance img =
         . (flip minusDouble) a
         . int2Double
         
-      as :: Hist
-      as = joinD . mapD (mapS normScale) . splitD $ a
-      
-      pixelReplicate :: Hist -> PA Hist
-      pixelReplicate = concatPS
-                       . replPL (lengths (getSegd xs))
-                       . replPS (lengthPS img)
+      gs :: Hist
+      gs = joinD . mapD (mapS normScale) . splitD $ a
       
   in unconcatPS img
-     . indexPL (pixelReplicate as)
+     . indexPL (expandPS img gs)
      . concatPS
      $ img
 

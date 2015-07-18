@@ -1,20 +1,161 @@
 
 
-  ...
+  Explain structure of program.
   
   \section{Details on various library function}
     ...
   \section{Transformations}
     ...
+    
+    Table of funcitons (#25 Notizblock, mapP, mapPS, mapPV, ...)
+    
     \subsection{Vectorization}
-      ...
-    \subsection{Communication Fusioning}
-      ...
-    \subsection{Stream Fusioning}
-      ...
+      Datei 2-OptimisedP.hs vorstellen und zeigen welche Zeilen
+      zu welchen Code gehören
       
-  \section{final Program}
-    ...
+      % After Vectorization:
+      \begin{lstlisting}
+      hbalance img :: PA (PA Int)
+      hbalance img = 
+        let a = scanlPS plusInt 0
+                . sparseToDensePS (plusInt gmax 1) 0
+                . (\g -> ATup2 (headPL g) (lengthPL g))
+                . groupPS
+                . sortPS
+                . concatPS
+                $ img
+            n = lengthPS a
+            gs = floorDoubleL
+                 . multDoubleL (int2DoubleL (replPS n gmax))
+                 . divL
+                     (minusL
+                      (int2DoubleL a)
+                      (replPS n (int2Double (headPS a)))
+                     )
+                 . replPS n
+                 $ minusDouble (int2Double (lastPS a)) (int2Double (headPS a))
+        in unconcatPS img
+           . indexPL (expandPS img gs)
+           . concatPS
+           $ img
+      \end{lstlisting}
+      * mapP, concatP -> mapPS, concatPS
+      * Applied Nested Data Parallelism on "apply" function.
+      * mapP scale . mapP norm have been composed into a composition of lifted operations (multDoubleL)
+      * replPS replicate the constants for every element in the list they are applied on
+      * 
+      
+      
+    \subsection{Communication Fusioning}
+      
+      Twofold interpretation: divL = <built-in parallel divL> OR < mapD divS> with distributed types and extended library optimization
+      
+      Genau erläuteren und präzisieren wie Work&Depth mit der Anzahl der Prozessoren in den distributed Types zusammenhängen.
+        Die tatsächliche Parallelität steck in der Anzahl der PUs (Processing Units) und den verteilten Algorithmen
+        zwischen den einzelnen PUs. Damit wird sum auf D(log n) gedrückt. Damit wird ebenfalls 
+      
+      
+      
+      % After communication Fusioning:
+      \begin{lstlisting}
+      let a = joinD
+              . mapD (\(as,a) -> mapS (plusInt a) as)
+              . propagateD plusInt 0
+              . mapD (scanlS plusInt 0)
+              . sparseToDenseD (plusInt gmax 1) 0
+              . splitSparseD (plusInt gmax 1)
+              . joinD
+              . mapD tripletToATup2
+              . segdSplitMerge 0
+              . sortPS
+              . concatPS
+              $ img
+          n = lengthPS a
+          gs = joinD
+               . mapD f
+                . splitD
+               $ a
+          f =
+            (\a b d c ->
+              floorDoubleS
+                (multDoubleS
+                  (divDoubleS
+                    (minusDoubleS
+                      (int2DoubleS c)
+                      d)
+                    b)
+                  a)
+              
+            )
+            $ ( replD n . int2Double $ gmax )
+            $ ( replD n
+                . minusDouble (int2Double (lastPS a))
+                . int2Double . headPS $ a )
+            $ ( replD n . int2Double . headPS $ a )
+      \end{lstlisting}
+      
+      
+      
+    \subsection{Stream Fusioning}
+      \begin{lstlisting}
+      let a0      = int2Double . headPS $ a 
+          divisor = minusDouble (int2Double (lastPS a))
+                    . int2Double . headPS $ a
+          gmax'   = int2Double $ gmax
+          normScale = floorDouble
+                      . (flip multDouble) gmax'
+                      . (flip divDouble) divisor
+                      . (flip minusDouble) a0
+                      . int2Double
+          gs = joinD . mapD (mapS normScale) . splitD $ a
+       \end{lstlisting}
+      
+  \section{Final Program}
+    \begin{lstlisting}
+    type Image = PA (PA Int)
+    type Hist  = PA Int
+
+    hbalance :: Image -> Image
+    hbalance img =
+      let a :: Hist
+          a = joinD
+              . mapD (\(as,a) -> mapS (plusInt a) as)
+              . propagateD plusInt 0
+              . mapD (scanlS plusInt 0)
+              . sparseToDenseD (plusInt gmax 1) 0
+              . splitSparseD (plusInt gmax 1)
+              . joinD
+              . mapD tripletToATup2
+              . segdSplitMerge 0
+              . sortPS
+              . concatPS
+              $ img
+                  
+          n :: Int
+          n = lengthPS a
+          
+          a0, divisor, gmax' :: Double
+          a0      = int2Double . headPS $ a
+          divisor = minusDouble (int2Double (lastPS a))
+                    . int2Double . headPS $ a
+          gmax'   = int2Double gmax
+          
+          normScale :: Int -> Int
+          normScale = 
+            floorDouble
+            . (flip multDouble) gmax'
+            . (flip divDouble) divisor
+            . (flip minusDouble) a
+            . int2Double
+            
+          gs :: Hist
+          gs = joinD . mapD (mapS normScale) . splitD $ a
+          
+      in unconcatPS img
+         . indexPL (expandPS img gs)
+         . concatPS
+         $ img
+    \end{lstlisting}
     
   \section{Runtime analysis}
     ...

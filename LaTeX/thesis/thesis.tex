@@ -11,8 +11,8 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}     % Zum verwenden von ä,ü und ö: http://en.wikibooks.org/wiki/LaTeX/Special_Characters
 \usepackage{libertine,pifont,microtype,textcomp,setspace,makeidx,listings,natbib,soul,hawstyle}
-\usepackage[german,refpage]{nomencl}
-\usepackage[ngerman,colorlinks=true]{hyperref}
+\usepackage[refpage]{nomencl}
+\usepackage[colorlinks=true]{hyperref}
 \usepackage{lipsum} %% for sample text
 \usepackage[nottoc,notlot,notlof,numbib]{tocbibind}
 
@@ -79,7 +79,7 @@
   columns=flexible,
   showstringspaces=false,
   morecomment=[l]\%,
-  basicstyle=\ttfamily\small,
+  basicstyle=\ttfamily\footnotesize,
   % keywordstyle=\color{keywordblue},
   keywords={type,if,then,else,let,in}
 }
@@ -114,10 +114,11 @@
 %%%%%
 %% customize (see readme.pdf for supported values)
 \HAWThesisProperties{Author={Chandrakant Swaneet Kumar Sahoo}
-                    ,Title={Nested Data Parallelism for Image Processing Algorithms}
-                    ,SubTitle={v0.2}
-                    ,EnglishTitle={...}
+                    ,Title={v0.2 || Nested Data Parallelism for Image Processing Algorithms}
+                    ,SubTitle={Optimisations in the Functional Programming Language Haskell}
+                    ,EnglishTitle={Nested Data Parallelism for Image Processing Algorithms}
                     ,ThesisType={Bachelorarbeit}
+                    ,SubTitleDelimiter={\, -}
                     ,ExaminationType={Bachelorprüfung}
                     ,DegreeProgramme={Bachelor of Science Angewandte Informatik}
                     ,ThesisExperts={Prof. Dr. Köhler-Bußmeier \and Prof. Dr. Meisel}
@@ -182,6 +183,7 @@
 
 \chapter{Conclusion (<5)}
   \input{conclusion.tex}
+  Example Cite \cite{GenVectorFusion2013}
 
 %% appendix if used
 %%\appendix
