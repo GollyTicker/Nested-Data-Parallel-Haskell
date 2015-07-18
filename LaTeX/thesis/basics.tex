@@ -1,6 +1,6 @@
 
 \section{Haskell}
-  introduction into syntax, immutability, and higher-order functions, lambdas,
+  introduction into syntax, immutability, and higher-order functions, lambdas, currying
   polymorphic types (PA a, Dist a, Vector a)
   evaluation, record syntax, naming conventions functions f,g,h, vars x,y,z,a,b,c, arrays of x -> xs -> xss
   identity function, flip
@@ -9,13 +9,27 @@
   Nested Data Parallelism in Haskell, an ongoing project.
   This work uses many ideas from their work.
   Show functions used to program in NDPH.
-  Example transformation and explain main types (#25 in Notizblock).
+  Show vectorized types and data for AInt, ATup2, AArr and AClo/Clo.
+  Transformation and explain main types (#25 in Notizblock).
   "Explicit calls to AArr and ATup2 and such mean global communication"
   "Types of PAs are global. Types of Dist are local."
-  
-  mapPS (mapPS f) xss = unconcatPS xss . $f^$ (expandPS xss $ATupK a_1 a_2 ... a_k$) . concatPS \$ xss
-  
-  % unconcatPA ass . fl (replsPA (getSegd ass) aenv) . concatPA $ ass
+    
+  % TODO: explain with image mapP.png !!
+  Each occurrence of \c{mapP f} is replaced by \c{fL} where \c{fL} is the lifted version
+  of that function. For user defined-functions, this lifted function
+  is automatically defined using other parallel primitives. However, for
+  some special functions, there exists a special lifted implementation.
+  We are concerned about nested parallel constructs like \c{mapP (mapP f)}.
+  They are transformed into the following construct
+  \begin{lstlisting}
+  mapP (mapP f) xss = unconcatPS xss
+                      . fL (expandPS xss fEnv)
+                      . concatPS
+                      $ xss
+  \end{lstlisting}
+  This is the key insight in nested data parallelism! Nested parallel operations
+  can be reduced to flattening the array (line 3), applying a flat data-parallel operation (line 2)
+  and finally unflattening the new array into the original structure (line 1).
   
   Show that GHC supports Inlining and Fusion through Rewrite Rules.
 \section{Parallel Computing and Complexity Measures}

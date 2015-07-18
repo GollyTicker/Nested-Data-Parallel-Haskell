@@ -29,6 +29,8 @@
 \newcommand{\pan}[1][a]{\c{[:#1:]}}
 \newcommand{\pad}[1][a]{\c{Dist (PA #1)}}
 \newcommand{\type}[1]{\texttt{\footnotesize{#1}}}
+\newcommand{\W}[0]{\textrm{W}}
+\newcommand{\D}[0]{\textrm{D}}
 \renewcommand{\c}[1]{\type{#1}\xspace}
 
 
@@ -38,9 +40,10 @@
 \usepackage{graphicx, amsmath}
 
 %% define some colors
-\colorlet{BackgroundColor}{gray!20}
-\colorlet{KeywordColor}{blue}
-\colorlet{CommentColor}{black!60}
+\definecolor{keywordblue}{HTML}{5F49CC}
+\colorlet{BackgroundColor}{gray!10}
+\colorlet{KeywordColor}{keywordblue}
+\colorlet{CommentColor}{black!90}
 %% for tables
 \colorlet{HeadColor}{gray!60}
 \colorlet{Color1}{blue!10}
@@ -70,14 +73,13 @@
   captionpos=b,
   fontadjust=true,
   % mine:
-  frame=none,
+  % frame=none,
   xleftmargin=1em,
   belowcaptionskip=\bigskipamount,
   captionpos=b,
   escapeinside={*'}{'*},
   language=haskell,
-  tabsize=2,
-  gobble=4,
+  tabsize=0,
   emphstyle={\bf},
   commentstyle=\it,
   stringstyle=\mdseries\rmfamily,
@@ -191,10 +193,6 @@
   \input{conclusion.tex}
   Example Cite \cite{GenVectorFusion2013}
 
-
-
-\nomenclature{Flat Data Parallelism}{sldjflk jksldjfklsjdklf sdlkjfklsjdf lkjsdlkfjlksdj flksdjlksdj fsd}
-
 %% appendix if used
 %%\appendix
 %%\typeout{===== File: appendix}
@@ -208,7 +206,7 @@
 
 \typeout{===== Section: literature}
 %% read the documentation for customizing the style
-\bibliographystyle{dinat}
+\bibliographystyle{apalike}
 \bibliography{thesis}
 
 \typeout{===== Section: nomenclature}

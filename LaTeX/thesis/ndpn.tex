@@ -8,5 +8,14 @@
     * sortPS is parallel merge-sort
   \section{Implementation}
     ...
-  \section{Runtime analysis}
+  \section{Complexities}
     ...
+    
+    % TODO: Genau erläuteren und präzisieren wie Work&Depth mit der Anzahl der Prozessoren in den distributed Types zusammenhängen.
+    %    Die tatsächliche Parallelität steck in der Anzahl der PUs (Processing Units) und den verteilten Algorithmen
+    %    zwischen den einzelnen PUs. Damit wird sumD und propagateD auf D(log n) gedrückt.
+        
+    % Ignoriert!! Twofold interpretation: divL = <built-in parallel divL> OR < mapD divS> with distributed types and extended library optimization
+    % immer die zweite variante - weil sonst das andere Pman program nicht ginge.
+      
+    

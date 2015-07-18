@@ -24,4 +24,141 @@
   local chunk of the dense array.
 
   Depth: 1, Work: \c{z + length ps}
+  
+\section{Complexities for \ndpv}  
+      
+    \subsection{Complexity table}
+      A table of complexities is given in \ref{complexities_ndpv}.
+      \begin{table}[h]
+        \caption{Complexities for \ndpv}
+        \label{complexities_ndpv}
+        \begin{tabular}{lll}
+          \toprule
+          function or variable &      O(W)           & O(D) \\
+          \midrule
+          hbalance        & \max(n \log n, gmax)& \log \max(n, gmax) \\
+          \midrule
+          hist            & \max(n \log n, gmax)& \log n \\
+          concatPS        & 1                   & 1 \\
+          sortPS          & $n \log n$          & $\log n$ \\
+          segdSplitMerge  & $n \log n$          & $\log n$ \\
+          mapD tripletToATup2  & gmax           & 1 \\
+          joinD xs        & gmax                & 1 \\
+          \midrule
+          accu            & gmax                & \log gmax \\
+          sparseToDenseD  & gmax                & 1 \\
+          splitSparseD    & gmax                & 1 \\
+          mapD scanlS     & gmax                & 1 \\
+          propagateD      & 1                   & $\log gmax$ \\
+          mapD (mapS plusInt) & gmax            & 1 \\
+          joinD           & gmax                & 1 \\
+          \midrule
+          as              & gmax                & 1 \\
+          splitD          & gmax                & 1 \\
+          mapD normScale  & gmax                & 1 \\
+          joinD           & gmax                & 1 \\
+          \midrule
+          expandPS  & 1  & 1 \\
+          \midrule
+          img' (the new image)     & n                   & 1 \\
+          concatPS        & 1                   & 1 \\
+          indexPL         & n                   & 1 \\
+          unconcatPS      & 1                   & 1 \\
+        \end{tabular}
+      \end{table}
+      
+    \subsection{Functions/Variables}
+
+    \subsubsection{Hbalance}
+      Let $n = |img| = w\cdot h$
+      \begin{equation}
+      \begin{split}
+      \W(w \times h,gmax)
+            & = \W(hist) + \W(accu) + \W(gs) + \W(expandPS) + \W(img') \\
+            & = O( \max(n \log n, gmax) + gmax + gmax + 1 + n) \\
+            & \in O(\max(n \log n, gmax)) \\
+      \D(w \times h,gmax)
+          & = \max \{ hist, accu, gs, expandPS, img'\} \\
+          & = \max \{\log n, \log gmax \} \\
+          & \in O(\log \max(n,gmax)) \\
+      \end{split}
+      \end{equation}
+        
+    \subsubsection{Histogram}
+      Let $n = |img| = w\cdot h$
+      \begin{equation}
+      \begin{split}
+      \W(w \times h)
+            & = \W(concatPS) + \W(sortPS) + \W(segdSplitMerge) \\
+            & + \W(mapD,tripletToATup2) + \W(joinD) \\
+            & = 1 + n \log n + n \log n + gmax + gmax \\
+            & = 1 + 2 (n \log n + gmax) \\
+            & \in O(\max(n \log n, gmax)) \\
+      \D(w \times h)
+            & = \max \{ concatPS,sortPS,...,joinD\} \\
+            & \in O(\log n) \\
+      \end{split}
+      \end{equation}
+    
+    \subsubsection{Accumulated histogram}
+      \begin{equation}
+      \begin{split}
+      \W(gmax)
+            & = \W(splitSparseD) + \W(sparseToDenseD) + \W(mapD,scanlS) \\
+            &     + \W(propagateD) + \W(mapD,mapS,plusInt) + \W(joinD) \\
+            & = gmax + gmax + gmax + 1 + gmax + gmax\\
+            & = 1 + 5 \cdot gmax \\
+            & \in O(gmax) \\
+      \D(gmax)
+          & = \max \{ splitSparseD, sparseToDenseD, (mapD,scanlS),...\} \\
+          & \in O(\log gmax)
+      \end{split}
+      \end{equation}
+    
+    \subsubsection{Normalisation and Scaling}
+      \begin{equation}
+      \begin{split}
+      \W(gmax)
+            & = \W(joinD) + \W(mapD,normScale) + \W(splitD) \\
+            & = gmax + gmax + gmax \\
+            & = 3 \cdot gmax \\
+            & \in O(gmax) \\
+      \D(gmax)
+          & = \max \{ joinD,(mapD,normScale),splitD\} \\
+          & \in O(1)
+      \end{split}
+      \end{equation}
+      
+    \subsubsection{expandPS}
+      \c{expandPS} is a function which, if executed strictly
+      and literally would have a work complexity of $n \cdot gmax$.
+      However, due to strong improvements in \cite{EffiVect2012Lipp}
+      this replication is simply cached locally such that
+      the work complexity for this case is negilible and
+      can be simplified to $1$. The improvements were not
+      introduces, since it unessesarily would lengthen this
+      thesis without significant insights.
+      
+      \begin{equation}
+      \begin{split}
+      \W(gmax,w \times h)
+            & \in O(1) \\
+      \D(gmax, w \times h)
+            & \in O(1) \\
+      \end{split}
+      \end{equation}
+      
+    \subsubsection{img'}
+      \begin{equation}
+      \begin{split}
+      \W(gmax, w \times h)
+            & = \W(unconcatPS) + \W(indexPL) + \W(concatPS) \\
+            & = 1 + n + 1 \\
+            & \in O(n) \\
+      \D(gmax, w \times h)
+          & = \max \{ unconcatPS, indexPL, concatPS \} \\
+          & \in O(1)
+      \end{split}
+      \end{equation}
+    
 
