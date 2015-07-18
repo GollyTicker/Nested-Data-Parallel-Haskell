@@ -1,0 +1,27 @@
+
+\section{sparseToDensePS}
+  \begin{lstlisting}
+    sparseToDensePS :: Int -> a -> PA (Int,a) -> PA a
+    sparseToDensePS size z ps = 
+      joinD
+      . sparseToDenseD size z
+      . splitSparseD size
+      $ ps
+
+    splitSparseD :: Int -> PA (Int,a) -> Dist (PA (Int,a))
+    sparseToDenseD :: Int -> a -> Dist (PA (Int,a)) -> Dist (PA a)
+  \end{lstlisting}
+  SparseToDensePS converts a sparse array of index-value-pairs
+  to a dense array, where the elements are inserted in the appropriate
+  indices. Unspecified indices are given the default value \c{z}.
+
+  The function operates by first spliting/distributing the sparse array
+  to the various PUs. It does that in such a way, that if all PUs were to
+  hold a chunk of an array of lengh \c{size}, then each PU would get
+  those index-value-pairs for which it would be responsible for on the
+  dense array. This approach enables the second step to be purely local.
+  The second step converts each local chunk of the sparse array to its corresponding
+  local chunk of the dense array.
+
+  Depth: 1, Work: \c{z + length ps}
+

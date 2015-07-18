@@ -76,8 +76,8 @@
   captionpos=b,
   escapeinside={*'}{'*},
   language=haskell,
-  tabsize=1,
-  gobble=3,
+  tabsize=2,
+  gobble=4,
   emphstyle={\bf},
   commentstyle=\it,
   stringstyle=\mdseries\rmfamily,
@@ -155,9 +155,9 @@
 \tableofcontents
 \newpage
 %% enable if these lists should be shown on their own page
-%\listoftables
+\listoftables
 %\listoffigures
-\lstlistoflistings
+% \lstlistoflistings
 
 %% main
 \mainmatter
@@ -191,10 +191,17 @@
   \input{conclusion.tex}
   Example Cite \cite{GenVectorFusion2013}
 
+
+
+\nomenclature{Flat Data Parallelism}{sldjflk jksldjfklsjdklf sdlkjfklsjdf lkjsdlkfjlksdj flksdjlksdj fsd}
+
 %% appendix if used
 %%\appendix
 %%\typeout{===== File: appendix}
 %%\include{appendix}
+
+\chapter{Appendix}
+  \input{appendix.tex}
 
 % bibliography and other stuff
 \backmatter
@@ -206,8 +213,8 @@
 
 \typeout{===== Section: nomenclature}
 %% uncomment if a TOC entry is needed
-%%\addcontentsline{toc}{chapter}{Glossar}
-\renewcommand{\nomname}{Glossar}
+% \addcontentsline{toc}{chapter}{Glossary}
+\renewcommand{\nomname}{Glossary}
 \clearpage
 \markboth{\nomname}{\nomname} %% see nomencl doc, page 9, section 4.1
 \printnomenclature

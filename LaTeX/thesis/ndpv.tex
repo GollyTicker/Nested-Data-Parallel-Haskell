@@ -28,7 +28,7 @@
     The table also holds for other functions with equal suffix - e.g. the \texttt{mapP} row also applies to \textt{scanlP}, \texttt{groupP} etc.
     
     \begin{table}[h]
-      \caption{Functions of the Transformation}
+      \caption{Table of functions}
       \label{mapPs}
       \begin{tabular}{lll}
           \toprule
@@ -52,40 +52,61 @@
            & & the chunks used to distribute \pad. \\
           mapSt f xs & Stream Fusion & \type{(a -> b) -> Stream a -> Stream b}\\
            & not executed & Applies a function on a \textbf{st}ream of values \\
+          splitD & Communication Fusion & \type{PA -> Dist (PA a)}\\
+           & allPUs & splits an array into chunks
+           & & and distributes them to each of the PUs \\
+          joinD & Communication Fusion & \type{Dist (PA a) -> PA a}\\
+           & allPUs & joins local chunks into a global array \\
       \end{tabular}
     \end{table}
+    
     Most of the functions are only simply inlined lateron - therefore they don't exist anymore at runtime and
-    are marked 'not-executed'.
-    Given these functions, we can finally take a look at the first step of the compilers transformation.
+    are marked 'not-executed'. Besides theese functions, we will also need a handful rewrite rules.
+    The most important of them are described in table \ref{rules}.
+    
+    \begin{table}[h]
+      \caption{Table of Rewrite Rules}
+      \label{rules}
+      \begin{tabular}{lll}
+          \toprule
+          rule & rewrite & description \\
+          \midrule
+          splitD/joinD & splitD . joinD = id & Joining and spliting an distributed array  \\
+          & & doesn't change the contents. Therefore \\
+          & & it is equivalent to doing nothing. \\
+       \end{tabular}
+    \end{table}
+    
+    Given these functions and rewrite rules, we can now finally take a look at the first step of the compilers transformation.
     
     \subsection{Vectorization}
       Applying the vectorization procedure as described in \cite{Harness2008} yields the following code. Let's take a look  at it.
       
       % After Vectorization:
       \begin{lstlisting}
-      hbalance img :: PA (PA Int)
-      hbalance img = 
-        let a = scanlPS plusInt 0
-                . sparseToDensePS (plusInt gmax 1) 0
-                . (\g -> ATup2 (headPL g) (lengthPL g))
-                . groupPS
-                . sortPS
-                . concatPS
-                $ img
-            n = lengthPS a
-            gs = floorDoubleL
-                 . multDoubleL (int2DoubleL (replPS n gmax))
-                 . divL
-                     (minusL
-                      (int2DoubleL a)
-                      (replPS n (int2Double (headPS a)))
-                     )
-                 . replPS n
-                 $ minusDouble (int2Double (lastPS a)) (int2Double (headPS a))
-        in unconcatPS img
-           . indexPL (expandPS img gs)
-           . concatPS
-           $ img
+    hbalance img :: PA (PA Int)
+    hbalance img = 
+      let a = scanlPS plusInt 0
+              . sparseToDensePS (plusInt gmax 1) 0
+              . (\g -> ATup2 (headPL g) (lengthPL g))
+              . groupPS
+              . sortPS
+              . concatPS
+              $ img
+          n = lengthPS a
+          gs = floorDoubleL
+               . multDoubleL (int2DoubleL (replPS n gmax))
+               . divL
+                   (minusL
+                    (int2DoubleL a)
+                    (replPS n (int2Double (headPS a)))
+                   )
+               . replPS n
+               $ minusDouble (int2Double (lastPS a)) (int2Double (headPS a))
+      in unconcatPS img
+         . indexPL (expandPS img gs)
+         . concatPS
+         $ img
       \end{lstlisting}
       We can observe how our functions \c{hist},\c{accu} etc. have been inlined and are tightly packed together here.
       We have also moved from using nested \pan to flat \pav and we have replaced polymorphic funcitons like \c{fromIntegral}
@@ -129,61 +150,79 @@
       \subsubsection{Histogram calculation}
         The new form of the accumulcated histogram calculation is given below:
         \begin{lstlisting}
-        let a = joinD
-                . mapD (\(as,a) -> mapS (plusInt a) as)
-                . propagateD plusInt 0
-                . mapD (scanlS plusInt 0)
-                . sparseToDenseD (plusInt gmax 1) 0
-                . splitSparseD (plusInt gmax 1)
-                . joinD
-                . mapD tripletToATup2
-                . segdSplitMerge 0
-                . sortPS
-                . concatPS
-                $ img
+    let a = joinD                           -- scanlPS ends
+            . mapD (\(as,a) -> mapS (plusInt a) as)
+            . propagateD plusInt 0
+            . mapD (scanlS plusInt 0)       -- scanlPS begins; fused
+            . sparseToDenseD (plusInt gmax 1) 0 -- sparseToDensePS begins
+            . splitSparseD (plusInt gmax 1)     
+            . joinD                             -- sparseTodensePS ends
+            . mapD tripletToATup2               -- fused lambda and groupPS 
+            . segdSplitMerge 0                  -- remainings of groupPS
+            . sortPS
+            . concatPS
+            $ img
         \end{lstlisting}
         We can firstly observe the occurrence of functions with a \c{-D} suffix. They operate either
         on each PU locally (as with \c{mapD}) or implement some specific inter-PU calculation (as does \c{propagateD}).
-        These functions are the result of inlining various parallel functions and eliminating communication. They correspondence
-        goes like this:
+        These functions are the result of inlining various parallel functions and eliminating communication.
+        The correspondence to their original functions are given as comments in the code. Only sortPS and concatPS
+        are unchanged. A real compiler would have inlined their definitions and looked for optimisations.
+        We are ignoring their inlining here to simplify the code - there is not much room for optimisation underneath them.
         
         
+        Aside from them, inlining \c{scanlPS} and \c{sparseToDensePS}
+        \footnote[1]{It's definition is given in the appendix.} releaves their internals.
+        Inbetween both of the functions, there was a composition of the distribution primitives - namely \c{splitD . joinD}.
+        Applying the rewrite rule "splitD/joinD" eliminated this communiation overhead. Hurray! Our compiler
+        is now finally starting to detect and fuse nunessesary communication!
         
-        * "Folgende Optimierung die sich die Kommunikation dazwischen spart."
-          (\g -> ...) . groupPS
-            =>                             -- (Value,StartIdx,Count)     (Value,Count)
-          let tripletToATup2 :: Dist (LinkedList (Int,Int,Int)) -> Dist (PA (Int,Int))
-          in joinD
-             . mapD tripletToATup2
-             . segdSplitMerge 0
+        This leaves \c{propagateD} as the only inter-PU communication inbetween the spliting of the
+        sparse array and joining the histogram at the end (line 1).
         
-        * "inline sparseToDensePS and scanlP and concatPS"
-        * explain the subfunction of sparseToDenseP
-        * split/join rule fires
-      
-      
+        The lambda and the groupPS were involved in a rather special fusion. We won't
+        go into the detail of it. Essentially, the lambda expression was
+        was applied to the result of groupPS. This enabled further communication
+        fusioning and created the local operation \c{tripletToATup2}. It creates the
+        local chunks of the sparse-array directly. \c{segdSplitMerge} does the
+        actual work of the distributed grouping\footnote[2]{as explained in the previous chapter}.
+        
       \subsubsection{Normalsation and Scaling}
+      
+      Now let's take a look at the remaining part of the code - that is - the
+      normalisation and scaling procedure:
+      
       \begin{lstlisting}
-      let n = lengthPS a
-          gs = joinD . mapD f . splitD $ a
-          f =
-            (\gmax' divisor a0 x ->
-              floorDoubleS
-                (multDoubleS
-                  (divDoubleS
-                    (minusDoubleS
-                      (int2DoubleS x)
-                      a0)
-                    divisor)
-                  gmax')
-              
-            )
-            $ ( replD n . int2Double $ gmax )
-            $ ( replD n
-                . minusDouble (int2Double (lastPS a))
-                . int2Double . headPS $ a )
-            $ ( replD n . int2Double . headPS $ a )
+    let n = lengthPS a
+        gs = joinD . mapD f . splitD $ a
+        f =
+          (\gmax' divisor a0 x ->
+            floorDoubleS
+              (multDoubleS
+                (divDoubleS
+                  (minusDoubleS
+                    (int2DoubleS x)
+                    a0)
+                  divisor)
+                gmax')
+            
+          )
+          $ ( replD n . int2Double $ gmax )
+          $ ( replD n
+              . minusDouble (int2Double (lastPS a))
+              . int2Double . headPS $ a )
+          $ ( replD n . int2Double . headPS $ a )
       \end{lstlisting}
+      
+      ..
+      
+      
+      Operationally, there is no significant change in the normalisation and scaling.
+      The variables \c{agmax} etc... are still being replicated into arrays
+      before applying the arithmetic mapping. However, now the replication
+      is only limited to the local PU - rather than creating a global array and
+      subsequently splitting it. We can obsere, how the code is slowly nearing
+      our intuitioned execution flow.
       
       * "inline primitive lifted operations"
       * "fire splitD/joinD rule 5 times"
@@ -198,16 +237,16 @@
       
     \subsection{Stream Fusioning}
       \begin{lstlisting}
-      let a0      = int2Double . headPS $ a 
-          divisor = minusDouble (int2Double (lastPS a))
-                    . int2Double . headPS $ a
-          gmax'   = int2Double $ gmax
-          normScale = floorDouble
-                      . (flip multDouble) gmax'
-                      . (flip divDouble) divisor
-                      . (flip minusDouble) a0
-                      . int2Double
-          gs = joinD . mapD (mapS normScale) . splitD $ a
+    let a0      = int2Double . headPS $ a 
+        divisor = minusDouble (int2Double (lastPS a))
+                  . int2Double . headPS $ a
+        gmax'   = int2Double $ gmax
+        normScale = floorDouble
+                    . (flip multDouble) gmax'
+                    . (flip divDouble) divisor
+                    . (flip minusDouble) a0
+                    . int2Double
+        gs = joinD . mapD (mapS normScale) . splitD $ a
        \end{lstlisting}
        
        * "Definitions of the sequential local functions ..."
