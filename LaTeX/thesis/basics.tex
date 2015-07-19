@@ -14,13 +14,131 @@ a description on how it works and examples for its uses in image processing.
 
 \section{Haskell}
   introduction into syntax, immutability, and higher-order functions, lambdas, currying
-  polymorphic types (PA a, Dist a, Vector a)
+  polymorphic types (PA a, Dist a, Vector a), type synonyms
   evaluation, record syntax, naming conventions functions f,g,h, vars x,y,z,a,b,c, arrays of x -> xs -> xss
   identity function, flip
-\section{Nested Data Parallelism}
-  Contrast Nested vs Flat data parallelism,
-  Nested Data Parallelism in Haskell, an ongoing project.
-  This work uses many ideas from their work.
+
+\section{Nested Data Parallelism}  
+  In FDP, parallel mapping primitives are provided to express parallelism.
+  E.g. we are provided with a function \c{map f xs}
+  \footnote{Its type is \type{(a -> b) -> Array a -> Array b}}
+  which applies \c{f} on each of the elements in \c{xs} in parallel.
+  This function has a farily intuitive parallel implementation -
+  simply distribute the input array across the processing units (PUs),
+  make each PU compute the mapping for its local chunk and finally
+  join all elements together.
+  However, the inner function \c{f} has to be sequential.
+  Because it is sequentially applied by each PU, the PU itself cannot
+  apply it in parallel again.
+  This is in constract to NDP where \c{f} itself can also be a parallel operation!
+  Hence the name - \textbf{Nested} Data Parallelism.
+  
+  Let's take a look at an example to show the difference between FDP and NDP.
+  
+  \subsection{SMVM}
+    An widely known problem is sparse-matrix-vector-multiply (\c{smvm}).
+    Given a sparse vector (an array with tuples of \c{(Idx,Elem)}) we want
+    to multiply it with a sparse matrix
+    \footnote{A sparse matrix is a matrix,
+    where the elements of each row are represented
+    by sparse vectors.}
+    to obtain a result vector.
+    Sprase matrices and sparse vectors are ver common
+    in scientific applications and are used to represent
+    vectors/matrices with only a few non-zero elements.
+    
+    In NDP we can give the following straightforward implementation:
+    \begin{lstlisting}
+type SparseVector = [: (Int,Double) :]
+type SparseMatrix = [: SparseVector :]
+
+dotp :: [:Double:] -> SparseVector -> Double
+dotp v sv = sumP ( mapP ( \(i,x) -> (v!i)*x ) sv )
+
+smvm :: SparseMatrix -> [:Double:] -> SparseVector
+smvm sm v = mapP (dotp v) sm
+    \end{lstlisting}
+    We first define the dot product for a sparse vector with a dense vector.
+    \c{dotp} works by assigning each element in the sparse vector,
+    a new value by multiplying its old value with the corresponding
+    value in the second vector
+    \footnote{\c{v!i} accesses the element at the index i in the array v.}
+    , and subsequently summing up all the elements
+    \footnote{\c{sumP} in this context has the type \type{[:Double:] -> Double} and
+    is implemented with a parallel tree-style logarithmic reduction.}
+    .
+    It can be executed optimally within FDP because the inner fuction is a sequential operation.
+    
+    In \c{smvm} we multiply each row with the input vector by using
+    the previously defined \c{dotp}. \c{smvm} is different.
+    We are using a parallel operation \c{dotp} inside another parallel operation - namely \c{mapP}.
+    FDP cannot cope with such constructs and it would only parallise the
+    outer most operation (that is \c{mapP}). Each dot product would
+    be executed sequentially.
+    
+    In contrast, within NDP \c{smvm} both levels of parallelism
+    would be executed in parallel.
+    It does that by transforming the program we wrote into a
+    functionally equivalent flat data parallel program. This transformation
+    is called 'flattening' or 'vectoriation' and will be explained in the next sections.
+    
+  \subsection{Vectorization}
+    
+    Consider a slightly simpler situation.
+      
+    \begin{lstlisting}
+let result = mapP (mapP (\x -> x+1)) [[1,2,3],[4,5],[],[6]]
+    \end{lstlisting}
+    It increases the elements of a nested array by one.
+    If we want to execute both levels in parallel,
+    then we would need to apply the increment function on
+    every element regardless of the nesting structure.
+    
+    
+    \begin{lstlisting}
+      mapP (mapP f) xss = unconcatPS xss
+                          . fL (expandPS xss fEnv)
+                          . concatPS
+                          $ xss
+    \end{lstlisting}
+    
+    
+    
+    
+  % TODO: was hiermit tun?
+  In the ground breaking work \cite{Belloch1996}
+  mayjor contributions to NDP were made. The paper
+  also presented Belloch's earlier work (\cite{NepaBelloch1993}) on NESL - a programming
+  language specifically designed for expressing parallelism
+  in functional programming languages. Its ideas and insights were
+  adapted to various languguages. One of these languages is Haskell.
+  Multitude years of research was nesessary to generalize the
+  advantages of the special purpose language NESL to a widely used
+  general purpose language like Haskell. This project
+  is called Nested Data Parallel Haskell and this section will give
+  an overview of its key contributions.
+  
+  \paragraph{A word on accuracy}
+    The project is - even after 15 years -
+    still in \textit{work in progress}. Due to frequent changes,
+    the papers often use conflicting notation and refer to
+    different statuses of progress. Inconsistent literature and a project still in work makes it difficult
+    to apply it in a thesis. It is not simple to use the original ideas from
+    NESL directly on Haskell as there are great differences (not mentioning
+    the fact it already took 15 years to adapt).
+    
+    Therefore, in this thesis, I have improvised on various conflicting or
+    missing details. I assumed implementations which could really have been
+    used in NDP.\footnote{E.g. \c{groupP} as introducted in chapter 5 doesn't
+    even exist right now. Its implementation as described is however perfectly possible.}
+    The reader is hereby noted that the details
+    mentioned here are implementable - but not nesessarily an accurate
+    representation of the current state of progress.
+  
+  
+  
+  % TODO: needs citations.
+
   Show functions used to program in NDPH.
   Show vectorized types and data for AInt, ATup2, AArr and AClo/Clo.
   Transformation and explain main types (#25 in Notizblock).
@@ -34,15 +152,10 @@ a description on how it works and examples for its uses in image processing.
   some special functions, there exists a special lifted implementation.
   We are concerned about nested parallel constructs like \c{mapP (mapP f)}.
   They are transformed into the following construct
-  \begin{lstlisting}
-  mapP (mapP f) xss = unconcatPS xss
-                      . fL (expandPS xss fEnv)
-                      . concatPS
-                      $ xss
-  \end{lstlisting}
   This is the key insight in nested data parallelism! Nested parallel operations
   can be reduced to flattening the array (line 3), applying a flat data-parallel operation (line 2)
   and finally unflattening the new array into the original structure (line 1).
+  
   
   Show that GHC supports Inlining and Fusion through Rewrite Rules.
 \section{Parallel Computing and Complexity Measures}

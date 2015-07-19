@@ -195,9 +195,6 @@ apply as img = mapP (mapP (as !:)) img
   \footnote{The lines are intentionally counted backwards. This is due to the right-assosiativity of function composition - e.g. \c{h . g . f} applies f first, then g and finally h.}
   ,histogram accumulcation (line 23), normalisation (line 26 - 30),
   scaling (line 33) and the final gray tone mapping (line 36).
-  We are using parallel array comprehensions \c{[:f(a)|a <- as:]}
-  to express elementwise parallel mapping.
-  They are syntactically desugared to \c{mapP (\lam a -> f(a)) as}.
   The implementation operationally only differs in the histogram calculation from \seq.
   (Aside from the fact, that \seq uses a binary-search-tree instead of an array
   for the gray tones.)
