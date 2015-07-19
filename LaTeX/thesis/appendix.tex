@@ -58,8 +58,8 @@
           splitD          & gmax                & 1 \\
           mapD normScale  & gmax                & 1 \\
           joinD           & gmax                & 1 \\
-          \midrule
-          expandPS  & 1  & 1 \\
+          %\midrule
+          %expandPS  & 1  & 1 \\
           \midrule
           img' (the new image)     & n                   & 1 \\
           concatPS        & 1                   & 1 \\
@@ -75,11 +75,11 @@
       \begin{equation}
       \begin{split}
       \W(w \times h,gmax)
-            & = \W(hist) + \W(accu) + \W(gs) + \W(expandPS) + \W(img') \\
-            & = O( \max(n \log n, gmax) + gmax + gmax + 1 + n) \\
+            & = \W(hist) + \W(accu) + \W(gs) + \comment{\W(expandPS)} + \W(img') \\
+            & = O( \max(n \log n, gmax) + gmax + gmax \comment{ + 1} + n) \\
             & \in O(\max(n \log n, gmax)) \\
       \D(w \times h,gmax)
-          & = \max \{ hist, accu, gs, expandPS, img'\} \\
+          & = \max \{ hist, accu, gs\comment{, expandPS}, img'\} \\
           & = \max \{\log n, \log gmax \} \\
           & \in O(\log \max(n,gmax)) \\
       \end{split}
@@ -129,26 +129,26 @@
           & \in O(1)
       \end{split}
       \end{equation}
-      
-    \subsubsection*{expandPS}
-      \c{expandPS} is a function which, if executed strictly
-      and literally would have a work complexity of $n \cdot gmax$.
-      However, due to strong improvements in \cite{EffiVect2012Lipp}
-      this replication is simply cached locally such that
-      the work complexity for this case is negilible and
-      can be simplified to $1$. The improvements were not
-      introduces, since it unessesarily would lengthen this
-      thesis without significant insights.
-      
-      \begin{equation}
-      \begin{split}
-      \W(gmax,w \times h)
-            & \in O(1) \\
-      \D(gmax, w \times h)
-            & \in O(1) \\
-      \end{split}
-      \end{equation}
-      
+    \comment{
+      \subsubsection*{expandPS}
+        \c{expandPS} is a function which, if executed strictly
+        and literally would have a work complexity of $n \cdot gmax$.
+        However, due to strong improvements in \cite{EffiVect2012Lipp}
+        this replication is simply cached locally such that
+        the work complexity for this case is negilible and
+        can be simplified to $1$. The improvements were not
+        introduces, since it unessesarily would lengthen this
+        thesis without significant insights.
+        
+        \begin{equation}
+        \begin{split}
+        \W(gmax,w \times h)
+              & \in O(1) \\
+        \D(gmax, w \times h)
+              & \in O(1) \\
+        \end{split}
+        \end{equation}
+    }
     \subsubsection*{img'}
       \begin{equation}
       \begin{split}

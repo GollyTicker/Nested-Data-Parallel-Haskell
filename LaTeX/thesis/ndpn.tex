@@ -51,11 +51,9 @@ $ xs
     In NDP, the latter is represented by
     \begin{lstlisting}
 AArr {
-data = [# 4,2,2,2,3,3,1 #],
-segd = ATup2 {
-  as = [# 0,1,5,7 #]
-  bs = [# 1,4,2,1 #]
-}
+  data = [# 4,2,2,2,3,3,1 #],
+  indices = [# 0,1,5,7 #]
+  lengths = [# 1,4,2,1 #]
 }
     \end{lstlisting}
     An efficient parallel implementation of \c{groupP}
@@ -91,7 +89,7 @@ segd = ATup2 {
   \subsection{SortP}
     General parallel sorting can be as simple as a parallel
     implementation of merge-sort where the recursive calls are executed
-    in parallel. \c{sortP} of type \type{[:a:] -> [:a:]} implements this,
+    in parallel. \c{sortP} of type \type{[:Int:] -> [:Int:]} implements this,
     and optimal complexities of $\W(n) \in O(n \log n)$
     and $\D(n) \in O(\log n)$.
     \footnote{There exists other sorting mechanism
