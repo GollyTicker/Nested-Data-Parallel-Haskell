@@ -1,5 +1,5 @@
 
-\section{sparseToDensePS}
+\section*{SparseToDensePS}
   \begin{lstlisting}
     sparseToDensePS :: Int -> a -> PA (Int,a) -> PA a
     sparseToDensePS size z ps = 
@@ -26,9 +26,9 @@
   Further analysis reveals complexities $\W(z,ps) \in O(z + length(ps))$
   and $\D(z,ps) \in O(1)$.
   
-\section{Complexities for \ndpv}  
+\section*{Complexities for \ndpv}  
       
-    \subsection{Complexity table}
+    \subsection*{Complexity table}
       A table of complexities is given in \ref{complexities_ndpv}.
       \begin{table}[h]
         \caption{Complexities for \ndpv}
@@ -68,9 +68,9 @@
         \end{tabular}
       \end{table}
       
-    \subsection{Functions/Variables}
+    \subsection*{Functions/Variables}
 
-    \subsubsection{Hbalance}
+    \subsubsection*{Hbalance}
       Let $n = |img| = w\cdot h$
       \begin{equation}
       \begin{split}
@@ -85,7 +85,7 @@
       \end{split}
       \end{equation}
         
-    \subsubsection{Histogram}
+    \subsubsection*{Histogram}
       Let $n = |img| = w\cdot h$
       \begin{equation}
       \begin{split}
@@ -101,7 +101,7 @@
       \end{split}
       \end{equation}
     
-    \subsubsection{Accumulated histogram}
+    \subsubsection*{Accumulated histogram}
       \begin{equation}
       \begin{split}
       \W(gmax)
@@ -116,7 +116,7 @@
       \end{split}
       \end{equation}
     
-    \subsubsection{Normalisation and Scaling}
+    \subsubsection*{Normalisation and Scaling}
       \begin{equation}
       \begin{split}
       \W(gmax)
@@ -130,7 +130,7 @@
       \end{split}
       \end{equation}
       
-    \subsubsection{expandPS}
+    \subsubsection*{expandPS}
       \c{expandPS} is a function which, if executed strictly
       and literally would have a work complexity of $n \cdot gmax$.
       However, due to strong improvements in \cite{EffiVect2012Lipp}
@@ -149,7 +149,7 @@
       \end{split}
       \end{equation}
       
-    \subsubsection{img'}
+    \subsubsection*{img'}
       \begin{equation}
       \begin{split}
       \W(gmax, w \times h)

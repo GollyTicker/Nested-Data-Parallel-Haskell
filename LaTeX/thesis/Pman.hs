@@ -8,7 +8,7 @@ hbalance img =
       max = hist ! gmax
       apply hist = parMap (\i -> h ! i) img
       sclNrm :: Int -> Int
-      sclNrm x = round( (x-min)/(max - min)*gmax )
+      sclNrm x = floor ( (x-min)/(max - min)*gmax )
   in  apply (parMap sclNrm) hist
 
 parAccuHist :: Image -> Hist

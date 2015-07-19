@@ -34,6 +34,11 @@
 \renewcommand{\c}[1]{\type{#1}\xspace}
 \newcommand{\lam}[0]{\textrm{$\lambda$}}
 
+% Building:
+% Gedit -> LaTeX build - Strg + Alt + 1
+% $ bibtex thesis
+% $ makeindex thesis.nlo -s nomencl.ist -o thesis.nls
+% Gedit -> LaTeX build - Strg + Alt + 1
 
 % My Packages
 \usepackage{booktabs,url}
@@ -199,7 +204,8 @@
 %%\typeout{===== File: appendix}
 %%\include{appendix}
 
-\chapter{Appendix}
+\chapter*{Appendix}
+\addcontentsline{toc}{chapter}{Appendix}
   \input{appendix.tex}
 
 % bibliography and other stuff
@@ -210,13 +216,15 @@
 \bibliographystyle{apalike}
 \bibliography{thesis}
 
-\typeout{===== Section: nomenclature}
+%\typeout{===== Section: nomenclature}
 %% uncomment if a TOC entry is needed
-% \addcontentsline{toc}{chapter}{Glossary}
+\addcontentsline{toc}{chapter}{Glossary}
 \renewcommand{\nomname}{Glossary}
-\clearpage
 \markboth{\nomname}{\nomname} %% see nomencl doc, page 9, section 4.1
 \printnomenclature
+
+\clearpage
+
 
 %% index
 \typeout{===== Section: index}

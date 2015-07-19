@@ -1,400 +1,410 @@
 
-  % TINA - There is no alterative.
-  %   - Angela Merkel
+% TINA - There is no alterative.
+%   - Angela Merkel
 
-  After building up momentum and viewing a few implementations of \algo
-  we are now ready to tackle the core transformation and optimisations
-  offered by Nested Data Parallelism in Haskell (and related functional languages).
-  This chapter will go through the transformations and present the
-  final program \ndpv. This program would have been the results of the compilers \textit{automatic}
-  optimisations before it would be translated into mashine code and finally executed.
-  At the end of this chapter, we will measure the complexities of \ndpv as we already did for the previous programs.
+After building up momentum and viewing a few implementations of \algo
+we are now ready to tackle the core transformation and optimisations
+offered by Nested Data Parallelism in Haskell (and related functional languages).
+This chapter will go through the transformations and present the
+final program \ndpv. This program would have been the results of the compilers \textit{automatic}
+optimisations before it would be translated into mashine code and finally executed.
+At the end of this chapter, we will measure the complexities of \ndpv as we already did for the previous programs.
+
+\section{Transformations}
+  As presented in the overview, the compiler applies a series of transformations. They can be
+  roughly broken down into three steps:
+  \begin{enumerate}
+    \item \emph{Vectorization} - Uses flat non-parametric array \pav representations instead of the
+          vanilla nested parallel arrays \pan . The flatening is also applied to nested parallel comprehensions.
+    \item \emph{Communicaiton Fusioning} - The parallel functions are inlined and the compiler uses rewrite rules to
+          find and reduce communication inbetween PUs. It distinguishes between global arrays (\pav) and the local chunks (\pad)
+          compromising the global one.
+    \item \emph{Stream Fusioning} - Local sequential functions over the chunks can be further fused together. Now
+          the creation of intermediate local arrays (\pad) is eliminated.
+  \end{enumerate}
   
-  \section{Transformations}
-    As presented in the overview, the compiler applies a series of transformations. They can be
-    roughly broken down into three steps:
-    \begin{enumerate}
-      \item \emph{Vectorization} - Uses flat non-parametric array \pav representations instead of the
-            vanilla nested parallel arrays \pan . The flatening is also applied to nested parallel comprehensions.
-      \item \emph{Communicaiton Fusioning} - The parallel functions are inlined and the compiler uses rewrite rules to
-            find and reduce communication inbetween PUs. It distinguishes between global arrays (\pav) and the local chunks (\pad)
-            compromising the global one.
-      \item \emph{Stream Fusioning} - Local sequential functions over the chunks can be further fused together. Now
-            the creation of intermediate local arrays (\pad) is eliminated.
-    \end{enumerate}
-    
-    Most notably, the vectorization step makes the following mapping.
-    \begin{lstlisting}
+  Most notably, the vectorization step makes the following mapping.
+  \begin{lstlisting}
 mapP (mapP f) xss = unconcatPS xss
-                            . fL (expandPS xss fEnv)
-                            . concatPS
-                            $ xss
-    \end{lstlisting}
-    where \c{fL} is the lifted version of \c{f} and \c{fEnv} is
-    the array of curried arguments. They need to be expanded accordingly.
-    
-    The transformation is going to make use of plenty functions. Most of them will are going to be
-    introduced when they first appear - others are more frequent and require a summary. They are explained in table \ref{mapPs}.
-    The table also holds for other functions with same suffix - e.g. the \c{mapP} row also applies to \c{scanlP}, \c{groupP} etc.
-    
-    \begin{table}[h]
-      \caption{Table of functions}
-      \label{mapPs}
-      \begin{tabular}{lll}
-          \toprule
-          function & first appearance/ & type/ \\
-            & execution context & description \\
-          \midrule
-          mapP f xs & Programer-view & \type{(a -> b) -> [:a:] -> [:b:]} \\
-           & not executed & \textbf{P}arallel array functions the programer uses \\
-          mapPS f xs & Vectorization & \type{(a :-> b) -> PA a -> PA b} \\
-           & not executed & \textbf{P}arallel \textbf{S}calar functions applied over flat arrays \\
-          indexPL is xs & Vectorization & \type{PA Int -> PA (PA a) -> PA a} \\
-           & not executed & \textbf{P}arallel \textbf{L}ifted indexing on flat arrays. It's scalar\\
-           & & function is \type{indexP :: Int -> [:a:] -> a} \\
-          mapD f x & Communication Fusion & \type{(a -> b) -> Dist a -> Dist b} \\
-           & mapD: all PUs & Each PU applies \c{f} on it's chunk of the \\
-           & f: local per PU & \textbf{d}istributed value. True parallelsim here! \\
-          mapS f xs & Communication Fusion & \type{(a -> b) -> Vector a -> Vector b}\\
-           & local PU & Applies a mapping \textbf{s}equentially. \\
-           & & \c{Vector} is the Haskell implementation of \\
-           & & conventional local in-memory arrays. They are \\
-           & & the chunks used to distribute \pad. \\
-          splitD & Communication Fusion & \type{PA -> Dist (PA a)}\\
-           & all PUs & splits an array into chunks and \\
-           & & distributes them to each of the PUs \\
-          joinD & Communication Fusion & \type{Dist (PA a) -> PA a}\\
-           & all PUs & joins local chunks into a global array \\
-          mapSt f xs & Stream Fusion & \type{(a -> b) -> Stream a -> Stream b}\\
-           & not executed & Applies a function on a \textbf{st}ream of values \\
-      \end{tabular}
-    \end{table}
-    
-    Most of the functions are only simply inlined lateron - therefore they don't exist anymore at runtime and
-    are marked 'not-executed'. Besides these functions, we will also need handful rewrite rules.
-    The most important of them are described in table \ref{rules}.
-    
-    \begin{table}[h]
-      \caption{Table of Rewrite Rules}
-      \label{rules}
-      \begin{tabular}{lll}
-          \toprule
-          rule & rewrite & description \\
-          \midrule
-          splitD/joinD & splitD . joinD = id & Joining and spliting an distributed array  \\
-          & & doesn't change the contents. Therefore \\
-          & & it is equivalent to doing nothing. \\
-          
-          mapD/replD & mapD f . replD n & Replicating a value and mapping \\
-          & = replD n . f & all values is equivalent to \\
-          & & directly applying the function and \\
-          & & subsequently replicating it. \\
-          
-          splitD/replPS & splitD . replPS n & Replicating and spliting a value \\
-          & = replD n & is equivalent to creating the local chunks\\
-          & & directly. ReplD implements this and knows \\
-          & & which chunk its PU is responsible for. \\
-          
-          ZipReplSplit & zipWithD f (replD a) & Zipping with a replicated value\\
-          & . splitD  & already in scope - is equivalent to - applying \\
-          & = mapD (f a) & the mapping with the value \\
-          & & curried into the function.\\
-          
-          mapD/zipWithD & mapD f . zipWithD g xs = & A map operation after a zip operation \\
-          & zipWithD (\lam x y -> f (g x y)) xs & is equivalent to a single zip operation \\
-          & & which applies both \c{f} and \c{g}. \\
-          
-          unstream/stream & unstream . stream = id & Converting back and fourth is \\
-          &  & equivalent to doing nothing. \\
-       \end{tabular}
-    \end{table}
+                          . fL (expandPS xss fEnv)
+                          . concatPS
+                          $ xss
+  \end{lstlisting}
+  where \c{fL} is the lifted version of \c{f} and \c{fEnv} is
+  the array of curried arguments. They need to be expanded accordingly.
   
-    Given these functions and rewrite rules, we can now finally take a look at the first step of the compilers transformation.
+  The transformation is going to make use of plenty functions. Most of them will are going to be
+  introduced when they first appear - others are more frequent and require a summary. They are explained in table \ref{mapPs}.
+  The table also holds for other functions with same suffix - e.g. the \c{mapP} row also applies to \c{scanlP}, \c{groupP} etc.
+  
+  \begin{table}[h]
+    \caption{Table of functions}
+    \label{mapPs}
+    \begin{tabular}{lll}
+        \toprule
+        function & first appearance/ & type/ \\
+          & execution context & description \\
+        \midrule
+        mapP f xs & Programer-view & \type{(a -> b) -> [:a:] -> [:b:]} \\
+         & not executed & \textbf{P}arallel array functions the programer uses \\
+        mapPS f xs & Vectorization & \type{(a :-> b) -> PA a -> PA b} \\
+         & not executed & \textbf{P}arallel \textbf{S}calar functions applied over flat arrays \\
+        indexPL is xs & Vectorization & \type{PA Int -> PA (PA a) -> PA a} \\
+         & not executed & \textbf{P}arallel \textbf{L}ifted indexing on flat arrays. It's scalar\\
+         & & function is \type{indexP :: Int -> [:a:] -> a} \\
+        mapD f x & Communication Fusion & \type{(a -> b) -> Dist a -> Dist b} \\
+         & mapD: all PUs & Each PU applies \c{f} on it's chunk of the \\
+         & f: local per PU & \textbf{d}istributed value. True parallelsim here! \\
+        mapS f xs & Communication Fusion & \type{(a -> b) -> Vector a -> Vector b}\\
+         & local PU & Applies a mapping \textbf{s}equentially. \\
+         & & \c{Vector} is the Haskell implementation of \\
+         & & conventional local in-memory arrays. \\
+        splitD & Communication Fusion & \type{PA -> Dist (PA a)}\\
+         & all PUs & splits an array into chunks and \\
+         & & distributes them to each of the PUs \\
+        joinD & Communication Fusion & \type{Dist (PA a) -> PA a}\\
+         & all PUs & joins local chunks into a global array \\
+        mapSt f xs & Stream Fusion & \type{(a -> b) -> Stream a -> Stream b}\\
+         & not executed & Applies a function on a \textbf{st}ream of values \\
+    \end{tabular}
+  \end{table}
+
+  \nomenclature{\c{Vector}}{is the Haskell implementation of conventional local in-memory arrays.
+          They are used as the distributed chunks of \pad.}
+  
+  Most of the functions are only simply inlined lateron - therefore they don't exist anymore at runtime and
+  are marked 'not-executed'. Besides these functions, we will also need handful rewrite rules.
+  The most important of them are described in table \ref{rules}.
+  
+  \begin{table}[h]
+    \caption{Table of Rewrite Rules}
+    \label{rules}
+    \begin{tabular}{lll}
+        \toprule
+        rule & rewrite & description \\
+        \midrule
+        splitD/joinD & splitD . joinD = id & Joining and spliting an distributed array  \\
+        & & doesn't change the contents. Therefore \\
+        & & it is equivalent to doing nothing. \\
+        
+        mapD/replD & mapD f . replD n & Replicating a value and mapping \\
+        & = replD n . f & all values is equivalent to \\
+        & & directly applying the function and \\
+        & & subsequently replicating it. \\
+        
+        splitD/replPS & splitD . replPS n & Replicating and spliting a value \\
+        & = replD n & is equivalent to creating the local chunks\\
+        & & directly. ReplD implements this and knows \\
+        & & which chunk its PU is responsible for. \\
+        
+        ZipReplSplit & zipWithD f (replD a) & Zipping with a replicated value\\
+        & . splitD  & already in scope - is equivalent to - applying \\
+        & = mapD (f a) & the mapping with the value \\
+        & & curried into the function.\\
+        
+        mapD/zipWithD & mapD f . zipWithD g xs = & A map operation after a zip operation \\
+        & zipWithD (\lam x y -> f (g x y)) xs & is equivalent to a single zip operation \\
+        & & which applies both \c{f} and \c{g}. \\
+        
+        unstream/stream & unstream . stream = id & Converting back and fourth is \\
+        &  & equivalent to doing nothing. \\
+     \end{tabular}
+  \end{table}
+
+  Given these functions and rewrite rules, we can now finally take a look at the first step of the compilers transformation.
+  
+  \subsection{Vectorization}
+    Applying the vectorization procedure as described in \cite{Harness2008} yields the following code. Let's take a look  at it.
     
-    \subsection{Vectorization}
-      Applying the vectorization procedure as described in \cite{Harness2008} yields the following code. Let's take a look  at it.
-      
-      % After Vectorization:
-      \begin{lstlisting}
+    % After Vectorization:
+    \begin{lstlisting}
 hbalance img :: PA (PA Int)
 hbalance img = 
-  let a = scanlPS plusInt 0
-              . sparseToDensePS (plusInt gmax 1) 0
-              . (\g -> ATup2 (headPL g) (lengthPL g))
-              . groupPS
-              . sortPS
-              . concatPS
-              $ img
-      n = lengthPS a
-      gs = floorDoubleL
-             . multDoubleL (int2DoubleL (replPS n gmax))
-             . divL
-                 (minusL
-                  (int2DoubleL a)
-                  (replPS n (int2Double (headPS a)))
-                 )
-             . replPS n
-             $ minusDouble (int2Double (lastPS a)) (int2Double (headPS a))
-  in unconcatPS img
-       . indexPL (expandPS img gs)
-       . concatPS
-       $ img
-      \end{lstlisting}
-      We can observe how our functions \c{hist},\c{accu} etc. have been inlined and are tightly packed together here.
-      We have also moved from using nested \pan to flat \pav and we have replaced polymorphic funcitons like \c{fromIntegral}
-      with specific monomorphic primitive mashine functions like \c{intToDouble}.
-      
-      Starting, lines 9 to 4 describe the calculation of the histogram.
-      \footnote[1]{The lines are intentionally counted backwards. This is due to the right-assosiativity of function composition - e.g. \c{h . g . f} applies f first, then g and finally h.}
-      It's only difference is the use of vectorized scalar functions (e.g.\c{groupPS}). These functions operate of the efficient flat
-      representation instead of the nested representation.
-      
-      
-      After that in line 4, the accumulated histogram is calculated. Lines 19 to 13 and 21 to 11
-      describe the normalisation and scaling of the gray tones respectively. The vectorized code uses
-      lifted arithmetic functions (like \c{floorDoubleL}) which operate over arrays of values - in contrast to
-      the scalar mashine primitives like \c{floorDouble}. Essentially, our variables \c{gmax'},\c{a0} and \c{divisor}
-      have been inlined are now replicated\footnote[2]{\c{replPS n x} creates an array of length n - all containing the element x. It has the type \type{Int -> a -> PA a}}
-      to the length of the gray tone array before the lifted arithmetic operations are applied.
-      
-      
-      Finally, lines 32 to 20 describe the mapping of the images gray tones.
-      The nested parallel operation \c{mapP (mapP (!a))} - formerly a part of \c{apply} - 
-      has now been flatten to use a lifted parallel operation, namely \c{indexPL}, over a \textbf{flat} array of
-      the pixels of the image. This is the core of nested data parallelism!
-      
-      In total, the program runtime has a few smaller constants factors. This is mainly due to the elimination of nested data structures
-      and operations. However, there is still much room for improvement.
-      
-      An undesireable side-effect
-      is the replication of the variables during normalisation and scaling. Instead of creating three arrays of identical values
-      to bulk-operate over them with the histogram array - we would like to create a single function which first
-      captures them as in closure. We would then map over the histogram without creating the intermediate arrays.
-      Luckily, our transformation is not over yet - and we will observe how this problem will be fixed and how further optimisations will be applied.
-      Let's head over to the next step.
-      
-    \subsection{Communication Fusioning}
-      
-      Communication Fusioning consists of inlining definitions of parallel functions and using rewrite rules to eliminate
-      unesessary communication. Applying the transformation resulted in a changed definition of the histogram \c{a} and the
-      gray tones \c{gs}. Let's take a look at their new forms.
-      
-      \subsubsection{Histogram calculation}
-        The new form of the accumulcated histogram calculation is given below:
-        \begin{lstlisting}
-let a = joinD                           -- scanlPS ends
-            . mapD (\(as,a) -> mapS (plusInt a) as)
-            . propagateD plusInt 0
-            . mapD (scanlS plusInt 0)       -- scanlPS begins; fused
-            . sparseToDenseD (plusInt gmax 1) 0 -- sparseToDensePS ends
-            . splitSparseD (plusInt gmax 1)     
-            . joinD                             -- sparseTodensePS begins
-            . mapD tripletToATup2               -- fused lambda and groupPS 
-            . segdSplitMerge 0                  -- workhorse of groupPS
+let a = scanlPS plusInt 0
+            . sparseToDensePS (plusInt gmax 1) 0
+            . (\g -> ATup2 (headPL g) (lengthPL g))
+            . groupPS
             . sortPS
             . concatPS
             $ img
-        \end{lstlisting}
-        We can firstly observe the occurrence of functions with a \c{-D} suffix. They operate either
-        on each PU locally (as with \c{mapD}) or implement some specific inter-PU calculation (as does \c{propagateD}).
-        These functions are the result of inlining various parallel functions and eliminating communication.
-        The correspondence to their original functions are given as comments in the code. Only sortPS and concatPS
-        are unchanged. A real compiler would have inlined their definitions and looked for optimisations.
-        We are ignoring their inlining here to simplify the code - there is not much room for optimisation underneath them.
-        
-        
-        Aside from them, inlining \c{scanlPS} and \c{sparseToDensePS}
-        \footnote[1]{It's definition is given in the appendix.} releaves their internals.
-        Inbetween both of the functions, there was a composition of the distribution primitives - namely \c{splitD . joinD}.
-        Applying the rewrite rule "splitD/joinD" eliminated this communiation overhead. Hurray! Our compiler
-        is now finally starting to detect and fuse nunessesary communication!
-        
-        This leaves \c{propagateD} as the only inter-PU communication inbetween the spliting of the
-        sparse array and joining the histogram at the end (line 1).
-        
-        The lambda and the groupPS were involved in a rather special fusion. We won't
-        go into the detail of it. Essentially, the lambda expression was
-        was applied to the result of groupPS. This enabled further communication
-        fusioning and created the local operation \c{tripletToATup2}. It creates the
-        local chunks of the sparse-array directly. \c{segdSplitMerge} does the
-        actual work of the distributed grouping\footnote[2]{as explained in the previous chapter}.
-        
-      \subsubsection{Normalisation and Scaling}
-      
-      Now let's take a look at the remaining part of the code - that is - the
-      normalisation and scaling procedure:
-      
+    n = lengthPS a
+    gs = floorDoubleL
+           . multDoubleL (int2DoubleL (replPS n gmax))
+           . divL
+               (minusL
+                (int2DoubleL a)
+                (replPS n (int2Double (headPS a)))
+               )
+           . replPS n
+           $ minusDouble (int2Double (lastPS a)) (int2Double (headPS a))
+in unconcatPS img
+     . indexPL (expandPS img gs)
+     . concatPS
+     $ img
+    \end{lstlisting}
+    We can observe how our functions \c{hist},\c{accu} etc. have been inlined and are tightly packed together here.
+    We have also moved from using nested \pan to flat \pav and we have replaced polymorphic funcitons like \c{fromIntegral}
+    with specific monomorphic primitive mashine functions like \c{intToDouble}.
+    
+    Starting, lines 9 to 4 describe the calculation of the histogram.
+    It's only difference is the use of vectorized scalar functions (e.g.\c{groupPS}). These functions operate of the efficient flat
+    representation instead of the nested representation.
+    
+    
+    After that in line 4, the accumulated histogram is calculated. Lines 19 to 13 and 21 to 11
+    describe the normalisation and scaling of the gray tones respectively. The vectorized code uses
+    lifted arithmetic functions (like \c{floorDoubleL}) which operate over arrays of values - in contrast to
+    the scalar mashine primitives like \c{floorDouble}. Essentially, our variables \c{gmax'},\c{a0} and \c{divisor}
+    have been inlined are now replicated\footnote{\c{replPS n x} creates an array of length n - all containing the element x. It has the type \type{Int -> a -> PA a}}
+    to the length of the gray tone array before the lifted arithmetic operations are applied.
+    
+    
+    Finally, lines 32 to 20 describe the mapping of the images gray tones.
+    The nested parallel operation \c{mapP (mapP (!a))} - formerly a part of \c{apply} - 
+    has now been flatten to use a lifted parallel operation, namely \c{indexPL}, over a \textbf{flat} array of
+    the pixels of the image. This is the core of nested data parallelism!
+    
+    In total, the program runtime has a few smaller constants factors. This is mainly due to the elimination of nested data structures
+    and operations. However, there is still much room for improvement.
+    
+    An undesireable side-effect
+    is the replication of the variables during normalisation and scaling. Instead of creating three arrays of identical values
+    to bulk-operate over them with the histogram array - we would like to create a single function which first
+    captures them as in closure. We would then map over the histogram without creating the intermediate arrays.
+    Luckily, our transformation is not over yet - and we will observe how this problem will be fixed and how further optimisations will be applied.
+    Let's head over to the next step.
+    
+  \subsection{Communication Fusioning}
+    
+    Communication Fusioning consists of inlining definitions of parallel functions and using rewrite rules to eliminate
+    unesessary communication. Applying the transformation resulted in a changed definition of the histogram \c{a} and the
+    gray tones \c{gs}. Let's take a look at their new forms.
+    
+    \subsubsection{Histogram calculation}
+      The new form of the accumulcated histogram calculation is given below:
       \begin{lstlisting}
-let n = lengthPS a
-    gs = joinD . mapD f . splitD $ a
-    f = (\gmax' divisor a0 x ->
-          floorDoubleS
-            (multDoubleS
-              (divDoubleS
-                (minusDoubleS
-                  (int2DoubleS x)
-                  a0)
-                divisor)
-              gmax')
-          )
-          $ ( replD n . int2Double $ gmax )
-          $ ( replD n
-              . minusDouble (int2Double (lastPS a))
-              . int2Double . headPS $ a )
-          $ ( replD n . int2Double . headPS $ a )
+let a = joinD                           -- scanlPS ends
+          . mapD (\(as,a) -> mapS (plusInt a) as)
+          . propagateD plusInt 0
+          . mapD (scanlS plusInt 0)       -- scanlPS begins; fused
+          . sparseToDenseD (plusInt gmax 1) 0 -- sparseToDensePS ends
+          . splitSparseD (plusInt gmax 1)     
+          . joinD                             -- sparseTodensePS begins
+          . mapD tripletToATup2               -- fused lambda and groupPS 
+          . segdSplitMerge 0                  -- workhorse of groupPS
+          . sortPS
+          . concatPS
+          $ img
       \end{lstlisting}
-      Let's take a look of the original definitions of the lifted functions. Their definition goes similar to these two examples:
-      \begin{lstlisting}
+      We can firstly observe the occurrence of functions with a \c{-D} suffix. They operate either
+      on each PU locally (as with \c{mapD}) or implement some specific inter-PU calculation (as does \c{propagateD}).
+      These functions are the result of inlining various parallel functions and eliminating communication.
+      The correspondence to their original functions are given as comments in the code. Only sortPS and concatPS
+      are unchanged. A real compiler would have inlined their definitions and looked for optimisations.
+      We are ignoring their inlining here to simplify the code - there is not much room for optimisation underneath them.
+      
+      
+      Aside from them, inlining \c{scanlPS} and \c{sparseToDensePS}
+      \footnote{It's definition is given in the appendix.} releaves their internals.
+      Inbetween both of the functions, there was a composition of the distribution primitives - namely \c{splitD . joinD}.
+      Applying the rewrite rule "splitD/joinD" eliminated this communiation overhead. Hurray! Our compiler
+      is now finally starting to detect and fuse nunessesary communication!
+      
+      This leaves \c{propagateD} as the only inter-PU communication inbetween the spliting of the
+      sparse array and joining the histogram at the end (line 1).
+      
+      The lambda and the groupPS were involved in a rather special fusion. We won't
+      go into the detail of it. Essentially, the lambda expression was
+      was applied to the result of groupPS. This enabled further communication
+      fusioning and created the local operation \c{tripletToATup2}. It creates the
+      local chunks of the sparse-array directly. \c{segdSplitMerge} does the
+      actual work of the distributed grouping\footnote{as explained in the previous chapter}.
+      
+    \subsubsection{Normalisation and Scaling}
+    
+    Now let's take a look at the remaining part of the code - that is - the
+    normalisation and scaling procedure:
+    
+    \begin{lstlisting}
+let n = lengthPS a
+  gs = joinD . mapD f . splitD $ a
+  f = (\gmax' divisor a0 x ->
+        floorDoubleS
+          (multDoubleS
+            (divDoubleS
+              (minusDoubleS
+                (int2DoubleS x)
+                a0)
+              divisor)
+            gmax')
+        )
+        $ ( replD n . int2Double $ gmax )
+        $ ( replD n
+            . minusDouble (int2Double (lastPS a))
+            . int2Double . headPS $ a )
+        $ ( replD n . int2Double . headPS $ a )
+    \end{lstlisting}
+    Let's take a look of the original definitions of the lifted functions. Their definition goes similar to these two examples:
+    \begin{lstlisting}
 floorDoubleL = joinD . mapD floorDoubleS . splitD
 multDoubleL as = joinD . zipWithD multDoubleS (splitD as) . splitD
-      \end{lstlisting}
-      The lifted functions first split their argument arrays(\c{splitD}) into each PU.
-      Then each PU (\c{mapD}) applies the respective operation on it's local chunk(\c{floorDoubleS}).
-      Finally the local chunks are joined into a global array.
-      
-      Inlining these functions created \emph{five} pairs of \c{splitD . joinD} - which were then immediately
-      eliminated using the "splitD/joinD" rule.
-      
-      After that, a cascade of rewrite rules fire and propagate the normalisation and scaling
-      constants towards inside the lifting operations. A sophisticated combination of the rules
-      "mapD/zipWithD", "splitD,replPS", "mapD/replD" and "ZipReplSplit" results in
-      the code we currently have.
-      
-      Operationally, there an important change in the normalisation and scaling.
-      Although, constants (like \c{int2Double \$ gmax}) are still being replicated into arrays
-      before applying the arithmetic mapping - now the replication
-      is only limited to the local PU. This is different than before, when
-      the constants were replicated globally and subsequently split.
-      We can observe, how the code is slowly nearing our previously intuitioned execution flow.
-      
-      
-      In terms of speed, the communication fusion fused together \c{six} points of synchronisation
-      and greatly reduced constant factors in its runtime complexity by pushing
-      replications into local PU operations. We can further improve on that with stream fusion.
-      
-    \subsection{Stream Fusioning}
-      Stream Fusioning is our final step of optimisation. Applying it improves
-      the normalisation and scaling. So, let's take a look at it.
-      \begin{lstlisting}
+    \end{lstlisting}
+    The lifted functions first split their argument arrays(\c{splitD}) into each PU.
+    Then each PU (\c{mapD}) applies the respective operation on it's local chunk(\c{floorDoubleS}).
+    Finally the local chunks are joined into a global array.
+    
+    Inlining these functions created \emph{five} pairs of \c{splitD . joinD} - which were then immediately
+    eliminated using the "splitD/joinD" rule.
+    
+    After that, a cascade of rewrite rules fire and propagate the normalisation and scaling
+    constants towards inside the lifting operations. A sophisticated combination of the rules
+    "mapD/zipWithD", "splitD,replPS", "mapD/replD" and "ZipReplSplit" results in
+    the code we currently have.
+    
+    Operationally, there an important change in the normalisation and scaling.
+    Although, constants (like \c{int2Double \$ gmax}) are still being replicated into arrays
+    before applying the arithmetic mapping - now the replication
+    is only limited to the local PU. This is different than before, when
+    the constants were replicated globally and subsequently split.
+    We can observe, how the code is slowly nearing our previously intuitioned execution flow.
+    
+    
+    In terms of speed, the communication fusion fused together \c{six} points of synchronisation
+    and greatly reduced constant factors in its runtime complexity by pushing
+    replications into local PU operations. We can further improve on that with stream fusion.
+    
+  \subsection{Stream Fusioning}
+    Stream Fusioning is our final step of optimisation. Applying it improves
+    the normalisation and scaling. So, let's take a look at it.
+    \begin{lstlisting}
 let a0      = int2Double . headPS $ a 
-    divisor = minusDouble (int2Double (lastPS a))
-                  . int2Double . headPS $ a
-    gmax'   = int2Double $ gmax
-    normScale = floorDouble
-                    . (flip multDouble) gmax'
-                    . (flip divDouble) divisor
-                    . (flip minusDouble) a0
-                    . int2Double
-    gs = joinD . mapD (mapS normScale) . splitD $ a
-       \end{lstlisting}
-       Firstly, we can observe, how the replications have been completely removed! The
-       constants are now first calculated and then used applied into the
-       arithmetic functions. The arithmetic functions also have been merged together into
-       a single function \c{normScale}! This function is now applied elementwise
-       on each value in each of the local chunks of the entire histogram array.
-       
-       This was a result of inlining the local sequential functions like \c{multDoubleS}
-       and subsequent stream fusion. For example, \c{multDoubleS} and \c{floorDoubleS} are defined as:\footnote[1]{Note the similarity of stream fusion and communication fusion when it comes to the function definitions and rewrite rules.}
-       \begin{lstlisting}
+  divisor = minusDouble (int2Double (lastPS a))
+                . int2Double . headPS $ a
+  gmax'   = int2Double $ gmax
+  normScale = floorDouble
+                  . (flip multDouble) gmax'
+                  . (flip divDouble) divisor
+                  . (flip minusDouble) a0
+                  . int2Double
+  gs = joinD . mapD (mapS normScale) . splitD $ a
+     \end{lstlisting}
+     Firstly, we can observe, how the replications have been completely removed! The
+     constants are now first calculated and then used applied into the
+     arithmetic functions. The arithmetic functions also have been merged together into
+     a single function \c{normScale}! This function is now applied elementwise
+     on each value in each of the local chunks of the entire histogram array.
+     
+     This was a result of inlining the local sequential functions like \c{multDoubleS}
+     and subsequent stream fusion. For example, \c{multDoubleS} and \c{floorDoubleS} are defined as:\footnote{Note the similarity of stream fusion and communication fusion when it comes to the function definitions and rewrite rules.}
+     \begin{lstlisting}
 floorDoubleS :: Vector Double -> Vector Int
 floorDoubleS = unstream . mapSt floorDouble . stream
 
 multDoubleS :: Vector Double -> Vector Double -> Vector Double
 multDoubleS as = unstream . zipWithSt multDouble (stream as) . stream
-       \end{lstlisting}
-       Inlining these definitions creates expressions of \c{unstream . stream}. Applying
-       the "unstream/stream" rule and a few other rules similar to the previous
-       communication fusion finally propagates the constants into the
-       \c{normScale} closure.
-       
-       The transformation is - at least for our human minds - over now. The next
-       section will give an overview of our results.
-           
-  \section{Final Program}
-    Summing up the parts, we end up with following optimised code for \ndpv:
-    \begin{lstlisting}
+     \end{lstlisting}
+     Inlining these definitions creates expressions of \c{unstream . stream}. Applying
+     the "unstream/stream" rule and a few other rules similar to the previous
+     communication fusion finally propagates the constants into the
+     \c{normScale} closure.
+     
+     The transformation is - at least for our human minds - over now. The next
+     section will give an overview of our results.
+         
+\section{Final Program}
+  Summing up the parts, we end up with following optimised code for \ndpv:
+  \begin{lstlisting}
 type Image = PA (PA Int)
 type Hist  = PA Int
 
 hbalance :: Image -> Image
 hbalance img =
-  let a :: Hist
-      a = joinD
-            . mapD (\(as,a) -> mapS (plusInt a) as)
-            . propagateD plusInt 0
-            . mapD (scanlS plusInt 0)
-            . sparseToDenseD (plusInt gmax 1) 0
-            . splitSparseD (plusInt gmax 1)
-            . joinD
-            . mapD tripletToATup2
-            . segdSplitMerge 0
-            . sortPS
-            . concatPS
-            $ img
-      n :: Int
-      n = lengthPS a
+let a :: Hist
+    a = joinD
+          . mapD (\(as,a) -> mapS (plusInt a) as)
+          . propagateD plusInt 0
+          . mapD (scanlS plusInt 0)
+          . sparseToDenseD (plusInt gmax 1) 0
+          . splitSparseD (plusInt gmax 1)
+          . joinD
+          . mapD tripletToATup2
+          . segdSplitMerge 0
+          . sortPS
+          . concatPS
+          $ img
+    n :: Int
+    n = lengthPS a
+    
+    a0, divisor, gmax' :: Double
+    a0      = int2Double . headPS $ a
+    divisor = minusDouble (int2Double (lastPS a))
+                  . int2Double . headPS $ a
+    gmax'   = int2Double gmax
+    
+    normScale :: Int -> Int
+    normScale = floorDouble
+                      . (flip multDouble) gmax'
+                      . (flip divDouble) divisor
+                      . (flip minusDouble) a
+                      . int2Double
       
-      a0, divisor, gmax' :: Double
-      a0      = int2Double . headPS $ a
-      divisor = minusDouble (int2Double (lastPS a))
-                    . int2Double . headPS $ a
-      gmax'   = int2Double gmax
-      
-      normScale :: Int -> Int
-      normScale = floorDouble
-                        . (flip multDouble) gmax'
-                        . (flip divDouble) divisor
-                        . (flip minusDouble) a
-                        . int2Double
-        
-      gs :: Hist
-      gs = joinD . mapD (mapS normScale) . splitD $ a
-      
-  in unconcatPS img
-       . indexPL (expandPS img gs)
-       . concatPS
-       $ img
-    \end{lstlisting}
-    On the surface - the algorithm works quite similar to a direct
-    implementation of \ndpn.
-    First the histogram is calculated (lines 18 to 11) and accumulated (lines 10 - 7).
-    Then the constants \c{a0},\c{divisor} and \c{gmax'} are calculated globally and distributed
-    to each PU (lines 22 to 33). After that, each PU applies the normalisation and scaling transformations(line 36).
-    The mapping array \c{gs} is then finally used to map
-    each gray tone to its new value (lines 41 to 38). It happens by using the
-    flat representation of the nested image.
+    gs :: Hist
+    gs = joinD . mapD (mapS normScale) . splitD $ a
     
-    All in all, \ndpv offers a few advantages:
-    \begin{itemize}
-      \item A decreased number of communication and synchronication points.
-      \item Flat data structures and flat operations further decrease constant overhead factors 
-      \item Distributed optimal-complexity prefix-sum, groupP and sortP
-      \item We implemented normalisation and scaling separately, but inlining
-              and optimisation still was able to fuse them together. We didn't
-              manually need to fuse it - as we had to do in \man
-      \item After writing \ndpn, there is no more work involved for the programer in generating this optimised code.
-    \end{itemize}
-    Having transformed \ndpn into \ndpv, we are now ready to give a complexity analysis thereof.
-    
-  \section{Complexities}
-    The complexity analysis for work and depths remains similar to that of \ndpn.
-    After all, both are the same algorithm. \ndpv is only better at it's constant factors.
-    Let $n = |img| = w\cdot h$ then we can calculate its complexity:
-    \begin{equation}
-    \begin{split}
-    \W(w \times h,gmax)
-          & = \W(hist) + \W(accu) + \W(gs) + \W(expandPS) + \W(img') \\
-          & = O( \max(n \log n, gmax) + gmax + gmax + 1 + n) \\
-          & \in O(\max(n \log n, gmax)) \\
-    \D(w \times h,gmax)
-        & = \max \{ hist, accu, gs, expandPS, img'\} \\
-        & = \max \{\log n, \log gmax \} \\
-        & \in O(\log \max(n,gmax)) \\
-    \end{split}
-    \end{equation}
-    The use of the plentyful new functions doesn't change the overall situation compared to \ndpn.
-    A full overview of all the functions an their complexities can be found in the table \ref{complexities_ndpv} in the appendix.
-    
-    
-    
-    
+in unconcatPS img
+     . indexPL (expandPS img gs)
+     . concatPS
+     $ img
+  \end{lstlisting}
+  On the surface - the algorithm works quite similar to a direct
+  implementation of \ndpn.
+  First the histogram is calculated (lines 18 to 11) and accumulated (lines 10 - 7).
+  Then the constants \c{a0},\c{divisor} and \c{gmax'} are calculated globally and distributed
+  to each PU (lines 22 to 33). After that, each PU applies the normalisation and scaling transformations(line 36).
+  The mapping array \c{gs} is then finally used to map
+  each gray tone to its new value (lines 41 to 38). It happens by using the
+  flat representation of the nested image.
+  
+  All in all, \ndpv offers a few advantages:
+  \begin{itemize}
+    \item A decreased number of communication and synchronication points.
+    \item Flat data structures and flat operations further decrease constant overhead factors 
+    \item Distributed optimal-complexity prefix-sum, groupP and sortP
+    \item We implemented normalisation and scaling separately, but inlining
+            and optimisation still was able to fuse them together. We didn't
+            manually need to fuse it - as we had to do in \man
+    \item After writing \ndpn, there is no more work involved for the programer in generating this optimised code.
+  \end{itemize}
+  Having transformed \ndpn into \ndpv, we are now ready to give a complexity analysis thereof.
+  
+\section{Complexities}
+  The complexity analysis for work and depths remains similar to that of \ndpn.
+  After all, both are the same algorithm. \ndpv is only better at it's constant factors.
+  Let $n = |img| = w\cdot h$ then we can calculate its complexity:
+  \begin{equation}
+  \begin{split}
+  \W(w \times h,gmax)
+        & = \W(hist) + \W(accu) + \W(gs) + \W(expandPS) + \W(img') \\
+        & = O( \max(n \log n, gmax) + gmax + gmax + 1 + n) \\
+        & \in O(\max(n \log n, gmax)) \\
+  \D(w \times h,gmax)
+      & = \max \{ hist, accu, gs, expandPS, img'\} \\
+      & = \max \{\log n, \log gmax \} \\
+      & \in O(\log \max(n,gmax)) \\
+  \end{split}
+  \end{equation}
+  The use of the plentyful new functions doesn't change the overall situation compared to \ndpn.
+  We end up with the same work and depth complexities as before. Being at $O(\max(n \log n,gmax))$ in work
+  the histogram calculation remains the most expensive when executed on a single processor.
+  With increasing number of processors, the various logarithmic depth
+  operations in the (accumulated) histogram calculation becomes the most expensive.
+  The take logarithmic time in the number of gray tones \c{gmax} or the number
+  of pixels \c{n} - depending on which one is greater.
+  A overview of all the functions an their complexities can be found in the table \ref{complexities_ndpv} in the appendix.
+  
+  After implementing four algoruthmis and analysing their complexities, we are now ready
+  to evaluate and compare them to each other. That is our goal for the next chapter.
+  
+  
+  
+  

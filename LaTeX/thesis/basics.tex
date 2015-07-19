@@ -1,6 +1,17 @@
 
 % Zitat: Auf den Schultern von Riesen.
 
+This chapter will give an introduction into the basics needed to
+follow this thesis. We will be introduced into functional programming
+in Haskell to ease the understanding of the presented code.
+Then we will cover Nested Data Parallelism (NDP) where
+key insights - and concepts to make use of them - will be presented.
+Afterwards a short introduction into parallel complexity measures is given.
+We will learn about work and depth complexities, how they relate
+to the runtime duraiton and how they can be calculated.
+Finally, the problem of \algo itself is presented - along with
+a description on how it works and examples for its uses in image processing.
+
 \section{Haskell}
   introduction into syntax, immutability, and higher-order functions, lambdas, currying
   polymorphic types (PA a, Dist a, Vector a)
@@ -36,11 +47,16 @@
   Show that GHC supports Inlining and Fusion through Rewrite Rules.
 \section{Parallel Computing and Complexity Measures}
   Explain Work and Depth Complexity measures
-   (and their definitions?)
-   sumP implementierung als Beispiel für Laufzeiteinschätung mit Work/Depth und Anzahl von Prozessoren #1
+  and their definitions!
+   sumP implementierung als Beispiel für Laufzeiteinschätung mit Work/Depth und Anzahl von Prozessoren #1!
+   
    (und zeigen, dass naives stream fusioning die parallelität verliert)
+  
+  $ cite: Parallel Programming Algorithms, NESL, Guy Belloch.
+   
 \section{\algo}
-  Introductipn into Histogram Balancing.
+
+  Introduction into Histogram Balancing.
   
   Prefix sum is a very common operation in computer science. It is a special
     case of scanning through a ordered container from left ro right applying a binary
