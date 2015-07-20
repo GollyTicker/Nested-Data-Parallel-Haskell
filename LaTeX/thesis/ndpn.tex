@@ -156,8 +156,8 @@ hbalance img =
       a0 = headP a
       agmax = lastP a
       n = normalize a0 agmax a
-      s = scale gmax n
-      img' = apply s img
+      gs = scale gmax n
+      img' = apply gs img
   in  img'
 
 hist :: Image -> Hist Int
@@ -175,10 +175,10 @@ normalize a0' agmax' as =
   let a0 = fromIntegral a0'
       agmax = fromIntegral agmax'
       divisor = agmax - a0
-  in  [: (fromIntegral freq' - a0) / divisor | freq' <- as :]
+  in  mapP ( \freq' -> (fromIntegral freq' - a0) / divisor ) as
 
 scale :: Int -> Hist Double -> Hist Int
-scale gmax as = [: floor (a * fromIntegral gmax) |  a <- as :]
+scale gmax as = mapP ( \a -> floor (a * fromIntegral gmax) ) as
 
 apply :: Hist Int -> Image -> Image
 apply as img = mapP (mapP (as !:)) img

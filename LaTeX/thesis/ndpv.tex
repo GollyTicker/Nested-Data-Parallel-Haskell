@@ -59,7 +59,7 @@ let a = scanlPS plusInt 0
            . replPS n
            $ minusDouble (int2Double (lastPS a)) (int2Double (headPS a))
 in unconcatPS img
-     . indexPL
+     . indexPL (expandPS img gs)
      . concatPS
      $ img
     \end{lstlisting} % (expandPS img gs)
@@ -84,6 +84,12 @@ in unconcatPS img
     The nested parallel operation \c{mapP (mapP (!a))} - formerly a part of \c{apply} - 
     has now been flatten to use a lifted parallel operation, namely \c{indexPL}, over a \textbf{flat} array of
     the pixels of the image. This is the core of nested data parallelism!
+    
+    We did however had to add an expression \c{expandPS img gs} to it to be
+    correct. That is an artifect of the flattening procedure and
+    is only mentioned here. It is simply responsilbe
+    for the redistribution of the \c{gs} array. It doesn't affect the
+    overall situation (in terms of work and depth). Therefore it won't be discussed furthermore.
     
     In total, the program runtime has a few smaller constants factors. This is mainly due to the elimination of nested data structures
     and operations. However, there is still much room for improvement.
@@ -273,7 +279,7 @@ let a :: Hist
     gs = joinD . mapD (mapS normScale) . splitD $ a
     
 in unconcatPS img
-     . indexPL
+     . indexPL (expandPS img gs)
      . concatPS
      $ img
   \end{lstlisting} %  (expandPS img gs)
@@ -302,7 +308,7 @@ in unconcatPS img
   The complexity analysis for work and depths remains similar to that of \ndpn.
   After all, both are the same algorithm. \ndpv is only better at it's constant factors.
   Let $n = |img| = w\cdot h$ then we can calculate its complexity:
-  \begin{equation}
+  \begin{equation*}
   \begin{split}
   \W(w \times h,gmax)
         & = \W(hist) + \W(accu) + \W(gs) + \comment{\W(expandPS) +} \W(img') \\
@@ -313,7 +319,7 @@ in unconcatPS img
       & = \max \{\log n, \log gmax \} \\
       & \in O(\log \max(n,gmax)) \\
   \end{split}
-  \end{equation}
+  \end{equation*}
   The use of the plentyful new functions doesn't change the overall situation compared to \ndpn.
   We end up with the same work and depth complexities as before. Being at $O(\max(n \log n,gmax))$ in work
   the histogram calculation remains the most expensive when executed on a single processor.

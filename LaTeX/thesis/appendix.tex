@@ -59,7 +59,7 @@
           mapD normScale  & gmax                & 1 \\
           joinD           & gmax                & 1 \\
           %\midrule
-          %expandPS  & 1  & 1 \\
+          %expandPS  & gmax  & 1 \\
           \midrule
           img' (the new image)     & n                   & 1 \\
           concatPS        & 1                   & 1 \\
@@ -72,7 +72,7 @@
 
     \subsubsection*{Hbalance}
       Let $n = |img| = w\cdot h$
-      \begin{equation}
+      \begin{equation*}
       \begin{split}
       \W(w \times h,gmax)
             & = \W(hist) + \W(accu) + \W(gs) + \comment{\W(expandPS)} + \W(img') \\
@@ -83,11 +83,11 @@
           & = \max \{\log n, \log gmax \} \\
           & \in O(\log \max(n,gmax)) \\
       \end{split}
-      \end{equation}
+      \end{equation*}
         
     \subsubsection*{Histogram}
       Let $n = |img| = w\cdot h$
-      \begin{equation}
+      \begin{equation*}
       \begin{split}
       \W(w \times h)
             & = \W(concatPS) + \W(sortPS) + \W(segdSplitMerge) \\
@@ -99,10 +99,10 @@
             & = \max \{ concatPS,sortPS,...,joinD\} \\
             & \in O(\log n) \\
       \end{split}
-      \end{equation}
+      \end{equation*}
     
     \subsubsection*{Accumulated histogram}
-      \begin{equation}
+      \begin{equation*}
       \begin{split}
       \W(gmax)
             & = \W(splitSparseD) + \W(sparseToDenseD) + \W(mapD,scanlS) \\
@@ -114,10 +114,10 @@
           & = \max \{ splitSparseD, sparseToDenseD, (mapD,scanlS),...\} \\
           & \in O(\log gmax)
       \end{split}
-      \end{equation}
+      \end{equation*}
     
     \subsubsection*{Normalisation and Scaling}
-      \begin{equation}
+      \begin{equation*}
       \begin{split}
       \W(gmax)
             & = \W(joinD) + \W(mapD,normScale) + \W(splitD) \\
@@ -128,7 +128,7 @@
           & = \max \{ joinD,(mapD,normScale),splitD\} \\
           & \in O(1)
       \end{split}
-      \end{equation}
+      \end{equation*}
     \comment{
       \subsubsection*{expandPS}
         \c{expandPS} is a function which, if executed strictly
@@ -140,17 +140,17 @@
         introduces, since it unessesarily would lengthen this
         thesis without significant insights.
         
-        \begin{equation}
+        \begin{equation*}
         \begin{split}
         \W(gmax,w \times h)
               & \in O(1) \\
         \D(gmax, w \times h)
               & \in O(1) \\
         \end{split}
-        \end{equation}
+        \end{equation*}
     }
     \subsubsection*{img'}
-      \begin{equation}
+      \begin{equation*}
       \begin{split}
       \W(gmax, w \times h)
             & = \W(unconcatPS) + \W(indexPL) + \W(concatPS) \\
@@ -160,6 +160,6 @@
           & = \max \{ unconcatPS, indexPL, concatPS \} \\
           & \in O(1)
       \end{split}
-      \end{equation}
+      \end{equation*}
     
 

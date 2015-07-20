@@ -1,17 +1,122 @@
 
 
+This chapter introduces \seq - a sequential implementation
+of \algo. The implementation is given first. Then
+its work and depth complexities - as introduced in section \ref{section:parmeasures}
+- are given.
 
-The sequenial algorithm is a straightforward implementation of the previosly
-described algorithm for \algo.
 
 \section{Implementation}
-  Show code,
-  Reexplain syntax,
-  Explain how it works in words (uses binary-tree maps, dense-arrays,etc..)
+  \seq is a direct implemenation of the description of \algo
+  in section \ref{section:hbalanceintro}.
+  First the data structures used are presented.
+  Then each component of the implementation is given. Afterwards
+  the components are assembled to \seq.
   
-  USE COST-CENTRE PDF!
+  \paragraph{Data Structures}
+    The implementation uses two data types.
+    \begin{lstlisting}
+type Image  = PtrVector (PtrVector Int)
+type Hist a = TreeMap Int a
+    \end{lstlisting}
+    \c{PtrVector a} is a pointer-based array holding values
+    of type \c{a}. The use of pointers enables them to be nested.
+    Thus they can be directly used to represent two-dimensional images.
+    \c{TreeMap k a} is a binary search tree indexed by keys of type
+    \c{k} and containing values of type \c{a}. They are
+    used for the representation of a histogram.
+    \footnote{The use of arrays for the representation of
+    histograms has undesireable effects. Languges with
+    mutability can destructively update the array
+    for each pixel in the image. The Immutability
+    of Haskell prevents this and forces the use of
+    immutable and shared data-structures like \c{TreeMap k a}.}
+    
+    Functions over \c{PtrVector} are suffixed \c{-V}.
+    Functions over \c{TreeMap} aresuffixed \c{-M}.
+  
+  \paragraph{Histogram Calculation}
+    The steps for the creation of the initial histogram are given below:
+    \begin{lstlisting}
+hist :: Image -> Hist Int
+hist = foldrV (\i -> insertWithM (+) i 1) emptyM . concatV
+    \end{lstlisting}
+    \c{hist} proceeds in two steps. First the image is flatten
+    into an one-dimensional array. Then, a \c{TreeMap} is created
+    counting the number of occurrences of each gray tone.
+    \c{foldrV} is linear in the size of the flattened iamge array.
+    \c{insertWithM} is logarithmic in the number elements
+    inserted into the map. The size is bounded by the number of 
+    gray tones - namely \c{gmax+1}.
+    
+  \paragraph{Accumulation}
+  Calculation the accumulated histogram can be implented by
+  a prefix sum over values. It is linear in the size of the map.
+  \begin{lstlisting}
+accu :: Hist Int -> Hist Int
+accu = scanlM (+) 0
+  \end{lstlisting}
+    
+  \paragraph{Normalisation}
+  After accumulation, one has to normalise the histogram.
+  The normalisation is a direct implementation of its formula in
+  \ref{section:hbalanceintro}.
+  \begin{lstlisting}
+normalize :: Int -> Int -> Hist Int -> Hist Double
+normalize a0' agmax' as =
+    let a0 = fromIntegral a0'
+        agmax = fromIntegral agmax'
+        divisor = agmax - a0
+    in  mapM (\freq' -> (fromIntegral freq' - a0) / divisor) as
+  \end{lstlisting}
+  It applies the mapping over the tree-mapusing \c{mapM}.
+  \c{fromIntegral} explicitly converts from \c{Int} to \c{Double} since
+  Haskell clearly distinguishes them. Variable names with a prime
+  (') denote values of type \c{Int}. Variable names without a prime
+  denote \c{Double}s. This naming convention is equally used in
+  \man, \ndpn and \ndpv.
+    
+  \paragraph{Scaling}
+  Scaling occurs similar to normalisation. It is implemented
+  by a mapping over all values in the histogram.
+  \begin{lstlisting}
+scale :: Int -> Hist Double -> Hist Int
+scale gmax = mapM (\d -> floor (d * fromIntegral gmax))
+  \end{lstlisting}
+    
+  \paragraph{Apply}
+  The application of the gray tone mapping to the images pixels
+  is implemented by a nested \c{mapV} over the image. It uses
+  \c{lookupLessEqualM} to lookup the values for the histogram.
+  (It reverts back to a lower gray tone, if the gray tone is not found in the map.)
+  \begin{lstlisting}
+apply :: Hist Int -> Image -> Image
+apply as img = mapV (mapV (lookupLessEqualM as)) img
+  \end{lstlisting}
+  
+  \paragraph{\algo}
+  Having defined the components, one can now directly define \seq:
+  \begin{lstlisting}
+hbalance :: Image -> Image
+hbalance img =
+  let h = hist img
+      a = accu h
+      a0 = firstM a
+      agmax = lastM a
+      n = normalize a0 agmax a
+      gs = scale gmax n
+      img' = apply gs img
+  in img'
+  \end{lstlisting}
+  First the histogram is created (line 3). Then it is accumulated (line 4).
+  After that it is normalised (line 5 to 7) and scaled(line 8).
+  And finally, the gray tone mapping is applied and returned (line 9 to 10).
+  It is defined exactly as previosuly envisioned.
   
 \section{Complexities}
+  % TODO: continue here.
+  USE COST-CENTRE PDF!
+  
   Do runtime analysis like in analysis/seq.tex. But a bit less detailed.
   (The actual derivations could be packed into an appendix!)
   

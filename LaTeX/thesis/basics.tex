@@ -38,7 +38,7 @@ foo x = round (max 5 x)
   In contrast to other programming languages parentheses \c{()} are not used for function application
   (as in \c{f(a)}) but instead are used to specify precedence/ordering.
   Function application is done with the most space efficient operator
-  - that is space ' ' itself! E.g. \c{round 5.2} applies the built-in
+  one can imagine - that is space ' ' itself! E.g. \c{round 5.2} applies the built-in
   float-rounding function to return the integer \c{5}. Multiple-argument
   functions can be applied with multiple spaces. E.g. \c{max 5 x}
   returns the maximum of 5 and x.
@@ -261,7 +261,7 @@ g . f = \x -> g (f x)
   are going to be explained in more detail.
   
   \paragraph{}
-    For parallel arrays, we have a few predefined operations availible.
+    For parallel arrays, we have a few predefined operations available.
     They correspond to functions used in conventional functional programming.
     Their names and their types are given in \ref{table:parfuns}.
     
@@ -397,6 +397,7 @@ mapPL f xss =
     namely the handling of presupplied arguments in the function. Our
     implementation only handles functions without presupplied arguments -
     but it much simpler to understand than the original in \cite{Harness2008}.
+    In the real version we would have another expression \c{expandPS xss fEnv}.
     Introducing it wouldn't affect the overall situation in this thesis -
     so it was simplified.
     }
@@ -406,7 +407,12 @@ mapPL f xss =
     \begin{figure}[h!]
         \begin{center}
         \includegraphics[width=\linewidth]{mapP.png}
-        \caption{Conceptional programer view and actual implementation of \c{mapP (mapP incr)}}
+        \caption{Conceptional programer view and actual implementation of \c{mapP (mapP incr)}
+        \footnote{Here, the commas inbetween the elements have been omitted for visual clarity.
+        This thesis will sometimes use such spaces for separation
+        instead of commas.
+        }
+        }
         \label{figure:mapP}
         \end{center}
     \end{figure}
@@ -646,9 +652,10 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   \clearpage
   
 \section{Parallel Computing and Complexity Measures}
+  \label{section:parmeasures}
   In Parallel Computing, the notion of time complexity of implementation
   has to be revisited. Now the time complexity is dependent on the
-  number of processors availible. Two key measures of
+  number of processors available. Two key measures of
   an algorithm are \emph{work} complexity
   and \emph{depth} complexity. Work is defined
   to be the time (counted in number of operations)
@@ -706,7 +713,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   Consider for example \c{ys = mapP inrc (replP n 1)}.
   Applying the formulas, we
   get complexities of
-  \begin{equation}
+  \begin{equation*}
   \begin{split}
   \W(xs)
         & = 1 + \W(replP,n,1) + \sum_{x \in xs}\W(incr,x) \\
@@ -716,7 +723,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
       & = 1 + 1 + 1 \\
       & \in O(1) \\
   \end{split}
-  \end{equation}
+  \end{equation*}
   where $xs$ is the intermediate array created by \c{replP}.
   Note how we have constant depth!
   If we had as many PUs as our array is in size
@@ -733,7 +740,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   flat array and mapped over only once. Therefore, we expect
   work in $O(w \cdot h)$ and depth in $O(1)$. And indeed - 
   this is what we get when applying our formulas.
-  \begin{equation}
+  \begin{equation*}
   \begin{split}
   \W(mapP,mapP,incr)
         & = 1 + \sum_{as \in ass}\W(mapP,incr,as) \\
@@ -749,7 +756,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
         & = 1 + 2 \\
         & \in O(1) \\
   \end{split}
-  \end{equation}
+  \end{equation*}
   
   Using these constructs, we have a useful tool in measuring
   programs complexity. In the complexities sections of
@@ -759,6 +766,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   on the appendix.
    
 \section{\algo}
+  \label{section:hbalanceintro}
   This section will introduce \algo. It will state the problem and give
   an overview of its procedure.
   Suppose we have an $w \times h$-8-bit-gray-tone image with low contrast.
@@ -823,33 +831,43 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
           this becomes a (accumulated) histogram. For $a = Double$, we get
           a normalised histogram.
         \item $\gmax: Graytone$:
-          The maximum gray tone for the data type in use. (e.g. 255 for 8-bit gray tones)
-        \item $hist: Image \rightarrow Histogram_{Int}$
-          calculates the histogram of an image. (1)
-        \item $accu: Histogram_{Int} \rightarrow Histogram_{Int}$
-          calculates the accumulating histogram from the original histogram. (2)
-        \item $normalize: Int \times Int \times Histogram_{Int} \rightarrow Histogram_{Double}$
-          normalizes the bars (in the range defined by the first two arguments) to a range from 0 to 1. (3)
-          The second argument (called $agmax$) denotes the number of total pixels in the image.
-          For an accumulated histogram $a:Histogram_{Int}$ it can be calculated with
-          $a(gmax)$ or $a(g')$ where $g'$ is highest gray tone in the image.
-          Both are equal, so the implementations take the liberty to use any of these formulas.
-        \item $scale: Graytone \times Histogram_{Double} \rightarrow Histogram_{Int}$
-          scales the normalized values to the maximum gray tone(255 in our case) and rounds down to the nearest integer. (4)
-        \item $apply: Histogram_{Int} \times Image \rightarrow Image$
-          maps each gray tone to its new value as dictated by the first argument. (5)
+          It is the maximum gray tone for the data type in use. (e.g. 255 for 8-bit gray tones)
       \end{itemize}
       
+      Furthermore, the method is broken down into the following functions:
+      
+      \begin{enumerate}
+        \item $hist: Image \rightarrow Histogram_{Int}$
+          It calculates the histogram of an image. (1)
+        \item $accu: Histogram_{Int} \rightarrow Histogram_{Int}$
+          It calculates the accumulating histogram from the original histogram. (2)
+        \item $normalize: Int \times Int \times Histogram_{Int} \rightarrow Histogram_{Double}$
+          It normalizes the bars (in the range defined by the first two arguments) to a range from 0 to 1. (3)
+          The arguments are denoted $a0$ and $agmax$.
+          Normalisation is defined by mapping the histogram values by $x \mapsto \frac{(x - a0)}{agmax - a0}$.
+          The second argument (called $agmax$) denotes the number of total pixels in the image.
+          \comment{
+            For an accumulated histogram $a:Histogram_{Int}$ it can be calculated with
+            $a(gmax)$ or $a(g')$ where $g'$ is highest gray tone in the image.
+            Both are equal, so the implementations may take the liberty to use any of these formulas.
+          }
+        \item $scale: Graytone \times Histogram_{Double} \rightarrow Histogram_{Int}$
+          It scales the normalized values to the maximum gray tone (gmax) and rounds down to the nearest integer.
+          Scaling is defined by mapping the histogram values by $x \mapsto \left \lfloor{x \cdot gmax}\right \rfloor $.
+        \item $apply: Histogram_{Int} \times Image \rightarrow Image$
+          maps each gray tone to its new value as dictated by the first argument. (5)
+      \end{enumerate}
+      
       Given these functions we can define $hbalance: Image \rightarrow Image$ as:
-      \begin{equation}
+      \begin{equation*}
       \begin{split}
-        hbalance(img) & := apply(s,img) \\
+          h & := hist(img) \\
+          a & := accu(h) \\
           s & := scale(gmax,n) \\
           n & := normalize(a(0), a(gmax), a) \\
-          a & := accu(h) \\
-          h & := hist(img) \\
+        hbalance(img) & := apply(s,img) \\
       \end{split}
-      \end{equation}
+      \end{equation*}
       
       Concrete implementations will be given in the coming chapters.
       Applying the algorithm to our initial image gives \ref{fig:img-eq}
