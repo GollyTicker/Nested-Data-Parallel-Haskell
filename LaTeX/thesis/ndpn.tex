@@ -90,13 +90,13 @@ AArr {
     General parallel sorting can be as simple as a parallel
     implementation of merge-sort where the recursive calls are executed
     in parallel. \c{sortP} of type \type{[:Int:] -> [:Int:]} implements this,
-    and optimal complexities of $\W(n) \in O(n \log n)$
+    and enjoyes complexities of $\W(n) \in O(n \log n)$
     and $\D(n) \in O(\log n)$.
     \footnote{There exists other sorting mechanism
     like \emph{Batcher's Bitonic Sort} with $O(n \log^2 n)$ work and $O(\log^2 n)$
     depth. I did not use its implementation as it is sophisticated and
     the workload of its vectorization would have been enourmous (on top of the work I already had).
-    Retrospectively, I didn't end up opening and inlining the \c{sortP} in \ndpn - but that
+    Retrospectively, I didn't end up opening and inlining the \c{sortP} in \ndpv - but that
     was not clear beforehand.
     }
     % TODO: cite. Parallel mergesort with work and depth.
@@ -213,9 +213,64 @@ apply as img = mapP (mapP (as !:)) img
   a simpler format for the same histogram.\footnote{Keeping sparse arrays for the representation of the histogram is a viable option yielding possibly different (maybe better?) complexities.}
   
   At last, we shall consider the function \c{apply}. It uses a nested
-  application of parallel functions and be subject to flattening in \ndpv.
+  application of parallel functions and will be subject to flattening in \ndpv.
   
 \section{Complexities}
+  Using the work and depths measures as introduces previously,
+  we can assign the following measures to the functions involved.
+  Let $n$ be the number of pixels in an $w \times h$ image,
+  then the complexities are given in table \ref{complexities:ndpn}.
+  \begin{table}[h!]
+    \caption{Work and Depth complexities for \ndpn}
+    \label{complexities:ndpn}
+    \begin{center}
+    \begin{tabular}{lll}
+        \toprule
+        function or variable & $\W \in O(...)$           & $\D \in O(...)$ \\
+        \midrule
+        hbalance        & $\max$(n $\log$ n, gmax) & $\log \max$(n, gmax) \\
+        \midrule
+        hist            & $\max$(n $\log$ n, gmax) & $\log$ n \\
+        sparseToDenseP  & gmax                 & 1 \\
+        groupP          & n                    & $\log$ n \\
+        sortP           & n $\log$ n             & $\log$ n \\
+        concatP         & 1                    & 1 \\
+        \midrule
+        accu            & gmax                 & $\log$ gmax \\
+        scanlP          & gmax                 & $\log$ gmax \\
+        \midrule
+        normalize       & gmax                 & 1 \\
+        scale           & gmax                 & 1 \\
+        \midrule
+        apply           & $n = w \cdot h$ & 1 \\
+    \end{tabular}
+    \end{center}
+  \end{table}
+    Be noted, that the entries corespond to a complexity class - 
+    and not to the actual number of operations.
+    Also note, how the hitogram calculation \c{hist} takes the
+    maximum of $n \log n$ and $gmax$ - depending on which value/parameter
+    is higher in the context it is used. Similarly,
+    we get logarithmic bounds on \c{hist} and \c{accu} - and we take
+    the maximum of both to get the final complexity classes.
+    All in all, for our \c{hbalance} in \ndpn we have $\W \in \max(n \log n, gmax)$
+    and $\D \in \log \max(n,gmax)$.
+    These special case distinctions will make up for interesting analysis
+    in our evaluation chapter.
+    
+    Summing it up. The algorithm is staightforward and can be understood with
+    a bit of thoughtwork. It is also to be noted - that we were able
+    to give a parallel implementation of histogram calculation - purely
+    by using common functional processing operations (such as \c{grouP} and \c{sortP}).
+    That is much lower workload that we had in \man. Overall this makes
+    the approach also fast to implement in code.
+    \footnote{I needed approx. thirty minutes to implement and test this code.}
+    
+    
+    Now that we have implemented and alaysed \ndpn - we can finally come
+    to the last part of the meat of this thesis. That is - the
+    transformation of \ndpn to \ndpv!
+      
   
   
   % TODO: Genau erläuteren und präzisieren wie Work&Depth mit der Anzahl der Prozessoren in den distributed Types zusammenhängen.

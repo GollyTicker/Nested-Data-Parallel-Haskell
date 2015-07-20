@@ -110,7 +110,7 @@ myFunc = bar a b                        -- indented, implicit argument
   \paragraph{Type Synonyms}
     Type synonyms enable us to refer to a complicated type by a simpler name.
     E.g. \c{type Foo a = (Int,a)} defines a type synonym - such that
-    \c{Foo Int} is replaced by \c{(Int,a)} during compilation. Compare them to
+    \c{Foo Double} is replaced by \c{(Int,Double)} during compilation. Compare them to
     type macros.
   
   \paragraph{Referential Transparency and Immutability}
@@ -153,7 +153,7 @@ foo x y = x
   
   \paragraph{Higher Order Functions}
     We can define functions which take and pass entire functions as arguments.
-    E.g.\c{} applies the function twice.
+    E.g.\c{applyTwice} applies the function twice.
     \begin{lstlisting}
 applyTwice :: (a -> a) -> a -> a
 applyTwice f x = f (f x)
@@ -177,6 +177,8 @@ id :: a -> a
 id x = x
 flip :: (a -> b -> c) -> b -> a -> c
 flip f x y = f y x
+(.) :: (b -> c) -> (a-> b) -> a -> c
+g . f = \x -> g (f x)
     \end{lstlisting}
     where \c{id} is the identity function and \c{flip} exchanges a functions
     first two arguments.
@@ -184,7 +186,7 @@ flip f x y = f y x
     That menas that (among others) the following law holds:
      \c{\textrm{$\forall$} f: f . id = id . f = f}. This is going to be useful later.
 
-  After a brief overview of the features and a halping hand on the syntax
+  After a brief overview of the features and a helping hand on the syntax
   I will be using, we can take a look at Nested Data Parallelism.
 
 \section{Nested Data Parallelism}
@@ -264,7 +266,7 @@ flip f x y = f y x
     Their names and their types are given in \ref{table:parfuns}.
     
     \begin{table}[h]
-      \caption{Parallel functions}
+      \caption{Parallel functions in NDP}
       \label{table:parfuns}
       \begin{tabular}{lll}
           \toprule
@@ -275,13 +277,17 @@ flip f x y = f y x
           headP & \c{[:a:] -> a} & returns the first element\\
           lastP & \c{[:a:] -> a} & returns the last element \\
           mapP & \c{(a -> b) -> [:a:] -> [:b:]} & applies a function on all elements \\
+          zipWithP & \c{(a -> b -> c)} & zip together pairs of elements with a \\
+           & \c{-> [:a:] -> [:b:] -> [:c:]} & function and return an array of results
+           \footnote{e.g. \c{zipWithP (*) [:1,2,3:] [:1,3,4:] = [:1*1,2*3,3*4:]}. The arrays as assumed to be of equal size.}
+           \\
           sortP & \c{[:Int:] -> [:Int:]} & sorts an array \\
+          sumP & \c{[:Int:] -> Int} & summes the arrays elements \\
           concatP & \c{[:[:a:]:] -> [:a:]} & removes a level of nesting \\
           unconcatP & \c{[:[:a::]] -> [:b:] -> [:[:b:]:]} & exposes a structure to a flat array \\
           replP & \c{Int -> a -> [:a:]} & replicates an element \\
       \end{tabular}
     \end{table}
-
     
   \subsection{Vectorization}
     Vectorization roughly involves two major steps -
@@ -520,8 +526,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     our new function has been optimised to communicate only
     at the beginning and the end and to apply both mappings
     in a single loop per PU!
-    All in all,
-    this is exactly what "let the compiler do the work for you" means!
+    This is exactly what "let the compiler do the work for you" means!
     
   \subsection{Tables of Functions and Rewrite Rules}
     The transformation in chapter \ref{chapter:ndpv} is going to
@@ -532,7 +537,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     the \c{mapP} row similarly applies to \c{scanlP}, \c{groupP} etc.
     
     \begin{table}[h!]
-      \caption{Functions in various stages}
+      \caption{Overview of Functions and Phases in NDP}
       \label{mapPs}
       \begin{tabular}{lll}
           \toprule
@@ -577,7 +582,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     The most important of them are described in table \ref{rules}.
     
     \begin{table}[h!]
-      \caption{Rewrite Rules}
+      \caption{Rewrite Rules in NDP}
       \label{rules}
       \begin{tabular}{lll}
           \toprule
@@ -652,38 +657,230 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   It can also be interpreted as the time needed if we had
   an unlimited number of processors.
   
+  There are limited ways in calculating work and depth. Both are defined
+  recursively over the work and depths of their subexpressions. Generally,
+  work is the sum of operations involved in all of the subexpressions
+  - while depths it  the maximum of number of operations involved in
+  any particular chain of dependencies.
+  We introduce the functions $\W(\cdot)$ and $\D(\cdot)$ which return work
+  and depth, respectively. Sometimes we use syntactics constructs
+  like $\W(f,x)$ to denote the work involved in \emph{applying}
+  \c{f} on \c{x} - it does not include the work involved
+  in calculating \c{x} in the first place. Sometimes,
+  we will also simple denote $\W(n)$ or $\D(n,gmax)$ to emphasize,
+  that the work and depth is dependent of the length of the input
+  or of the parameter $gmax$. In these cases. the function refered to
+  is clear from the context.
+  Table \ref{table:workdepth} gives
+  work and depth complexities for our parallel primitives.
   
-  TODO. 
-  E.g. depth of a tree-like parallel reduction becomes the
-  length of the longest path; that is the tree's height - which
-  itself only logarithmic in
+  \begin{table}[h]
+    \caption{Work and Depth complexities of general functions}
+    \label{table:workdepth}
+    \begin{center}
+    \begin{tabular}{lll}
+      \toprule
+      function & work & depth \\
+      \midrule
+      (!:),indexP & 1 & 1 \\
+      lengthP & 1 & 1 \\
+      headP & 1 & 1 \\
+      lastP & 1 & 1 \\
+      g . f & $\W(g) + \W(f)$ & $\D(g) + \D(f)$ \\
+      mapP f xs & 1 + $\W(xs) + \sum_{x \in xs}\W(f,x)$ & 1+ $\D(xs) + \max_{x \in xs}\D(f,x)$ \\
+      zipWith f as bs & 1 + $\W(as) + \W(bs)$ & 1 + $\D(as) + \D(bs)$ \\
+        & $+ \sum_{pairs (x,y) \in (xs,ys)}\W(f,x,y)$ & $ + \sum_{pairs (x,y) \in (xs,ys)}\D(f,x,y)$ \\
+      sortP & $O(n \log n)$ & $O(\log n)$ \\
+      sumP & n & $\log$ n \\
+      concatP & 1 & 1 \\
+      unconcatP & 1 & 1 \\
+      replP &  n & 1 \\
+    \end{tabular}
+    \end{center}
+  \end{table}
   
-  TODO TODO TODO
-  ...
-  Explain Work and Depth Complexity measures
-  Give and their definitions!
-   sumP implementierung als Beispiel für Laufzeiteinschätung mit Work/Depth und Anzahl von Prozessoren #1!
-   
-   % Nennen, dass naives stream fusioning die parallelität verliert)
+  Note that \c{mapP} has constant depth. 
+  It embodies the idea, that the work or depth is the sum or maximum
+  of the subexpressions neatly.
   
-  % cite: Parallel Programming Algorithms, NESL, Guy Belloch.
+  Consider for example \c{ys = mapP inrc (replP n 1)}.
+  Applying the formulas, we
+  get complexities of
+  \begin{equation}
+  \begin{split}
+  \W(xs)
+        & = 1 + \W(replP,n,1) + \sum_{x \in xs}\W(incr,x) \\
+        & = 1 + n + n \\
+        & \in O(n) \\
+  \D(xs) & = 1 + \D(replP,n,1) + \max_{x \in xs}\D(incr,x) \\
+      & = 1 + 1 + 1 \\
+      & \in O(1) \\
+  \end{split}
+  \end{equation}
+  where $xs$ is the intermediate array created by \c{replP}.
+  Note how we have constant depth!
+  If we had as many PUs as our array is in size
+  - we could assign each PU one element of the array and our operations
+  would indeed require only constant time of local element allocation
+  and function application.
+  
+  These measures, as introduced in \cite{Belloch1996}, work
+  neatly within Nested Data Parallelism. Consider for example the
+  expression \c{mapP (mapP incr) ass} where the
+  nested array \c{ass} has dimensions $w \times h$.
+  As we noted in section \ref{ndpintro}, within NDP,
+  the nested parallel expression will be flattened into a
+  flat array and mapped over only once. Therefore, we expect
+  work in $O(w \cdot h)$ and depth in $O(1)$. And indeed - 
+  this is what we get when applying our formulas.
+  \begin{equation}
+  \begin{split}
+  \W(mapP,mapP,incr)
+        & = 1 + \sum_{as \in ass}\W(mapP,incr,as) \\
+        & = 1 + \sum_{as \in ass}(1 + \sum_{a \in as} \W(incr,a)) \\
+        & = 1 + \sum_{as \in ass}(1 + \sum_{a \in as} 1) \\
+        & = 1 + \sum_{as \in ass}(1 + h) \\
+        & = 1 + w \cdot (1 + h) \\
+        & \in O(w \cdot h) \\
+  \D(mapP,mapP,incr) & = 1 + \max_{as \in ass}\D(mapP,incr,as) \\
+        & = 1 + \max_{as \in ass}(1 + \max_{a \in as} \D(incr,a)) \\
+        & = 1 + \max_{as \in ass}(1 + \max_{a \in as} 1) \\
+        & = 1 + \max_{as \in ass}2 \\
+        & = 1 + 2 \\
+        & \in O(1) \\
+  \end{split}
+  \end{equation}
+  
+  Using these constructs, we have a useful tool in measuring
+  programs complexity. In the complexities sections of
+  the programs, mostly only the results - without their derivaiton -
+  will be presented. More detailed derivations of the complexities shown
+  in the algorithms sections can be found
+  on the appendix.
    
 \section{\algo}
-   TODO
+  This section will introduce \algo. It will state the problem and give
+  an overview of its procedure.
+  Suppose we have an $w \times h$-8-bit-gray-tone image with low contrast.
+  \footnote{photo by Phillip Capper. Source: \url{https://en.wikipedia.org/wiki/File:Unequalized_Hawkes_Bay_NZ.jpg}}
+      
+      \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.45\textwidth]{img-org}
+        \caption{An image with low constrast}
+        \label{fig:img-org}
+      \end{figure}
+      Our goal is to make details more visible to the viewer. For that,
+      Let's take a look at the histogram of the image.
+      \footnote{made by used Wikipedia user \c{Jarekt}. Source: \url{https://en.wikipedia.org/wiki/File:Unequalized_Histogram.svg}}
+      
+      \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.45\textwidth]{hist-org}
+        \caption{The histogram of the original image with absolute(red) and accumulative(black) count.}
+        \label{fig:hist-org}
+      \end{figure}
+      
+      A histogram shows the gray tone distribution of the image in interest.
+      The x-axis denotes the gray tone and the y-axis denotes the
+      number of pixels with a gray tone $x$ (red). The black curve denotes the
+      total number of pixels with a gray tone $g \leq x$.
 
-  Introduction into Histogram Balancing.
-  
-  Prefix sum is a very common operation in computer science. It is a special
-    case of scanning through a ordered container from left ro right applying a binary
-    associative function \c{f}.
-    It is defined as:
-      $$ scanl(f,z,[a_1,a_2,...,a_n])
-         := [f(z,a_1),f(f(z,a_1),a_2),...,f(f(...f(f(z,a_1),a_2)...,a_{n-1}),a_n)]
-      $$
-    An example shall be $scanl(+,0,[1,2,2,3,-2]) = [1,3,5,8,6]$. In some definitions
-    the first element is $z$. This is however not the definition we need here.
+      We can now see, why details are difficult to recognize in our original image.
+      The gray tones are tightly packed together and the
+      entire image only uses values in the range [120..205].
+      Histogram Balancing solves this problem by defining a mapping
+      $f: Graytone \rightarrow Graytone$, such that the accumulating count
+      of the resulting image increases as uniformly as possible from 0 to 255.
+      The histogram \ref{fig:hist-eq}
+      \footnote{made by used Wikipedia user \c{Jarekt}. Source: \url{https://en.wikipedia.org/wiki/File:Equalized_Histogram.svg}}
+      shows our goal.
+      
+      \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.45\textwidth]{hist-eq}
+        \caption{The histogram of the balanced image}
+        \label{fig:hist-eq}
+      \end{figure}
+      
+      Notice the new curve for the accumulating count(black). We can define
+      this mapping by spreading out the gray tones such that more
+      important gray tones get a larger range to occupy. We interpret
+      a high histogram-value for a gray tone as a high importance.
+      Given this interpretation, we can - build the accumulation histogram (1 and 2) - remembering which
+      bar belongs to which gray tone, normalize(3) and scale(4) the bars to [0..255] - 
+      and finally - assign each bar (and therefore its gray tone) a new gray tone
+      using the bars location in the range [0..255](5).
+      % TODO? I should include visual diagrams for this in the thesis.
+      
+      \paragraph{}
+      To define the transformation $ hbalance: Image \rightarrow Image$ we need the following definitions:
+      \begin{itemize}
+        \item $Image := (Width,Height,Width \times Height \rightarrow Graytone)$:
+          An image
+        \item $Histogram_a: Graytone \rightarrow a$:
+          A histogram  assigns a value of type $a$ to each gray tone. For $a = Int$,
+          this becomes a (accumulated) histogram. For $a = Double$, we get
+          a normalised histogram.
+        \item $\gmax: Graytone$:
+          The maximum gray tone for the data type in use. (e.g. 255 for 8-bit gray tones)
+        \item $hist: Image \rightarrow Histogram_{Int}$
+          calculates the histogram of an image. (1)
+        \item $accu: Histogram_{Int} \rightarrow Histogram_{Int}$
+          calculates the accumulating histogram from the original histogram. (2)
+        \item $normalize: Int \times Int \times Histogram_{Int} \rightarrow Histogram_{Double}$
+          normalizes the bars (in the range defined by the first two arguments) to a range from 0 to 1. (3)
+          The second argument (called $agmax$) denotes the number of total pixels in the image.
+          For an accumulated histogram $a:Histogram_{Int}$ it can be calculated with
+          $a(gmax)$ or $a(g')$ where $g'$ is highest gray tone in the image.
+          Both are equal, so the implementations take the liberty to use any of these formulas.
+        \item $scale: Graytone \times Histogram_{Double} \rightarrow Histogram_{Int}$
+          scales the normalized values to the maximum gray tone(255 in our case) and rounds down to the nearest integer. (4)
+        \item $apply: Histogram_{Int} \times Image \rightarrow Image$
+          maps each gray tone to its new value as dictated by the first argument. (5)
+      \end{itemize}
+      
+      Given these functions we can define $hbalance: Image \rightarrow Image$ as:
+      \begin{equation}
+      \begin{split}
+        hbalance(img) & := apply(s,img) \\
+          s & := scale(gmax,n) \\
+          n & := normalize(a(0), a(gmax), a) \\
+          a & := accu(h) \\
+          h & := hist(img) \\
+      \end{split}
+      \end{equation}
+      
+      Concrete implementations will be given in the coming chapters.
+      Applying the algorithm to our initial image gives \ref{fig:img-eq}
+      \footnote{photo by Phillip Capper. Source: \url{https://en.wikipedia.org/wiki/File:Equalized_Hawkes_Bay_NZ.jpg}}
+      . Details are more distinguishable in our new image.
+      
+      \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.45\textwidth]{img-eq}
+        \caption{The equalized image}
+        \label{fig:img-eq}
+      \end{figure}
     
+  \algo{} is a frequently used algorithm in image processing. It is 
+  one of first methods applied on images to decrease their complexity
+  in sophisticated image processing pipelines.
   
-  Uses thereof and overview of an algorithm.
-  Wird z.B im Zusammenhang mit \mu-Momenten zur Erkennung
-    affin-transformierter Bildpaare verwendet.
+  \paragraph{}
+  After being exposed to the bread and butter, we are now ready to tackle the
+  implementations \seq, \man, \ndpn and \ndpv!
+  
+  % TODO: cite a book for its uses and the algorithm itself
+    
+  \comment{
+    Prefix sum is a very common operation in computer science. It is a special
+      case of scanning through a ordered container from left ro right applying a binary
+      associative function \c{f}.
+      It is defined as:
+        $$ scanl(f,z,[a_1,a_2,...,a_n])
+           := [f(z,a_1),f(f(z,a_1),a_2),...,f(f(...f(f(z,a_1),a_2)...,a_{n-1}),a_n)]
+        $$
+      An example shall be $scanl(+,0,[1,2,2,3,-2]) = [1,3,5,8,6]$. In some definitions
+      the first element is $z$. This is however not the definition we need here.
+  }
