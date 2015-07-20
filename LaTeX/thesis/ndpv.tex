@@ -87,14 +87,14 @@ in unconcatPS img
     
     In total, the program runtime has a few smaller constants factors. This is mainly due to the elimination of nested data structures
     and operations. However, there is still much room for improvement.
-    
-    An undesireable side-effect
-    is the replication of the variables during normalisation and scaling. Instead of creating three arrays of identical values
-    to bulk-operate over them with the histogram array - we would like to create a single function which first
-    captures them as in closure. We would then map over the histogram without creating the intermediate arrays.
-    Luckily, our transformation is not over yet - and we will observe how this problem will be fixed and how further optimisations will be applied.
-    Let's head over to the next step.
-    
+    \comment{
+      An undesireable side-effect
+      is the replication of the variables during normalisation and scaling. Instead of creating three arrays of identical values
+      to bulk-operate over them with the histogram array - we would like to create a single function which first
+      captures them as in closure. We would then map over the histogram without creating the intermediate arrays.
+      Luckily, our transformation is not over yet - and we will observe how this problem will be fixed and how further optimisations will be applied.
+      Let's head over to the next step.
+    }
   \subsection{Communication Fusioning}
     
     Communication Fusioning consists of inlining definitions of parallel functions and using rewrite rules to eliminate
@@ -139,7 +139,7 @@ let a = joinD                           -- scanlPS ends
       was applied to the result of groupPS. This enabled further communication
       fusioning and created the local operation \c{tripletToATup2}. It creates the
       local chunks of the sparse-array directly. \c{segdSplitMerge} does the
-      actual work of the distributed grouping\footnote{as explained in the previous chapter}.
+      actual work of the distributed grouping\footnote{as explained in chapter \ref{chapter:ndpn}}.
       
     \subsubsection{Normalisation and Scaling}
     
@@ -165,7 +165,7 @@ let n = lengthPS a
             . int2Double . headPS $ a )
         $ ( replD n . int2Double . headPS $ a )
     \end{lstlisting}
-    Let's take a look of the original definitions of the lifted functions. Their definition goes similar to these two examples:
+    The first thing happend was the inlining of the lifted functions. Their definition goes similar to these two examples:
     \begin{lstlisting}
 floorDoubleL = joinD . mapD floorDoubleS . splitD
 multDoubleL as = joinD . zipWithD multDoubleS (splitD as) . splitD
@@ -182,7 +182,7 @@ multDoubleL as = joinD . zipWithD multDoubleS (splitD as) . splitD
     "mapD/zipWithD", "splitD,replPS", "mapD/replD" and "ZipReplSplit" results in
     the code we currently have.
     
-    Operationally, there an important change in the normalisation and scaling.
+    Operationally, there is an important change in the normalisation and scaling.
     Although, constants (like \c{int2Double \$ gmax}) are still being replicated into arrays
     before applying the arithmetic mapping - now the replication
     is only limited to the local PU. This is different than before, when
@@ -190,7 +190,7 @@ multDoubleL as = joinD . zipWithD multDoubleS (splitD as) . splitD
     We can observe, how the code is slowly nearing our previously intuitioned execution flow.
     
     
-    In terms of speed, the communication fusion fused together \c{six} points of synchronisation
+    In terms of speed, the communication fusion fused together \emph{six} points of synchronisation
     and greatly reduced constant factors in its runtime complexity by pushing
     replications into local PU operations. We can further improve on that with stream fusion.
     
@@ -309,7 +309,7 @@ in unconcatPS img
         & = O( \max(n \log n, gmax) + gmax + gmax \comment{ + 1} + n) \\
         & \in O(\max(n \log n, gmax)) \\
   \D(w \times h,gmax)
-      & = \max \{ hist, accu, gs\ceomment{, expandPS}, img'\} \\
+      & = \max \{ hist, accu, gs\comment{, expandPS}, img'\} \\
       & = \max \{\log n, \log gmax \} \\
       & \in O(\log \max(n,gmax)) \\
   \end{split}
@@ -319,11 +319,11 @@ in unconcatPS img
   the histogram calculation remains the most expensive when executed on a single processor.
   With increasing number of processors, the various logarithmic depth
   operations in the (accumulated) histogram calculation becomes the most expensive.
-  The take logarithmic time in the number of gray tones \c{gmax} or the number
+  They require time logarithmic in the number of gray tones \c{gmax} or the number
   of pixels \c{n} - depending on which one is greater.
   A overview of all the functions an their complexities can be found in the table \ref{complexities_ndpv} in the appendix.
   
-  After implementing four algoruthmis and analysing their complexities, we are now ready
+  After implementing four algorithmis and analysing their complexities, we are now ready
   to evaluate and compare them to each other. That is our goal for the next chapter.
   
   
