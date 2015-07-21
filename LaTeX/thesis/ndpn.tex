@@ -10,7 +10,7 @@ and finally its complexities are calculated.
 
 \section{Utilities}
 
-  \subsection{Scanl}
+  \subsection*{Scanl}
     Parallel prefix sum has well studied efficient implementations.
     One of them is the following:
     \begin{lstlisting}   
@@ -43,7 +43,7 @@ $ xs
     it is sufficient to state the following complexities for scanlP:
     $\W(n) \in O(n)$ and $\D(n) \in O(\log n)$.
 
-  \subsection{GroupP}
+  \subsection*{GroupP}
     \c{groupP} is a frequently used function in functional programming.
     It's type is \type{[:a:] -> [:[:a:]:]} and given an array it returns an array of arrays,
     where each subarray contains equal consecutive
@@ -87,7 +87,7 @@ AArr {
     All in all, \c{groupP} is an operation which can very well exploit the flat representation of nested arrays.
     % TODO: and to appendix and refer to it?
     
-  \subsection{SortP}
+  \subsection*{SortP}
     General parallel sorting can be as simple as a parallel
     implementation of merge-sort where the recursive calls are executed
     in parallel. \c{sortP} of type \type{[:Int:] -> [:Int:]} implements this,
@@ -103,7 +103,7 @@ AArr {
     % TODO: cite. Parallel mergesort with work and depth.
     % TODO: cite batchers bitonic sort
 
-  \subsection{Histogram calculation}
+  \subsection*{Histogram calculation}
     Conventional functional programming often enables one to write
     consise and correct implementations of functionality on ordered
     data structures (like lists and arrays). For example -

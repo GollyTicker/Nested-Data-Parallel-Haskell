@@ -537,7 +537,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     the new function has been optimised to reduce communication
     and applies both operations in a single loop per PU.
     
-  \subsection{Tables of Functions and Rewrite Rules}
+  \subsection*{Functions and Rewrite Rules}
     The transformation in chapter \ref{chapter:ndpv} is going to
     make use of many functions. Most common ones are explained in table \ref{mapPs}.
     The table also holds for other functions with same suffix - e.g.
@@ -627,7 +627,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
        \end{tabular}
     \end{table}
   
-  \subsection{A word on accuracy}
+  \subsection*{A word on accuracy}
     The project of NDP in Haskell is - even after 15 years -
     still in \textit{work in progress}. Due to frequent changes,
     the source papers use conflicting notation and refer to
@@ -769,7 +769,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   \label{section:hbalanceintro}
   This section will introduce \algo. It will state the problem and give an overview of its solution.
   
-  \subsection{Problem}
+  \subsection*{Problem}
     Suppose an $w \times h$-8-bit-gray-tone image with low contrast.
     \footnote{Photo by Phillip Capper. Source: \url{https://en.wikipedia.org/wiki/File:Unequalized_Hawkes_Bay_NZ.jpg}}
     
@@ -823,7 +823,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     }
     % TODO? I should include visual diagrams for this in the thesis.
       
-  \subsection{Algorithm}
+  \subsection*{Algorithm}
     To describe the image transformation $ hbalance: Image \rightarrow Image$ a few definitions are necessary:
     
     \begin{table}[h!]

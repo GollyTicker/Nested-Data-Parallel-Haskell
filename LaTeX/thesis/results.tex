@@ -81,7 +81,7 @@ Finally, the chapter ends with a conclusion.
     $gmax$ and $n$ are given. This makes some algorithms faster than the other.
     
   
-  \section{Pro and Cons}
+  \section{Pro and Contra}
     Table \ref{table:procons} gives an extensive
     pro and contra analysis of the four programs.
     They compare the programs on similarity to \ac,
@@ -110,7 +110,6 @@ Finally, the chapter ends with a conclusion.
            & \ind They are not separated steps anymore. \\
            & \con Much human work was necessary to parallelize the histogram creation. \\
            & \con Subsequent algorithms have to be coded to operate on flat images. \footnotemark \\
-           % TODO: footnote inside table?
           \midrule
           \ndpn & \pro It is almost a direct implementation of \ac \\
            & \pro It implements parallel histogram creation using only high level function compositions \\
@@ -129,6 +128,7 @@ Finally, the chapter ends with a conclusion.
     \end{table}
     
   \section{Conclusion}
+    TODO.
   
   \footnotetext{Unless one wraps \man with (un-)flattening operations. This approach however manually implements the flattening approach used in NDP.}
 
