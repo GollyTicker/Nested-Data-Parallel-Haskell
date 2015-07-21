@@ -221,7 +221,7 @@ apply as img = mapP (mapP (as !:)) img
     \label{complexities:ndpn}
     \begin{center}
     \begin{tabular}{lll}
-        \toprule
+0        \toprule
         function or variable & $\W \in O(...)$           & $\D \in O(...)$ \\
         \midrule
         hbalance        & $n \log n + gmax$   & $\log n + \log gmax$\\
@@ -244,7 +244,7 @@ apply as img = mapP (mapP (as !:)) img
   \end{table}
     The entries correspond to a complexity class.
     They don't denote the actual number of operations.
-    For the depths,\c{hist} and \c{accu} get logarithmic bounds by
+    For the depths, \c{hist} and \c{accu} get logarithmic bounds by
     either the size of the image or the maximum gray tone
     - depending on which one creates the longer chain of dependency.
     All in all, \ndpn has $\W \in O(n \log n + gmax)$

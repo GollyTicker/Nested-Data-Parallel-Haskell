@@ -20,20 +20,29 @@
 % My Commands
 \newcommand{\comment}[1]{}
 
+\newcommand{\ac}[0]{$A_C$\xspace}
 \newcommand{\seq}[0]{$P_{seq}$\xspace}
 \newcommand{\man}[0]{$P_{man}$\xspace}
 \newcommand{\ndpn}[0]{$P_{nest}$\xspace}
 \newcommand{\ndpv}[0]{$P_{vect}$\xspace}
+
 \newcommand{\algo}[0]{Histogram Balancing\xspace}
+
 \newcommand{\pav}[1][a]{\c{PA #1}\xspace}
 \newcommand{\pan}[1][a]{\c{[:#1:]}\xspace}
 \newcommand{\pad}[1][a]{\c{Dist (PA #1)}\xspace}
+
 \newcommand{\type}[1]{\c{#1}}
 \newcommand{\W}[0]{\textrm{W}}
 \newcommand{\D}[0]{\textrm{D}}
 \newcommand{\p}[0]{\paragraph{}\xspace}
 \renewcommand{\c}[1]{\mbox{\texttt{\footnotesize{#1}}\xspace}}
 \newcommand{\lam}[0]{\textrm{$\lambda$}}
+
+\newcommand{\blt}[1]{\textbf{\c{#1}}\xspace}
+\newcommand{\pro}[0]{\blt{+}}
+\newcommand{\con}[0]{\blt{-}}
+\newcommand{\ind}[0]{\blt{ }}
 
 % Building:
 % Gedit -> LaTeX build - Strg + Alt + 1
@@ -123,7 +132,6 @@
 \makenomenclature
 
 \begin{document}
-
 % \selectlanguage{ngerman}
 
 %%%%%
@@ -213,7 +221,7 @@
 
 \typeout{===== Section: literature}
 %% read the documentation for customizing the style
-\bibliographystyle{apalike}
+\bibliographystyle{dinat}
 \bibliography{thesis}
 
 %\typeout{===== Section: nomenclature}
@@ -231,5 +239,4 @@
 \printindex
 
 \HAWasurency
-
 \end{document}

@@ -1,19 +1,21 @@
 
 % Vertrauen ist gut, Kontrolle ist besser.
 
-This chapter summarises results of the the four implementations
+This chapter summarises results of the four implementations
 \seq, \man, \ndpn and \npdv. First the complexities of
-the implementations are given and discussed. Then
-the pro and contra of each implementation are states.
-Finally, this chapter end with a comparison of
-sequential to parallel programming
-and manual to compiler-optimised programming.
+the programs are given and observations
+are made an discussed.
+Then, the pro and contra of each program are given - 
+comparing them on different aspects.
+Finally, the chapter ends with a conclusion.
 
-\section{Complexities}
+\section{Complexity Analysis}
   The complexities of all four programs are summarised in table
-  \ref{table:allcomps}.
+  \ref{table:allcomps}. Note that in most image processing applications $gmax < n$ holds. The number
+  of pixels in an image is usually greater than the 
+  number of gray tones each pixel has available.
   
-  \begin{table}[h]
+  \begin{table}[h!]
     \caption{Work and Depth complexities}
     \label{table:allcomps}
     \centering
@@ -24,42 +26,109 @@ and manual to compiler-optimised programming.
       \seq  & $n \log gmax + gmax$ & $n \log gmax + gmax$ \\
       \man  & $n \cdot gmax$ & $\log n$ \\
       \ndpn & $n \log n + gmax$ & $\log n + \log gmax$ \\
-      \ndpn & $n \log n + gmax$ & $\log n + \log gmax$ \\
+      \ndpv & $n \log n + gmax$ & $\log n + \log gmax$ \\
     \end{tabular}
   \end{table}
-  One can make multiple observations.
+  A few observations can be made.
   
-  First, 
+  \paragraph{\ndpn versus \ndpv:}
+    \ndpn and \ndpv have equal work and depth complexities.
+    Compiler optimisations can rarely optimise into a lower complexity class.
+    However, the use of flat data structures, the optimisation
+    for cache locality and the fusion of communication and loops
+    greatly reduces the constants factors of \ndpv.
   
-  pman better in parallel? pndpv better in work
+  \paragraph{\man versus \ndpv:}
+    \label{paragraph:manvsndpv}
+    Work and depth complexities of \man and \ndpv are competing.
+    While the work of \man is a product of the parameters $n$ and $gmax$ - 
+    the work of \ndpv (and \ndpn) is only a sum. For larger parameters,
+    and a limited number of processors \ndpv will out-compete \man.
+    \ndpv has a speed-up linear in $gmax$.
+    
+    Regarding depth however, the opposite is the case. \man grows
+    logarithmic to $n$ whereas \ndpv grows logarithmic
+    to $n$ and $gmax$. For large values of $gmax$ and a high number of processors,
+    \man will out-compete \ndpv. However, the speed-up is only a
+    summand of $\log gmax$.
   
-  Second, Pnest and Pvect equal in work and depth. Only better
-  constant factor. "The compiler cannot do the impossible".
+  \paragraph{Sequential versus Parallel:}
+    \seq has the best bounds in work out of all programs.
+    It is low due to its iteration-based histogram creation.
+    Parallel programs cannot use this method because they
+    then were to fall back to sequential traversal.
+    \man and \ndpn instead used more advanced methods to implement the histogram creation
+    in parallel.
+    
+    On the one hand, their methods have worse work complexities.
+    If $gmax$ is treated as a constant, then \seq grows linearly
+    - whereas \man and \ndpv grow $O(n \log n)$.
+    On the other hand, they greatly improve in depth complexities.
+    While \seq remains linear to $n$, \man and \ndpv are only logarithmic to $n$.
+    
+    Parallel Programs have an overhead when the number of
+    PUs is low. With an increasing number of PUs, they out-compete \seq.
   
-  Third. sequential has the fastest work, but is purely sequential.
-  (Parallel programs have an overhead).
-
-  Different ratios of gmax and n make differnt algorithms faster. (binary tree of desicions)
+  \paragraph{Parameter configuration:}
+    Different parametrization in $n$ and $gmax$ leads
+    to different programs being better and worse and others.
+    As stated in paragraph \ref{paragraph:manvsndpv}, for
+    large parameters and a limited number of PUs,
+    \ndpv performs better than \man.
+    However, for large $gmax$ and a high number of PUs the situation
+    is reversed.
+    Depending on the application context, different parameters
+    $gmax$ and $n$ are given. This makes some algorithms faster than the other.
+    
   
-\section{\seq}
-  ...
-
-\section{\man}
-  ...
-
-\section{\pndn and \ndpv}
+  \section{Pro and Cons}
+    Table \ref{table:procons} gives an extensive
+    pro and contra analysis of the four programs.
+    They compare the programs on similarity to \ac,
+    efficiency with many or few PUs,
+    the human workload involved and more.
+    
+    \begin{table}[h!]
+      \caption{Pros and Contras of the programs}
+      \label{table:procons}
+      \begin{center}
+      \begin{tabular}{ll}
+          \toprule
+          program & pro \\
+          \midrule
+          \seq & \pro It is a direct implementation \ac \\
+           & \pro It requires the least amount of human work\\
+           & \con It is purely sequential and cannot gain from parallelism. \\
+          \midrule
+          \man & \pro It achieves time logarithmic to $n$ for large number of PUs \\
+           & \pro It has low constant factors. \\
+           & \pro It has a short implementation. \\
+           & \blt{+/-} The programmer trades flexibility and comfort for fine grained control. \\
+           & \con The work is product of $n$ and $gmax$. It grows faster the other ones. \\
+           & \con It is only a surface translation of \ac \\
+           & \con Normalisation and scaling and histogram creation were fused together manually. \\
+           & \ind They are not separated steps anymore. \\
+           & \con Much human work was necessary to parallelize the histogram creation. \\
+           & \con Subsequent algorithms have to be coded to operate on flat images. \footnotemark \\
+           % TODO: footnote inside table?
+          \midrule
+          \ndpn & \pro It is almost a direct implementation of \ac \\
+           & \pro It implements parallel histogram creation using only high level function compositions \\
+           & \pro It involves only limited workload for the human. \\
+           & \con It has higher constant factors due to communication \\
+          \ndpv & \\
+           & \pro The programmer does not need to care about flat representation of the image \\
+           & \pro Flattening of arrays and nested functions reduce constant factors \\
+           & \pro Communication Fusion and Stream Fusion reduce constant factors\\
+           & \ind and automatically fuse normalisation and scaling. \\
+           & \pro The compiler optimises automatically \\
+           & \con If failed, compiler optimisations are difficult to guide. \\
+           & \blt{+/-} The programmer trades fine grained control for flexibility and comfort. \\
+      \end{tabular}
+      \end{center}
+    \end{table}
+    
+  \section{Conclusion}
   
-  
-  
-\paragraph{Speedup in Parallisation}
-  ...
-
-\paragraph{\man vs \ndpn and \ndpv}
-  Before moving to the next chapter - one shall be reminded that
-  \man involved much manual work. It was not a direct translation
-  of the algorithms description. It, especially requires
-  the subsequent algorithms to use a flat image representation.
-  \footnote{Unless one wraps \man with (un-)flattening operations.
-  However, that approach is a manual replication of the
-  flattening approach used in NDP.}
+  \footnotetext{Unless one wraps \man with (un-)flattening operations. This approach however manually implements the flattening approach used in NDP.}
 
