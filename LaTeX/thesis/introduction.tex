@@ -1,8 +1,22 @@
 
-...
 
 \section{Context}
-  TODO
+  In the past few decades the raw processing power of CPUs has
+  not increased by any significant amount.
+  Instead, we are presented with hardware with an
+  exponentially increasing number of processors
+  - each of them as fast as the previous generation.
+  Parallel COmputing is concerned with the use of multiple
+  processing units to increase performance.
+  Functional programming languages are
+  particularly successfull in parallel programming
+  due to their immutability and cache friendly-ness
+  
+  Research and Development in this field is generally referred to as Parallel Computing.
+  For my thesis, I have further reduced the context to the programming language Haskell and Image Processing. An explanation is given next.
+    
+  
+  A few questions arise:
   
   !Context like in the expose!
   
@@ -22,6 +36,21 @@
     Constant Factors
 
 \section{Goal}
+
+  To answer these questions, an image processing algorithm
+  is chosen and implemented in four variations.
+  
+  \ac $:=$ \algo, the conceptual image processing algorithm
+  
+  \seq $:=$ An ordinary Haskell implementation of \ac
+
+  \man $:=$ A manually-parallelized implementation of \ac
+  
+  \ndpn $:=$ A Nested-Data-Parallel implementation of \ac
+
+  \ndpv $:=$ The compiler-transformed implementation of \ac from \ndpn
+        
+
   Leading question. Subquestion.
   Formulating the approach
   

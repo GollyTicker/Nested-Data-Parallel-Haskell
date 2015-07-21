@@ -151,8 +151,7 @@ foo x y = x
     E.g. \c{List a} denotes a list of elements of type a. \c{List Int}
     is by that definition a linked list of integers.
     
-    Polymorphisim is for example useful in the type of map.
-    \c{map :: (a -> b) -> List a -> List b}.
+    Polymorphisim is for example useful in \c{map :: (a -> b) -> List a -> List b}.
   
   \paragraph{Higher Order Functions}
     Functions are values and can be taken or passed ar arguments to other functions.
@@ -167,8 +166,8 @@ map :: (a -> b) -> List a -> List b
   \paragraph{Lambdas}
     Functions can be written literally using Lambda expressions.
     For example, the function \c{f x = 2*(x+1)} can be written
-    directly as \c{f = \lam x -> 2*(x+1)} or \c{f = \textbackslash{} x -> 2*(x+1)}.
-    The backslash \textbackslash{} is used inside code snippets - \lam is used outside of them.
+    directly as \c{f = \lam x -> 2*(x+1)} or \c{f = \textbackslash{x} -> 2*(x+1)}.
+    The backslash \textbackslash{} is used inside code snippets - \lam{} is used outside of them.
     \footnote{The \textbackslash{} is used because of its similarity to \lam.}
     
   \paragraph{Identity, flip and function composition}
@@ -181,7 +180,7 @@ flip f x y = f y x
 (.) :: (b -> c) -> (a-> b) -> a -> c
 g . f = \x -> g (f x)
     \end{lstlisting}
-    where \c{id} is the identity function and \c{flip} exchanges a functions
+    \c{id} is the identity function and \c{flip} exchanges a functions
     first two arguments.
     The identity function is the neutral element of function composition \c{(.)}
     and the following law holds:
@@ -275,8 +274,8 @@ g . f = \x -> g (f x)
         headP & \c{[:a:] -> a} & returns the first element\\
         lastP & \c{[:a:] -> a} & returns the last element \\
         mapP & \c{(a -> b) -> [:a:] -> [:b:]} & applies a function on all elements \\
-        zipWithP & \c{(a -> b -> c)} & zip together pairs of elements with a \\
-         & \c{-> [:a:] -> [:b:] -> [:c:]} & function and return an array of results \\
+        zipWithP & \c{(a -> b -> c)} & zip together pairs of elements by \c{f} \\
+         & \c{-> [:a:] -> [:b:] -> [:c:]} & and return an array of results \\
         sortP & \c{[:Int:] -> [:Int:]} & sorts an array \\
         sumP & \c{[:Int:] -> Int} & sums the arrays elements \\
         concatP & \c{[:[:a:]:] -> [:a:]} & removes a level of nesting \\
@@ -554,7 +553,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
           mapP f xs & Programer-view & \type{(a -> b) -> [:a:] -> [:b:]} \\
            & not executed & \textbf{P}arallel array functions the programer uses \\
           mapPS f xs & Vectorization & \type{(a -> b) -> PA a -> PA b} \\
-           & not executed & \textbf{P}arallel \textbf{S}calar functions the program is vectorized into \\
+           & not executed & \textbf{P}arallel \textbf{S}calar functions over flat arrays \\
           indexPL is xs & Vectorization & \type{PA Int -> PA (PA a) -> PA a} \\
            & not executed & \textbf{P}arallel \textbf{L}ifted indexing on flat arrays. It's scalar\\
            & & function is \type{indexP :: Int -> [:a:] -> a} \\
