@@ -2,41 +2,30 @@
 % TINA - There is no alterative.
 %   - Angela Merkel
 
-After building up momentum and viewing a few implementations of \algo
-we are now ready to tackle the core transformation and optimisations
-offered by Nested Data Parallelism in Haskell (and related functional languages).
-This chapter will go through the transformations and present the
-final program \ndpv. This program would have been the results of the compilers \textit{automatic}
+This chapter will apply the core transformation and optimisations
+offered by Nested Data Parallelism in Haskell.
+This chapter will go through the transformations first and then present the
+final program \ndpv. The program would have been the results of the compilers \textit{automatic}
 optimisations before it would be translated into mashine code and finally executed.
-At the end of this chapter, we will measure the complexities of \ndpv as we already did for the previous programs.
+At the end of this chapter, complexity measures for \ndpv are given.
 
 \section{Transformations}
-  As presented in the overview, the compiler applies a series of transformations. They can be
-  roughly broken down into three steps:
+  As presented in section \ref{section:ndpintro}, the compiler applies
+  three phases of program transformations:
   \begin{enumerate}
-    \item \emph{Vectorization} - Uses flat non-parametric array \pav representations instead of the
-          vanilla nested parallel arrays \pan . The flatening is also applied to nested parallel comprehensions.
-    \item \emph{Communicaiton Fusioning} - The parallel functions are inlined and the compiler uses rewrite rules to
-          find and reduce communication inbetween PUs. It distinguishes between global arrays (\pav) and the local chunks (\pad)
-          compromising the global one.
-    \item \emph{Stream Fusioning} - Local sequential functions over the chunks can be further fused together. Now
-          the creation of intermediate local arrays (\pad) is eliminated.
+    \item \emph{Vectorization} - Flattening of array representations
+      and flattening of nested parallel functions.
+    \item \emph{Communicaiton Fusioning} - Inlining of parallel
+      functions and the use of Rewrite Rules
+      to eliminate communication.
+    \item \emph{Stream Fusioning} - Inlining of local traversals and
+      the use of Rewrite Rulesto reduce the number of traversals.
   \end{enumerate}
   
-  Most notably, the vectorization step makes the following mapping.
-  \begin{lstlisting}
-mapP (mapP f) xss => unconcatPS xss
-                          . fL
-                          . concatPS
-                          $ xss
-  \end{lstlisting} % removed (expandPS xss fEnv)
-  where \c{fL} is the lifted version of the original \c{f}.
-  % TODO: words
-  we can now finally take a look at the first step of the compilers transformation.
+  The compiler begin with Vectorization.
   
   \subsection{Vectorization}
-    Applying the vectorization procedure as described in \cite{Harness2008} yields the following code. Let's take a look  at it.
-    
+    Applying the vectorization procedure as described in \cite{Harness2008} yields the following code:
     % After Vectorization:
     \begin{lstlisting}
 hbalance img :: PA (PA Int)
@@ -63,33 +52,35 @@ in unconcatPS img
      . concatPS
      $ img
     \end{lstlisting} % (expandPS img gs)
-    We can observe how our functions \c{hist},\c{accu} etc. have been inlined and are tightly packed together here.
-    We have also moved from using nested \pan to flat \pav and we have replaced polymorphic funcitons like \c{fromIntegral}
-    with specific monomorphic primitive mashine functions like \c{intToDouble}.
+    Various functions (like \c{hist} and \c{accu}) have been inlined and are tightly packed together here.
+    The program also replaced the nested \pan by flat \pav.
+    It also replaced polymorphic funcitons like \c{fromIntegral}
+    by specific monomorphic primitive mashine functions like \c{intToDouble}.
     
     Starting, lines 9 to 4 describe the calculation of the histogram.
     It's only difference is the use of vectorized scalar functions (e.g.\c{groupPS}). These functions operate of the efficient flat
     representation instead of the nested representation.
     
+    After that in line 4, the accumulated histogram is calculated.
     
-    After that in line 4, the accumulated histogram is calculated. Lines 19 to 13 and 21 to 11
-    describe the normalisation and scaling of the gray tones respectively. The vectorized code uses
-    lifted arithmetic functions (like \c{floorDoubleL}) which operate over arrays of values - in contrast to
-    the scalar mashine primitives like \c{floorDouble}. Essentially, our variables \c{gmax'},\c{a0} and \c{divisor}
-    have been inlined are now replicated\footnote{\c{replPS n x} creates an array of length n - all containing the element x. It has the type \type{Int -> a -> PA a}}
+    Lines 19 to 13 and 21 to 11 describe the normalisation and scaling of the gray tones respectively.
+    The vectorized code uses lifted arithmetic functions (like \c{floorDoubleL}) that
+    opereate over arrays.
+    The normalisation constants \c{gmax'},\c{a0} and \c{divisor}
+    have been inlined and are replicated\footnote{\c{replPS n x} creates an array of length n - all containing the element x. It has the type \type{Int -> a -> PA a}}
     to the length of the gray tone array before the lifted arithmetic operations are applied.
     
     
     Finally, lines 32 to 20 describe the mapping of the images gray tones.
     The nested parallel operation \c{mapP (mapP (!a))} - formerly a part of \c{apply} - 
     has now been flatten to use a lifted parallel operation, namely \c{indexPL}, over a \textbf{flat} array of
-    the pixels of the image. This is the core of nested data parallelism!
+    the pixels of the image. This is an embodiment of the key insight in Nested Data Parallelism.
     
     We did however had to add an expression \c{expandPS img gs} to it to be
-    correct. That is an artifect of the flattening procedure and
-    is only mentioned here. It is simply responsilbe
-    for the redistribution of the \c{gs} array. It doesn't affect the
-    overall situation (in terms of work and depth). Therefore it won't be discussed furthermore.
+    correct. That is an artifact of the actual flattening procedure.
+    It is responsible for the redistribution of the \c{gs} array. It doesn't affect the
+    overall situation (in terms of work and depth) and therefore
+    it is not further discussed.
     
     In total, the program runtime has a few smaller constants factors. This is mainly due to the elimination of nested data structures
     and operations. However, there is still much room for improvement.
@@ -104,11 +95,11 @@ in unconcatPS img
   \subsection{Communication Fusioning}
     
     Communication Fusioning consists of inlining definitions of parallel functions and using rewrite rules to eliminate
-    unesessary communication. Applying the transformation resulted in a changed definition of the histogram \c{a} and the
-    gray tones \c{gs}. Let's take a look at their new forms.
+    unesessary communication. Applying this transformation changes the definition of the histogram \c{a} and the
+    gray tones \c{gs}. They are separately discussed below.
     
     \subsubsection{Histogram calculation}
-      The new form of the accumulcated histogram calculation is given below:
+      The new definition of the accumulcated histogram calculation is given below:
       \begin{lstlisting}
 let a = joinD                           -- scanlPS ends
           . mapD (\(as,a) -> mapS (plusInt a) as)
@@ -123,35 +114,31 @@ let a = joinD                           -- scanlPS ends
           . concatPS
           $ img
       \end{lstlisting}
-      We can firstly observe the occurrence of functions with a \c{-D} suffix. They operate either
+      One can firstly observe the occurrence of distributed functions (with a \c{-D} suffix). They operate either
       on each PU locally (as with \c{mapD}) or implement some specific inter-PU calculation (as does \c{propagateD}).
       These functions are the result of inlining various parallel functions and eliminating communication.
       The correspondence to their original functions are given as comments in the code. Only sortPS and concatPS
-      are unchanged. A real compiler would have inlined their definitions and looked for optimisations.
-      We are ignoring their inlining here to simplify the code - there is not much room for optimisation underneath them.
-      
+      are unchanged. A real compiler would have inlined their definitions and looked for optimisations.      
       
       Aside from them, inlining \c{scanlPS} and \c{sparseToDensePS}
-      \footnote{It's definition is given in the appendix.} releaves their internals.
+      \footnote{It's definition is given in the appendix.} exposes their internals.
       Inbetween both of the functions, there was a composition of the distribution primitives - namely \c{splitD . joinD}.
-      Applying the rewrite rule "splitD/joinD" eliminated this communiation overhead. Hurray! Our compiler
-      is now finally starting to detect and fuse nunessesary communication!
+      Applying the rewrite rule "splitD/joinD" eliminated a point of synchronisation.
       
       This leaves \c{propagateD} as the only inter-PU communication inbetween the spliting of the
       sparse array and joining the histogram at the end (line 1).
       
-      The lambda and the groupPS were involved in a rather special fusion. We won't
-      go into the detail of it. Essentially, the lambda expression was
+      The expression \c{mapP (\g -> (headP g,lengthP g))} and \c{groupPS}
+      were involved in a rather special fusion. Essentially, the lambda expression was
       was applied to the result of groupPS. This enabled further communication
-      fusioning and created the local operation \c{tripletToATup2}. It creates the
+      fusioning and created the local operation \c{tripletToATup2}
+      \footnote{tripletToATup2 :: (LinkedList (Int,Int,Int)) -> (PA (Int,Int))}
+      . It creates the
       local chunks of the sparse-array directly. \c{segdSplitMerge} does the
       actual work of the distributed grouping\footnote{as explained in chapter \ref{chapter:ndpn}}.
       
     \subsubsection{Normalisation and Scaling}
-    
-    Now let's take a look at the remaining part of the code - that is - the
-    normalisation and scaling procedure:
-    
+    The new code for normalisation and scaling is given below:
     \begin{lstlisting}
 let n = lengthPS a
   gs = joinD . mapD f . splitD $ a
@@ -171,38 +158,33 @@ let n = lengthPS a
             . int2Double . headPS $ a )
         $ ( replD n . int2Double . headPS $ a )
     \end{lstlisting}
-    The first thing happend was the inlining of the lifted functions. Their definition goes similar to these two examples:
+    The definitions of the lifted functions are similar to these two examples:
     \begin{lstlisting}
 floorDoubleL = joinD . mapD floorDoubleS . splitD
 multDoubleL as = joinD . zipWithD multDoubleS (splitD as) . splitD
     \end{lstlisting}
-    The lifted functions first split their argument arrays(\c{splitD}) into each PU.
-    Then each PU (\c{mapD}) applies the respective operation on it's local chunk(\c{floorDoubleS}).
-    Finally the local chunks are joined into a global array.
-    
     Inlining these functions created \emph{five} pairs of \c{splitD . joinD} - which were then immediately
     eliminated using the "splitD/joinD" rule.
     
-    After that, a cascade of rewrite rules fire and propagate the normalisation and scaling
-    constants towards inside the lifting operations. A sophisticated combination of the rules
-    "mapD/zipWithD", "splitD,replPS", "mapD/replD" and "ZipReplSplit" results in
-    the code we currently have.
+    After that, a cascade of rewrite rules fired and propagated the normalisation and scaling
+    constants towards local computation. A sophisticated combination of the rules
+    "mapD/zipWithD", "splitD,replPS", "mapD/replD" and "ZipReplSplit" resulted in
+    the code given above.
     
     Operationally, there is an important change in the normalisation and scaling.
     Although, constants (like \c{int2Double \$ gmax}) are still being replicated into arrays
     before applying the arithmetic mapping - now the replication
     is only limited to the local PU. This is different than before, when
-    the constants were replicated globally and subsequently split.
-    We can observe, how the code is slowly nearing our previously intuitioned execution flow.
+    the constants were replicated \emph{globally} and subsequently split.
     
-    
-    In terms of speed, the communication fusion fused together \emph{six} points of synchronisation
-    and greatly reduced constant factors in its runtime complexity by pushing
-    replications into local PU operations. We can further improve on that with stream fusion.
+    In terms of speed, communication fusion eliminated \emph{six} points of synchronisation.
+    It greatly reduced constant factors in its complexity by pushing
+    replications from global redistributions into local PU operations.
+    Stream Fusion further improves this.
     
   \subsection{Stream Fusioning}
-    Stream Fusioning is our final step of optimisation. Applying it improves
-    the normalisation and scaling. So, let's take a look at it.
+    Stream Fusioning is the final step of optimisation. Applying it improves
+    the normalisation and scaling only. The new code is given below:
     \begin{lstlisting}
 let a0      = int2Double . headPS $ a 
   divisor = minusDouble (int2Double (lastPS a))
@@ -215,14 +197,16 @@ let a0      = int2Double . headPS $ a
                   . int2Double
   gs = joinD . mapD (mapS normScale) . splitD $ a
      \end{lstlisting}
-     Firstly, we can observe, how the replications have been completely removed! The
-     constants are now first calculated and then used applied into the
-     arithmetic functions. The arithmetic functions also have been merged together into
-     a single function \c{normScale}! This function is now applied elementwise
+     The replications have been removed entirely.
+     Constants are calculated first and then used in \c{normScale}
+     to apply the arithmetic calculation.
+     The arithmetic functions also have been merged together into
+     single function \c{normScale}. This function is now applied elementwise
      on each value in each of the local chunks of the entire histogram array.
      
-     This was a result of inlining the local sequential functions like \c{multDoubleS}
-     and subsequent stream fusion. For example, \c{multDoubleS} and \c{floorDoubleS} are defined as:\footnote{Note the similarity of stream fusion and communication fusion when it comes to the function definitions and rewrite rules.}
+     The code is the result of inlining the local sequential functions (like \c{multDoubleS})
+     and subsequent stream fusion.
+     For example, \c{multDoubleS} and \c{floorDoubleS} are defined as:
      \begin{lstlisting}
 floorDoubleS :: Vector Double -> Vector Int
 floorDoubleS = unstream . mapSt floorDouble . stream
@@ -231,15 +215,14 @@ multDoubleS :: Vector Double -> Vector Double -> Vector Double
 multDoubleS as = unstream . zipWithSt multDouble (stream as) . stream
      \end{lstlisting}
      Inlining these definitions creates expressions of \c{unstream . stream}. Applying
-     the "unstream/stream" rule and a few other rules similar to the previous
-     communication fusion finally propagates the constants into the
-     \c{normScale} closure.
+     the "unstream/stream" rule and a few other rules analogous to
+     Communication Fusioning finally propagates the constants outside
+     of any traversals.
      
-     The transformation is - at least for our human minds - over now. The next
-     section will give an overview of our results.
+     The transformation is over now. The next section will give an overview of the results.
          
 \section{Final Program}
-  Summing up the parts, we end up with following optimised code for \ndpv:
+  Summing up the steps, the compiler gives the following optimised code for \ndpv:
   \begin{lstlisting}
 type Image = PA (PA Int)
 type Hist  = PA Int
@@ -283,23 +266,22 @@ in unconcatPS img
      . concatPS
      $ img
   \end{lstlisting} %  (expandPS img gs)
-  On the surface - the algorithm works quite similar to a direct
-  implementation of \ndpn.
+  On the surface, the algorithm works quite similar to a direct implementation of \ndpn.
   First the histogram is calculated (lines 18 to 11) and accumulated (lines 10 - 7).
   Then the constants \c{a0},\c{divisor} and \c{gmax'} are calculated globally and distributed
   to each PU (lines 22 to 33). After that, each PU applies the normalisation and scaling transformations(line 36).
-  The mapping array \c{gs} is then finally used to map
-  each gray tone to its new value (lines 41 to 38). It happens by using the
-  flat representation of the nested image.
+  The mapping array \c{gs} is then finally used to map each gray tone to its new value (lines 41 to 38).
+  The gray tone mapping is an example of the flattening of nested parallel functions in NDP.
   
-  All in all, \ndpv offers a few advantages:
+  All in all, \ndpv offers a few advantages over \ndpn:
   \begin{itemize}
-    \item A decreased number of communication and synchronication points.
-    \item Flat data structures and flat operations further decrease constant overhead factors 
-    \item Distributed optimal-complexity prefix-sum, groupP and sortP
-    \item We implemented normalisation and scaling separately, but inlining
-            and optimisation still was able to fuse them together. We didn't
-            manually need to fuse it - as we had to do in \man
+    \item a decreased number of communication and synchronication points
+    \item flat data structures and flat operations further decrease constant factors
+    % \item distributed prefix-sum, groupP and sortP  TODO. nennen?
+    \item Inlining and optimisation fused
+          normalisation and scaling together - even though
+          they were separated in \ndpn. The programmer didn't
+          need to fuse them manually. This stands in contrast to the situation in \man.
     \item After writing \ndpn, there is no more work involved for the programer in generating this optimised code.
   \end{itemize}
   Having transformed \ndpn into \ndpv, we are now ready to give a complexity analysis thereof.
@@ -308,6 +290,9 @@ in unconcatPS img
   The complexity analysis for work and depths remains similar to that of \ndpn.
   After all, both are the same algorithm. \ndpv is only better at it's constant factors.
   Let $n = |img| = w\cdot h$ then we can calculate its complexity:
+  \footnote{
+  The calculation of \c{a} is split again into \c{hist} and \c{accu}.
+  }
   \begin{equation*}
   \begin{split}
   \W(w \times h,gmax)
@@ -321,17 +306,18 @@ in unconcatPS img
   \end{split}
   \end{equation*}
   The use of the plentyful new functions doesn't change the overall situation compared to \ndpn.
-  We end up with the same work and depth complexities as before. Being at $O(\max(n \log n,gmax))$ in work
+  \ndpv has the same work and depth complexities as before.
+  Being at $O(\max(n \log n,gmax))$ in work
   the histogram calculation remains the most expensive when executed on a single processor.
   With increasing number of processors, the various logarithmic depth
-  operations in the (accumulated) histogram calculation becomes the most expensive.
+  operations in the (accumulated) histogram calculation becomes the bottleneck.
   They require time logarithmic in the number of gray tones \c{gmax} or the number
   of pixels \c{n} - depending on which one is greater.
   A overview of all the functions an their complexities can be found in the table \ref{complexities_ndpv} in the appendix.
   
-  After implementing four algorithmis and analysing their complexities, we are now ready
-  to evaluate and compare them to each other. That is our goal for the next chapter.
   
-  
-  
+  The implementation and analysis of the programs \seq, \man, \ndpn and \ndpv
+  have been given. The next chapter will give an evaluation.
+
+
   
