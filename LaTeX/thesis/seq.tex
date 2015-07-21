@@ -8,7 +8,7 @@ its work and depth complexities - as introduced in section \ref{section:parmeasu
 
 \section{Implementation}
   \seq is a direct implemenation of the description of \algo
-  in section \ref{section:hbalanceintro}.
+  of section \ref{section:hbalanceintro}.
   First the data structures used are presented.
   Then each component of the implementation is given. Afterwards
   the components are assembled to \seq.
@@ -31,9 +31,7 @@ type Hist a = TreeMap Int a
     for each pixel in the image. The Immutability
     of Haskell prevents this and forces the use of
     immutable and shared data-structures like \c{TreeMap k a}.}
-    
-    Functions over \c{PtrVector} are suffixed \c{-V}.
-    Functions over \c{TreeMap} aresuffixed \c{-M}.
+    Functions over \c{PtrVector} are suffixed \c{-V}. Functions over \c{TreeMap} aresuffixed \c{-M}.
   
   \paragraph{Histogram Calculation}
     The steps for the creation of the initial histogram are given below:
@@ -50,7 +48,7 @@ hist = foldrV (\i -> insertWithM (+) i 1) emptyM . concatV
     gray tones - namely \c{gmax+1}.
     
   \paragraph{Accumulation}
-  Calculation the accumulated histogram can be implented by
+  Calculating the accumulated histogram can be implented by
   a prefix sum over values. It is linear in the size of the map.
   \begin{lstlisting}
 accu :: Hist Int -> Hist Int
@@ -111,20 +109,79 @@ hbalance img =
   First the histogram is created (line 3). Then it is accumulated (line 4).
   After that it is normalised (line 5 to 7) and scaled(line 8).
   And finally, the gray tone mapping is applied and returned (line 9 to 10).
-  It is defined exactly as previosuly envisioned.
+  It is defined exactly as previously envisioned.
   
 \section{Complexities}
-  % TODO: continue here.
-  USE COST-CENTRE PDF!
+  For sequential algorithms, work and depth fall
+  together with their time complexity class.
+  This is true for the purely sequential
+  program \seq.
   
-  Do runtime analysis like in analysis/seq.tex. But a bit less detailed.
-  (The actual derivations could be packed into an appendix!)
-  
-  
-  Introduce variables.
+  Before the time complexity is calculated, 
+  a few variables are introduced:
   \begin{itemize}
-    \item n sei die Anzahl der Bildpixel
-    \item w sei die Bildbreite
-    \item h sei die Bildhöhe
-    \item p sei die Anzahl der PUs (gang members).
+    \item[n:] the number of pixels in the image
+    \item[$h$:] the height of the image and equally the
+              the number of subarrays in the nested array
+    \item[$w$:] the width of the image and
+              equally the length of the subarrays
   \end{itemize}
+  
+  \begin{table}[h!]
+    \caption{Complexities in \seq}
+    \label{table:seq}
+    \centering
+    \begin{tabular}{lll}
+        \toprule
+        function or variable & $O(...)$ \\
+        \midrule
+        hbalance          & $n \log gmax + gmax$ \\
+        firstM           & 1\\ 
+        lastM            & 1\\
+        \midrule
+        hist              & $n \log gmax$\\
+        concatV          & n \\ 
+        emptyM           & 1\\ 
+        insertWithM      & $\log gmax$\\ 
+        foldrV           & $n \log gmax$ \\ 
+        \midrule
+        accu              & gmax\\ 
+        scanlM           & gmax\\
+        \midrule
+        normalize         & gmax\\ 
+        scale             & gmax\\ 
+        mapM             & gmax\\ 
+        \midrule
+        apply             & $n \log gmax = w \cdot h \cdot \log gmax$ \\
+        lookupLessEqualM & $\log gmax$ \\ 
+    \end{tabular}
+  \end{table}
+  
+  The complexity for the functions involved in \seq are given
+  in table \ref{table:seq}.
+  The functions are grouped together by their context.
+  Each component of \seq (e.g. \c{hist}, \c{accu}) is
+  given a group with its each of its subfunctions and
+  the components complexity.
+  For example, \c{hist} uses three functions.
+  \c{concatV} has linear complexity in the number
+  of total elements in the nested array - that is \c{n}.
+  \c{insertWithM} is an logarithmic time insertion operation
+  into a tree. \c{foldrV} traverses each pixel,
+  starting with an empty map \c{emptyM} and
+  adds each pixel into the TreeMap using \c{insertWithM}.
+  There are \c{n} pixels in the array and and each insertion
+  takes at-most time logarithmic to the maximum gray tone \c{gmax}.
+  Therefore its time complexity is $O(n \log gmax)$.
+  Further analysis of the other functions reveals the complexities
+  given in the table.
+  
+  
+  Finally, \c{hbalance} uses
+  \c{hist} ($O(n \log gmax)$) and a few
+  other functions ($O(gmax)$). 
+  Therefore \seq has a complexity of $O(n \log gmax + gmax)$.
+  
+  \p
+  The next chapter introduces the first parallel implementation \man.
+  

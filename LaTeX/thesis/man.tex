@@ -169,31 +169,32 @@ hbalance img =
     Given the code for \man, one can now give work and depth
     complexities. These complexities are given in table \ref{table:man}.
     The table summarises the work and depths of each of the calls.
+    It is calculated by applying the formulas from section
+    \ref{section:parmeasures}.
     
   \begin{table}[h]
     \centering
-    \caption{Work and Depth complexities}
+    \caption{Complexities of\man}
     \label{table:man}
     \begin{tabular}{lll}
         \toprule
-        function or variable & O(W)     & O(D) \\
+        function or variable & $\W \in O(...)$           & $\D \in O(...)$ \\
         \midrule
-        hbalance        & n * gmax      & log n \\
+        hbalance        & n \cdot gmax    & $\log$ n \\
         apply           & n           & 1 \\
         parMap sclNrm   & gmax        & 1 \\
-        accuHist     & n * gmax      & log n \\
+        accuHist        & n  \cdot gmax    & $\log$ n \\
         \midrule
-        accuHist     & n * gmax      & log n \\
+        accuHist        & n  \cdot gmax    & $\log$ n \\
         splitMid        & 1           & 1 \\
         parZipWith      & gmax        & 1 \\
-        parReplicate       & gmax        & 1 \\
-        parGenerate        & gmax        & 1 \\
-        arr ! i          & 1           & 1 \\
+        parReplicate    & gmax        & 1 \\
+        parGenerate     & gmax        & 1 \\
+        arr ! i         & 1           & 1 \\
     \end{tabular}
   \end{table}
   
-  By applying the formulas, from section
-  \ref{section:parmeasures} one can calculate the table.
+  
   The outer-most work and depth of \man is given below:
   \begin{equation*}
   \begin{split}
@@ -202,7 +203,7 @@ hbalance img =
         & = n \cdot gmax + gmax + n \\
         & \in O(n \cdot gmax) \\
   \D(n,gmax)
-      & = \max \{ accuHist, (parMap,sclNrm), apply\} \\
+      & = \D(accuHist) + \D(parMap,sclNrm) +  \D(apply) \\
       & = \max \{ \log n, 1, 1\} \\
       & \in O(\log n) \\
   \end{split}
@@ -218,7 +219,7 @@ hbalance img =
   of the algorithms description. It, especially requires
   the subsequent algorithms to use a flat image representation.
   
-  
+  \paragraph{}
   The next chapter covers \ndpn - an implementation using NDP.
   
   

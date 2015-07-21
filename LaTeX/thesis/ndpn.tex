@@ -2,10 +2,10 @@
 % Quine quotation.
 
 This chapter describes an implementation of \algo that uses
-Nested Data Parallelism in Haskell (by \cite{Harness2008}).
+Nested Data Parallelism in Haskell (as in \cite{Harness2008}).
 First, a few predefined functions are presented to
 increase their the understanding of their operational behavior.
-Then the implementation are presented
+Then the implementation is presented
 and finally its complexities are calculated.
 
 \section{Utilities}
@@ -96,9 +96,9 @@ AArr {
     \footnote{There exists other sorting mechanism
     like \emph{Batcher's Bitonic Sort} with $O(n \log^2 n)$ work and $O(\log^2 n)$
     depth. The author did not use its implementation as it is sophisticated and
-    the workload of its vectorization would are expected to be enourmous (on top of the all the other work).
-    Retrospectively, the thesis didn't end up and inlining and exposing the internals of \c{sortP} in \ndpv.
-    But this was not know beforehand.
+    the workload of its vectorization were expected to be enourmous (on top of the all the other work).
+    Retrospectively, the thesis inline and expose the internals of \c{sortP} in \ndpv.
+    But this was not clear beforehand.
     }
     % TODO: cite. Parallel mergesort with work and depth.
     % TODO: cite batchers bitonic sort
@@ -178,7 +178,7 @@ scale gmax as = mapP ( \a -> floor (a * fromIntegral gmax) ) as
 apply :: Hist Int -> Image -> Image
 apply as img = mapP (mapP (as !:)) img
   \end{lstlisting}
-  The first two lines describe the data structure we are using to encode an image - 
+  The first two lines describe the data structure used to encode an image - 
   namely nested data-parallel arrays.
   As decribed in the basics chapter - in NDP
   nested arrays are converted to flat data and a segment decsriptor
@@ -217,16 +217,16 @@ apply as img = mapP (mapP (as !:)) img
   Let $n$ be the number of pixels in an $w \times h$ image,
   then the complexities are given in table \ref{complexities:ndpn}.
   \begin{table}[h!]
-    \caption{Work and Depth complexities for \ndpn}
+    \caption{Complexities of \ndpn}
     \label{complexities:ndpn}
     \begin{center}
     \begin{tabular}{lll}
         \toprule
         function or variable & $\W \in O(...)$           & $\D \in O(...)$ \\
         \midrule
-        hbalance        & $\max$(n $\log$ n, gmax) & $\log \max$(n, gmax) \\
+        hbalance        & $n \log n + gmax$   & $\log n + \log gmax$\\
         \midrule
-        hist            & $\max$(n $\log$ n, gmax) & $\log$ n \\
+        hist            & $n \log n + gmax$    & $\log$ n \\
         sparseToDenseP  & gmax                 & 1 \\
         groupP          & n                    & $\log$ n \\
         sortP           & n $\log$ n             & $\log$ n \\
@@ -244,13 +244,11 @@ apply as img = mapP (mapP (as !:)) img
   \end{table}
     The entries corespond to a complexity class.
     They don't denote the actual number of operations.
-    Special focus is given to \c{hist}.
-    Its complexity takes the maximum of $n \log n$ and $gmax$ - depending on which value/parameter
-    is higher in the context it is used.
-    Similarly, \c{hist} and \c{accu} get logarithmic bounds by
-    either the size of the image or the maximum gray tone.
-    All in all, \ndpn has $\W \in \max(n \log n, gmax)$
-    and $\D \in \log \max(n,gmax)$.
+    For the depths,\c{hist} and \c{accu} get logarithmic bounds by
+    either the size of the image or the maximum gray tone
+    - depending on which one creates the longer chain of dependency.
+    All in all, \ndpn has $\W \in O(n \log n + gmax)$
+    and $\D \in O(\log n + \log gmax)$.
     These special case distinctions are the source
     of interesting analysis in the final evaluation.
     

@@ -7,8 +7,8 @@ in Haskell is given - it is to ease the understanding of the code involed.
 Then Nested Data Parallelism (NDP) is covered where
 key insights are made and concepts exploit them are presented.
 Afterwards a short introduction into parallel complexity measures is given.
-We will learn about work and depth complexities, how they relate
-to the runtime duraiton and how they can be calculated.
+The concept of work and depth complexities are given
+- together with definitions to calculate them.
 Finally, \algo is presented. Its problem is described and
 the solution is formulated.
 
@@ -22,56 +22,57 @@ the solution is formulated.
   \footnote{some which - like the Glasgow Haskell Compiler - are written in Haskell themselves}
   to optimise the abstractions to efficient mashine code.
   
-  We will now be briefly presented with the main features used in this thesis:
+  A few of the main features needed in this thesis are presented now:
+  
+  
   \paragraph{Syntax}
-  Consider this function:
-  \begin{lstlisting}
+    Consider this function:
+    \begin{lstlisting}
 foo :: Double -> Int
 foo x = round (max 5 x)
-  \end{lstlisting}
-  \c{foo} takes the maximum of 5 and the argument number \c{x} and
-  rounds it to the nearest integer. The function is given a type
-  signature in the first line. \c{f :: t} denotes that \c{f} is of type \c{t}.
-  The type describes a function from a double floating number
-  to an integer. Multiple argument functions are typed with multiple arrows.
-  E.g. \c{max :: Double -> Double -> Double}-
-  In contrast to many programming languages parentheses \c{()} are not used for function application
-  (as in \c{f(a)}) but instead are used to specify precedence/ordering.
-  Function application is expressed with spacing - space as in ' '. E.g. \c{round 5.2} applies the built-in
-  floating point rounding function to return the integer \c{5}. Multiple-argument
-  functions are be applied with multiple spaces. E.g. \c{max 5 x}
-  applies \c{max} on \c{5} and \c{x}.
-  
-  The function is written alternatively as:
-  \begin{lstlisting}
+    \end{lstlisting}
+    \c{foo} takes the maximum of 5 and the argument number \c{x} and
+    rounds it to the nearest integer. The function is given a type
+    signature in the first line. \c{f :: t} denotes that \c{f} is of type \c{t}.
+    The type describes a function from a double floating number
+    to an integer. Multiple argument functions are typed with multiple arrows.
+    E.g. \c{max :: Double -> Double -> Double}-
+    In contrast to many programming languages parentheses \c{()} are not used for function application
+    (as in \c{f(a)}) but instead are used to specify precedence/ordering.
+    Function application is expressed with spacing - space as in ' '. E.g. \c{round 5.2} applies the built-in
+    floating point rounding function to return the integer \c{5}. Multiple-argument
+    functions are be applied with multiple spaces. E.g. \c{max 5 x}
+    applies \c{max} on \c{5} and \c{x}.
+    
+    The function is written alternatively as:
+    \begin{lstlisting}
 foo :: Double -> Int
 foo x = let a = max 5 x
                   b = round a
             in  b
-  \end{lstlisting}
-  \c{let} statements bind expressions to variables.
-  The expression after the \c{in} keyword is the return value of the
-  entire expression.
-  
-  The function can be written without the explicit use of its argument \c{x}.
-  \begin{lstlisting}
+    \end{lstlisting}
+    \c{let} statements bind expressions to variables.
+    The expression after the \c{in} keyword is the return value of the
+    entire expression.
+    
+    The function can be written without the explicit use of its argument \c{x}.
+    \begin{lstlisting}
 foo = (round) . (max 5)
 foo = round . max 5
-  \end{lstlisting}
-  This is called currying and function composition.
-  We can omit the last argument of a function and define the function
-  \c{foo} by literally writing out what we mean:
-  "Take the maximum of 5 and then round".
-  Function composition is denoted by a dot \c{(.)}.
-  The second line shows, that the space operator binds stronger than function composition.
-  
-  In functional programming one often ends up nesting multiple functions:
-  \begin{lstlisting}
+    \end{lstlisting}
+    This is called currying and function composition.
+    One can omit the last argument of a function and define the function
+    \c{foo} and focus on the functionality: "Take the maximum of 5 and then round".
+    Function composition is denoted by a dot \c{(.)}.
+    The second line shows, that the space operator binds stronger than function composition.
+    
+    In functional programming one often ends up nesting multiple functions:
+    \begin{lstlisting}
 myFunc x = (bar a b (baz c (foo d x)))
-  \end{lstlisting}
-  One can write the same function in various different ways - depending on space
-  and visual ease.
-  \begin{lstlisting}
+    \end{lstlisting}
+    One can write the same function in various different ways - depending on space
+    and visual ease.
+    \begin{lstlisting}
 myFunc x = bar a b . baz c . foo d $ x  -- composed with explicit argument
 myFunc = bar a b . baz c . foo d        -- composed with implicit argument
 myFunc x = bar a b                      -- indented, explicit argument
@@ -81,7 +82,7 @@ myFunc x = bar a b                      -- indented, explicit argument
 myFunc = bar a b                        -- indented, implicit argument
              . baz c
              . foo d
-  \end{lstlisting}
+    \end{lstlisting}
     The new \c{\$} operator is used here. It denotes function application either.
     % \footnote{Fun fact: \c{\$} is defined in Haskell itself! It goes by \c{f \$ x = f x}}
     However, it
@@ -105,6 +106,7 @@ myFunc = bar a b                        -- indented, implicit argument
     ill-typed expressions, e.g. \c{3 + False}, is rejected.
     Types can be (almost always) be inferred from the context and
     don't need to be specified.
+    
   \paragraph{Type Synonyms}
     Type synonyms enable one to refer to a complicated type by a simpler name.
     E.g. \c{type Foo a = (Int,a)} defines a type synonym - such that
@@ -185,10 +187,15 @@ g . f = \x -> g (f x)
     and the following law holds:
      \c{\textrm{$\forall$} f: f . id = id . f = f}. This is useful for Rewrite Rules.
 
+
+  \p
   A brief overview has been given. An introduction to Nested Data Parallelism is given next.
 
+
+
 \section{Nested Data Parallelism}
-  \label{ndpintro}
+  \label{section:ndpintro}
+  
   In the ground breaking work \cite{Belloch1996}
   major contributions to parallel programming in
   functional programming languages were made.
@@ -221,14 +228,16 @@ g . f = \x -> g (f x)
     Within Flat Data Parallelism only the outer-most level is run in parallel.
     Running the inner elements in parallel requires a different apporach in dividing up the workload.
     
+    \p
     Nested Data Parallelism lifts these limitations.
     In NDP \c{f} can be a parallel operation either. All levels of nesting can
     be executed in parallel - hence the name: \textbf{Nested} Data Parallelism.
     It achives this by transforming the source program into a functionally
     equivalent flat data-parallel program. This (non-trivial) transformation
     is called 'Flattening' or 'Vectoriation' and includes subsequent compiler optimisations.
+    
     The entire program transformation can be broken down in three steps.
-    Each step introduces its new data types.
+    Each step introduces its new data types. They are presented below:
     \begin{enumerate}
       \item \emph{Vectorization} -
         The nested arrays \pan{} which are used by the programer
@@ -249,36 +258,32 @@ g . f = \x -> g (f x)
         implement the local array chunks and to fuse loops, respectively.
     \end{enumerate}
     
-  An overview of the functions available to the programmer is given next.
-  Then, each of the three phases of transformation will be explained.
-  
-  \paragraph{}
-    For parallel arrays, one has few predefined functions.
-    They correspond to functions used in conventional functional programming.
-    Their names and their types are given in \ref{table:parfuns}.
-    \footnote{e.g. \c{zipWithP (*) [:1,2,3:] [:1,3,4:] = [:1*1,2*3,3*4:]}. The arrays as assumed to be of equal size.}
-    
-    \begin{table}[h]
-      \caption{Parallel functions in NDP}
-      \label{table:parfuns}
-      \begin{tabular}{lll}
-          \toprule
-          function & type & description \\
-          \midrule
-          (!:),indexP & \c{[:a:] -> Int -> a} & indexes the array \\
-          lengthP & \c{[:a:] -> Int} & returns the length of the array \\
-          headP & \c{[:a:] -> a} & returns the first element\\
-          lastP & \c{[:a:] -> a} & returns the last element \\
-          mapP & \c{(a -> b) -> [:a:] -> [:b:]} & applies a function on all elements \\
-          zipWithP & \c{(a -> b -> c)} & zip together pairs of elements with a \\
-           & \c{-> [:a:] -> [:b:] -> [:c:]} & function and return an array of results \\
-          sortP & \c{[:Int:] -> [:Int:]} & sorts an array \\
-          sumP & \c{[:Int:] -> Int} & summes the arrays elements \\
-          concatP & \c{[:[:a:]:] -> [:a:]} & removes a level of nesting \\
-          unconcatP & \c{[:[:a::]] -> [:b:] -> [:[:b:]:]} & exposes a structure to a flat array \\
-          replP & \c{Int -> a -> [:a:]} & replicates an element \\
-      \end{tabular}
-    \end{table}
+  \p
+  For parallel arrays, one has few predefined functions.
+  They correspond to functions used in conventional functional programming.
+  Their names and their types are given in \ref{table:parfuns}.
+  \footnote{e.g. \c{zipWithP (*) [:1,2,3:] [:1,3,4:] = [:1*1,2*3,3*4:]}. The arrays as assumed to be of equal size.}
+  \begin{table}[h]
+    \caption{Parallel functions in NDP}
+    \label{table:parfuns}
+    \begin{tabular}{lll}
+        \toprule
+        function & type & description \\
+        \midrule
+        (!:),indexP & \c{[:a:] -> Int -> a} & indexes the array \\
+        lengthP & \c{[:a:] -> Int} & returns the length of the array \\
+        headP & \c{[:a:] -> a} & returns the first element\\
+        lastP & \c{[:a:] -> a} & returns the last element \\
+        mapP & \c{(a -> b) -> [:a:] -> [:b:]} & applies a function on all elements \\
+        zipWithP & \c{(a -> b -> c)} & zip together pairs of elements with a \\
+         & \c{-> [:a:] -> [:b:] -> [:c:]} & function and return an array of results \\
+        sortP & \c{[:Int:] -> [:Int:]} & sorts an array \\
+        sumP & \c{[:Int:] -> Int} & summes the arrays elements \\
+        concatP & \c{[:[:a:]:] -> [:a:]} & removes a level of nesting \\
+        unconcatP & \c{[:[:a::]] -> [:b:] -> [:[:b:]:]} & exposes a structure to a flat array \\
+        replP & \c{Int -> a -> [:a:]} & replicates an element \\
+    \end{tabular}
+  \end{table}
     
   \subsection{Vectorization}
     Vectorization involves two major steps -
@@ -289,6 +294,9 @@ g . f = \x -> g (f x)
       Type dependent representation enbales the programer
       to work with arrays containing complex
       data structures without sacrifying efficiency.
+      It is described in 
+      \cite{FastArr2003Chakravarty}
+      and \cite{DataFamily2005Chakravarty}.
       
       Consider for example \type{[:Int:]} and \type{[:[:Int:]:]}.
       The former can be easily implemented using a contiguos region
@@ -299,6 +307,7 @@ g . f = \x -> g (f x)
       to arrays of integers. Pointers however are undesireable, since they
       decrease Cache Locality. CPU Caching is crucial for performance
       and is directly linked to Cache Locality.
+      
       Nested arrays need a different approach for representation.
       That approach is the separation of data and structure.
       The folowing example describes how a nested array
@@ -323,6 +332,7 @@ array = AArr {
       the \underline{second} index (3) and \underline{second} length (2). Extracting
       2 elements starting at index 3 in the \c{data} array will return
       exactly these two elements.
+      
       This flat representation uses the new type \type{PA (PA Int)}
       instead of the old \type{[:[:Int:]:]}. 
       For nested arrays the functions \c{concatP} and \c{unconcatP}
@@ -335,7 +345,6 @@ array = AArr {
       The flat representation of irregularly nested arrays
       and the constant time (un-)flattening operations are crucial insights in
       NDP.
-      
       
       Implementation for all other types - such as arrays of ints,
       arrays of doubles, are also given. For example \c{[:1,2,3:] :: [:Int:]} can be simply
@@ -387,11 +396,12 @@ mapPL f xss =
     \footnote{This implementation is different from the original in one important aspect - 
     namely the handling of presupplied arguments in the function. Our
     implementation only handles functions without presupplied arguments -
-    but it much simpler to understand than the original in \cite{Harness2008}.
+    but it much simpler to understand than the original in
+    in \cite{HighOrdFlat2006}.
     More accurately, one has an additional expression \c{expandPS xss fEnv}.
     Introducing it wouldn't affect the overall situation in this thesis.
     Therefore, it was omitted.
-    }
+    } 
     Figure \ref{figure:mapP} shall visually aid the understanding
     using the example \c{mapP (mapP incr)}.
     
@@ -419,7 +429,11 @@ mapPL f xss =
     More details can be found in \cite{Harness2008}.
     
   \subsection{Communication Fusion}
-    During Communication Fusion lifted functions like \c{incrL} are inlined.
+    During Communication Fusion
+    \footnote{as described in
+    \cite{DistTypes1999} and \cite{TypesNested2000}
+    }
+    lifted functions like \c{incrL} are inlined.
     They generally have following form:
     \begin{lstlisting}
 incrL :: PA Int -> PA Int
@@ -445,7 +459,7 @@ incrL = joinD . mapD incrS . splitD
     that each PU is processing its
     chunk of the distributed value locally.
     
-    With such introductions, we can take a look at the type of expressions
+    After these introducing words, one can take a look at the type of expressions
     Communication Fusion is designed to optimise. Here is an example.
     \begin{lstlisting}
 myFunc :: PA Int -> PA Int
@@ -494,12 +508,13 @@ myFunc = joinD . mapD (mult2S . incrS) . splitD
     packed together consecutive operations. This is desireable behaviour.
     Now the compiler can further optimise local operations using Stream Fusion.
     
-    
   \subsection{Stream Fusion}
     Stream Fusion concerns the optimisation of recursive composed functions
     into a single loop. It is a complex topic
     \footnote{A few papers on Stream Fusion:
-    \cite{GenVectorFusion2013}, \cite{Fusion2007} and \cite{ArrayFusion2001Chakravarty}
+    \cite{GenVectorFusion2013}, \cite{Fusion2007},
+    \cite{ArrayFusion2001Chakravarty}
+    and \cite{CostArray2002Leshchinskiy}
     } and this section will give a broad overview.
     For the purposes of this thesis it is sufficient to state the following:
     \begin{itemize}
@@ -620,7 +635,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     still in work is a problem for a thesis on that topic.
     It is not simple to use the original ideas from NESL directly
     on Haskell as there are great differences inbetween them (not mentioning
-    the 15 years of research behind it).
+    the 15 years of research already in it).
     
     Therefore, in this thesis, the author has improvised on a few conflicting or
     missing details to create an overall consistent view on NDP.
@@ -631,12 +646,8 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     mentioned here are implementable - but not nesessarily an accurate
     representation of the current state of progress.
     
-    
-  \paragraph{}
     After this introduction to NDP, the next sections will explain
     parallel complexitiy measures and \algo.
-  
-  \clearpage
   
 \section{Parallel Complexity Measures}
   \label{section:parmeasures}
@@ -676,28 +687,28 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
       \toprule
       function & work & depth \\
       \midrule
-      (!:),indexP & 1 & 1 \\
-      lengthP & 1 & 1 \\
-      headP & 1 & 1 \\
-      lastP & 1 & 1 \\
       g . f & $\W(g) + \W(f)$ & $\D(g) + \D(f)$ \\
       mapP f xs & 1 + $\W(xs) + \sum_{x \in xs}\W(f,x)$ & 1+ $\D(xs) + \max_{x \in xs}\D(f,x)$ \\
       zipWith f as bs & 1 + $\W(as) + \W(bs)$ & 1 + $\D(as) + \D(bs)$ \\
         & $+ \sum_{pairs (x,y) \in (xs,ys)}\W(f,x,y)$ & $ + \sum_{pairs (x,y) \in (xs,ys)}\D(f,x,y)$ \\
       sortP & $O(n \log n)$ & $O(\log n)$ \\
       sumP & n & $\log$ n \\
+      replP &  n & 1 \\
+      (!:),indexP & 1 & 1 \\
+      lengthP & 1 & 1 \\
+      headP & 1 & 1 \\
+      lastP & 1 & 1 \\
       concatP & 1 & 1 \\
       unconcatP & 1 & 1 \\
-      replP &  n & 1 \\
     \end{tabular}
     \end{center}
   \end{table}
   
   The work and depth of \c{mapP} embodies the idea, that both are the sum or maximum of the subexpressions.
   
-  An example is given now.
-  Given the expression \c{ys = mapP inrc (replP n 1)}, one can apply
-  the formuas to calculate its work and depth complexity.
+  An example is given now. Given the expression
+  \c{ys = mapP inrc (replP n 1)}, one can apply
+  the formulas to calculate its work and depth complexity.
   \begin{equation*}
   \begin{split}
   \W(ys)
@@ -743,7 +754,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   \end{split}
   \end{equation*}
   
-  Work and depth are a useful tool in measuring
+  Work and depth are an useful tool in measuring
   programs complexity. In the remaining thesis,
   the work and depths complexities (mostly without their derivation)
   are presented.
@@ -752,86 +763,93 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     in the algorithms sections can be found
     on the appendix.
   }
-   
+
+
 \section{\algo}
   \label{section:hbalanceintro}
   This section will introduce \algo. It will state the problem and give an overview of its solution.
   
   \subsection{Problem}
-  Suppose an $w \times h$-8-bit-gray-tone image with low contrast.
-  \footnote{Photo by Phillip Capper. Source: \url{https://en.wikipedia.org/wiki/File:Unequalized_Hawkes_Bay_NZ.jpg}}
-      
-      \begin{figure}[h]
-        \centering
-        \includegraphics[width=0.45\textwidth]{img-org}
-        \caption{An image with low constrast}
-        \label{fig:img-org}
-      \end{figure}
-      The goal is to make details more visible to the human viewer.
-      Inspecting the images histogram reveals new insights.
-      \footnote{made by used Wikipedia user \c{Jarekt}. Source: \url{https://en.wikipedia.org/wiki/File:Unequalized_Histogram.svg}}
-      
-      \begin{figure}[h]
-        \centering
-        \includegraphics[width=0.45\textwidth]{hist-org}
-        \caption{The histogram of the original image with absolute(red) and accumulative(black) count.}
-        \label{fig:hist-org}
-      \end{figure}
-      
-      A histogram shows the gray tone distribution of the image.
-      The x-axis denotes the gray tone and the y-axis denotes the
-      number of pixels with a gray tone $x$ (red). The black curve denotes the
-      total number of pixels with a gray tone $g$ such that $g \leq x$.
+    Suppose an $w \times h$-8-bit-gray-tone image with low contrast.
+    \footnote{Photo by Phillip Capper. Source: \url{https://en.wikipedia.org/wiki/File:Unequalized_Hawkes_Bay_NZ.jpg}}
+    
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=0.45\textwidth]{img-org}
+      \caption{An image with low constrast}
+      \label{fig:img-org}
+    \end{figure}
+    The goal is to make details more visible to the human viewer.
+    Inspecting the images histogram reveals new insights.
+    \footnote{made by used Wikipedia user \c{Jarekt}. Source: \url{https://en.wikipedia.org/wiki/File:Unequalized_Histogram.svg}}
+    
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=0.45\textwidth]{hist-org}
+      \caption{The histogram of the original image with absolute(red) and accumulative(black) count.}
+      \label{fig:hist-org}
+    \end{figure}
+    
+    A histogram shows the gray tone distribution of the image.
+    The x-axis denotes the gray tone and the y-axis denotes the
+    number of pixels with a gray tone $x$ (red). The black curve denotes the
+    total number of pixels with a gray tone $g$ such that $g \leq x$.
 
-      Details are difficult to recognize in the original image
-      due to their tight packing in the histogram. The
-      entire image limits its values to the range [120..205].
-      \algo solves this problem by defining a mapping
-      $f: Graytone \rightarrow Graytone$, such that the accumulating count
-      of the resulting image increases as uniformly as possible from 0 to 255.
-      The histogram \ref{fig:hist-eq}
-      \footnote{made by used Wikipedia user \c{Jarekt}. Source: \url{https://en.wikipedia.org/wiki/File:Equalized_Histogram.svg}}
-      is the envisioned goal.
-      
-      \begin{figure}[h]
-        \centering
-        \includegraphics[width=0.45\textwidth]{hist-eq}
-        \caption{The histogram of the balanced image}
-        \label{fig:hist-eq}
-      \end{figure}
-      This mapping can be definedby spreading out the gray tones such that more
-      frequent gray tones get a larger range to occupy. This idea is
-      explained more in detail next.
-      \comment{
-        Given this interpretation, one can proceed by,
-        first build the accumulating histogram (1 and 2) and remembering which
-        bar belongs to which gray tone, normalize(3) and scale(4) the bars to [0..255] - 
-        and finally - assign each bar (and therefore its gray tone) a new gray tone
-        using the bars location in the range [0..255](5).
-      }
-      % TODO? I should include visual diagrams for this in the thesis.
+    Details are difficult to recognize in the original image
+    due to their tight packing in the histogram. The
+    entire image limits its values to the range [120..205].
+    \algo solves this problem by defining a mapping
+    $f: Graytone \rightarrow Graytone$, such that the accumulating count
+    of the resulting image increases as uniformly as possible from 0 to 255.
+    The histogram \ref{fig:hist-eq}
+    \footnote{made by used Wikipedia user \c{Jarekt}. Source: \url{https://en.wikipedia.org/wiki/File:Equalized_Histogram.svg}}
+    is the envisioned goal.
+    
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=0.45\textwidth]{hist-eq}
+      \caption{The histogram of the balanced image}
+      \label{fig:hist-eq}
+    \end{figure}
+    This mapping can be definedby spreading out the gray tones such that more
+    frequent gray tones get a larger range to occupy. This idea is
+    explained more in detail next.
+    \comment{
+      Given this interpretation, one can proceed by,
+      first build the accumulating histogram (1 and 2) and remembering which
+      bar belongs to which gray tone, normalize(3) and scale(4) the bars to [0..255] - 
+      and finally - assign each bar (and therefore its gray tone) a new gray tone
+      using the bars location in the range [0..255](5).
+    }
+    % TODO? I should include visual diagrams for this in the thesis.
       
   \subsection{Algorithm}
-    To define the image transformation $ hbalance: Image \rightarrow Image$ we need the following definitions:
-    \begin{itemize}
-      \item $Image := (Width,Height,Width \times Height \rightarrow Graytone)$:
-        An image is assigns each pair of coordinates a gray tone. It is bounded in width and height.
-      \item $Histogram_a: Graytone \rightarrow a$:
-        A histogram assigns a value of type $a$ to each gray tone. For $a = Int$,
-        this becomes is an (accumulated) histogram. For $a = Double$, one can
-        describe normalised histograms.
-      \item $\gmax: Graytone$:
-        It is the maximum gray tone for the gray tones in use (e.g. 255 for 8-bit gray tones).
-    \end{itemize}
+    To describe the image transformation $ hbalance: Image \rightarrow Image$ a few definitions are nesessary:
+    
+    \begin{table}[h!]
+    \label{table:hbaldefs}
+    \centering
+    \begin{tabular}{ll}
+      $Image$ & := $(Width,Height,Width \times Height \rightarrow Graytone)$ \\
+      $Histogram_a$ & $: Graytone \rightarrow a$ \\
+      $gmax$ & : $Graytone$ \\
+    \end{tabular}
+    \end{table}
+    
+    An $Image$ assigns a gray tone to each pair of coordinates. It is bounded in width and height.
+    A $Histogram_a$ assigns a value of type $a$ to each gray tone. For $a = Int$,
+    this becomes is an (accumulated) histogram. For $a = Double$, one can
+    describe normalised histograms.
+    $gmax$ is the maximum gray tone for the gray tones in use (e.g. 255 for 8-bit gray tones).
     
     The method is broken down into the following functions:
-    
+      
     \begin{enumerate}
-      \item $hist: Image \rightarrow Histogram_{Int}$
+      \item $hist: Image \rightarrow Histogram_{Int}$ \newline
         It calculates the histogram of an image.
-      \item $accu: Histogram_{Int} \rightarrow Histogram_{Int}$
+      \item $accu: Histogram_{Int} \rightarrow Histogram_{Int}$ \newline
         It calculates the accumulating histogram from the original histogram.
-      \item $normalize: Int \times Int \times Histogram_{Int} \rightarrow Histogram_{Double}$
+      \item $normalize: Int \times Int \times Histogram_{Int} \rightarrow Histogram_{Double}$  \newline
         It normalizes the accumulated histogram
         to a range from 0 to 1. (3)
         The arguments are denoted $a0$ and $agmax$.
@@ -843,13 +861,13 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
           $a(gmax)$ or $a(g')$ where $g'$ is highest gray tone in the image.
           Both are equal, so the implementations may take the liberty to use any of these formulas.
         }
-      \item $scale: Graytone \times Histogram_{Double} \rightarrow Histogram_{Int}$
+      \item $scale: Graytone \times Histogram_{Double} \rightarrow Histogram_{Int}$  \newline
         It scales the normalized values to the maximum gray tone (gmax) and rounds down to the nearest integer.
         Scaling is defined in mapping the histogram values by $x \mapsto \left \lfloor{x \cdot gmax}\right \rfloor $.
-      \item $apply: Histogram_{Int} \times Image \rightarrow Image$
+      \item $apply: Histogram_{Int} \times Image \rightarrow Image$  \newline
         It maps each gray tone to its new value as dictated by the histogram in the first argument.
     \end{enumerate}
-    
+      
     Given these functions $hbalance: Image \rightarrow Image$ can be defined as:
     \begin{equation*}
     \begin{split}
@@ -880,8 +898,9 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   
   
   \paragraph{}
-  After this introduction,
-  the programs \seq, \man\, \ndpn and \ndpv are presented and analysed next.
+    The introduction is over and
+    the programs \seq, \man\, \ndpn and \ndpv
+    are presented and analysed next.
   
   % TODO: cite a book for its uses and the algorithm itself
     
@@ -894,5 +913,5 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
            := [f(z,a_1),f(f(z,a_1),a_2),...,f(f(...f(f(z,a_1),a_2)...,a_{n-1}),a_n)]
         $$
       An example shall be $scanl(+,0,[1,2,2,3,-2]) = [1,3,5,8,6]$. In some definitions
-      the first element is $z$. This is however not the definition we need here.
+      the first element is $z$. This is however not the definition one needs here.
   }

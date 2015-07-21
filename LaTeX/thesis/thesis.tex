@@ -31,6 +31,7 @@
 \newcommand{\type}[1]{\c{#1}}
 \newcommand{\W}[0]{\textrm{W}}
 \newcommand{\D}[0]{\textrm{D}}
+\newcommand{\p}[0]{\paragraph{}\xspace}
 \renewcommand{\c}[1]{\mbox{\texttt{\footnotesize{#1}}\xspace}}
 \newcommand{\lam}[0]{\textrm{$\lambda$}}
 
@@ -180,7 +181,7 @@
 \chapter{Basics}
   \input{basics.tex}
   
-\chapter{Sequential: \seq (<4)}
+\chapter{Sequential: \seq}
   \input{seq.tex}
   
 \chapter{Manually parallised: \man}
@@ -197,7 +198,6 @@
 
 \chapter{Conclusion (<5)}
   \input{conclusion.tex}
-  Example Cite \cite{GenVectorFusion2013}
 
 %% appendix if used
 %%\appendix
@@ -206,7 +206,7 @@
 
 \chapter*{Appendix}
 \addcontentsline{toc}{chapter}{Appendix}
-  \input{appendix.tex}
+  %\input{appendix.tex}
 
 % bibliography and other stuff
 \backmatter
