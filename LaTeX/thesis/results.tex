@@ -2,12 +2,13 @@
 % Vertrauen ist gut, Kontrolle ist besser.
 
 This chapter summarises results of the four implementations
-\seq, \man, \ndpn and \npdv. First the complexities of
-the programs are given and observations
-are made an discussed.
-Then, the pro and contra of each program are given - 
-comparing them on different aspects.
-Finally, the chapter ends with a conclusion.
+\seq, \man, \ndpn and \ndpv.
+First the complexities of the programs are given
+and discussed.
+Then, the pro and contra of each program are presented.
+They compare them on different aspects.
+Finally, the chapter ends with a conclusion
+on Nested Data Parallelism.
 
 \section{Complexity Analysis}
   The complexities of all four programs are summarised in table
@@ -53,12 +54,12 @@ Finally, the chapter ends with a conclusion.
     summand of $\log gmax$.
   
   \paragraph{Sequential versus Parallel:}
-    \seq has the best bounds in work out of all programs.
-    It is low due to its iteration-based histogram creation.
+    Out of all programs, \seq has the best bounds of work.
+    This is due to its iteration-based histogram creation.
     Parallel programs cannot use this method because they
     then were to fall back to sequential traversal.
-    \man and \ndpn instead used more advanced methods to implement the histogram creation
-    in parallel.
+    \man and \ndpn instead used more advanced methods to
+    implement parallel histogram creation.
     
     On the one hand, their methods have worse work complexities.
     If $gmax$ is treated as a constant, then \seq grows linearly
@@ -78,57 +79,79 @@ Finally, the chapter ends with a conclusion.
     However, for large $gmax$ and a high number of PUs the situation
     is reversed.
     Depending on the application context, different parameters
-    $gmax$ and $n$ are given. This makes some algorithms faster than the other.
+    $gmax$ and $n$ are given. This makes some algorithms faster than the others.
     
   
   \section{Pro and Contra}
     Table \ref{table:procons} gives an extensive
     pro and contra analysis of the four programs.
-    They compare the programs on similarity to \ac,
-    efficiency with many or few PUs,
-    the human workload involved and more.
+    They compare the programs on their similarity to \ac,
+    running time with variation of the number of PUs,
+    amount of human workload involved and more.
     
     \begin{table}[h!]
-      \caption{Pros and Contras of the programs}
+      \caption{Pros and Contras}
       \label{table:procons}
       \begin{center}
       \begin{tabular}{ll}
           \toprule
-          program & pro \\
+          program & pro/contra \\
           \midrule
-          \seq & \pro It is a direct implementation \ac \\
-           & \pro It requires the least amount of human work\\
+          \seq & \pro It is a direct implementation \ac. \\
+           & \pro It requires the least amount of human work.\\
+           & \con It has semi-high constant factors due to pointer-based nesting.\\
            & \con It is purely sequential and cannot gain from parallelism. \\
           \midrule
-          \man & \pro It achieves time logarithmic to $n$ for large number of PUs \\
+          \man & \pro It achieves time logarithmic to $n$ for large number of PUs. \\
            & \pro It has low constant factors. \\
            & \pro It has a short implementation. \\
            & \blt{+/-} The programmer trades flexibility and comfort for fine grained control. \\
-           & \con The work is product of $n$ and $gmax$. It grows faster the other ones. \\
-           & \con It is only a surface translation of \ac \\
-           & \con Normalisation and scaling and histogram creation were fused together manually. \\
+           & \con The work is product of $n$ and $gmax$. It grows faster than all other complexities. \\
+           & \con It is only a surface translation of \ac. \\
+           & \con Normalisation, scaling and histogram creation were fused together manually. \\
            & \ind They are not separated steps anymore. \\
            & \con Much human work was necessary to parallelize the histogram creation. \\
            & \con Subsequent algorithms have to be coded to operate on flat images. \footnotemark \\
           \midrule
-          \ndpn & \pro It is almost a direct implementation of \ac \\
-           & \pro It implements parallel histogram creation using only high level function compositions \\
+          \ndpn & \pro It achieves time logarithmic to $n$ and $gmax$ for large number of PUs. \\
+           & \pro It is almost a direct implementation of \ac. \\
+           & \pro It implements parallel histogram creation using  \\
+           & \ind only high level function compositions. \\
            & \pro It involves only limited workload for the human. \\
-           & \con It has higher constant factors due to communication \\
+           & \con It has high constant factors (than \man and \ndpv) due  \\
+           & \ind to nesting and umoptimised communication and traversals. \\
           \ndpv & \\
-           & \pro The programmer does not need to care about flat representation of the image \\
-           & \pro Flattening of arrays and nested functions reduce constant factors \\
-           & \pro Communication Fusion and Stream Fusion reduce constant factors\\
+           & \pro The programmer does not need to think about the flat representation of the image. \\
+           & \pro Flattening of arrays and nested functions reduce constant factors. \\
+           & \pro Communication Fusion and Stream Fusion reduce constant factors \\
            & \ind and automatically fuse normalisation and scaling. \\
-           & \pro The compiler optimises automatically \\
+           & \pro The compiler optimises automatically. \\
            & \con If failed, compiler optimisations are difficult to guide. \\
            & \blt{+/-} The programmer trades fine grained control for flexibility and comfort. \\
+           & \con Real code produced by the compiler is mostly incomprehensible for humans. \\
       \end{tabular}
       \end{center}
     \end{table}
     
+  \clearpage
+    
   \section{Conclusion}
-    TODO.
+    Given the prior analysis, a few conclusions on parallel functional programming with NDP can be drawn.
+    Using Nested Data Parallelism, high-level flexible parallel programs can be written and efficiently executed.
+    In NDP much work and burden is taken from the programmer to the compiler.
+    Solving the same problem using conventional parallel programming methods requires more time and thought,
+    but can lead to better performance and more control on the execution.
+    For small numbers of PUs, sequential programming is faster and
+    simpler than parallel programming. However, for large number of
+    PUs parallel programs perform better.
+    
+    
+    All in all, the four programs, \seq, \man, \ndpn and \ndpv,
+    have different strenghts and weaknesses. No program is strictly better in all aspects than any other.
+     
+    
+    
+    
   
   \footnotetext{Unless one wraps \man with (un-)flattening operations. This approach however manually implements the flattening approach used in NDP.}
 
