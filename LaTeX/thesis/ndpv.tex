@@ -9,6 +9,8 @@ final program \ndpv. The program would have been the results of the compilers \t
 optimisations before it would be translated into mashine code and finally executed.
 At the end of this chapter, complexity measures for \ndpv are given.
 
+\comment{
+
 \section{Transformations}
   As presented in section \ref{section:ndpintro}, the compiler applies
   three phases of program transformations:
@@ -128,7 +130,7 @@ let a = joinD                           -- scanlPS ends
       This leaves \c{propagateD} as the only inter-PU communication inbetween the spliting of the
       sparse array and joining the histogram at the end (line 1).
       
-      The expression \c{mapP (\g -> (headP g,lengthP g))} and \c{groupPS}
+      The expression \c{mapP (\lam g -> (headP g,lengthP g))} and \c{groupPS}
       were involved in a rather special fusion. Essentially, the lambda expression was
       was applied to the result of groupPS. This enabled further communication
       fusioning and created the local operation \c{tripletToATup2}
@@ -320,4 +322,4 @@ in unconcatPS img
   have been given. The next chapter will give an evaluation.
 
 
-  
+}

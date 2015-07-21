@@ -37,16 +37,16 @@
           \toprule
           function or variable &      O(W)           & O(D) \\
           \midrule
-          hbalance        & \max(n \log n, gmax)& \log \max(n, gmax) \\
+          hbalance        & $\max(n \log n, gmax)$& $\log \max(n, gmax)$ \\
           \midrule
-          hist            & \max(n \log n, gmax)& \log n \\
+          hist            & $\max(n \log n, gmax)$& $\log n$ \\
           concatPS        & 1                   & 1 \\
           sortPS          & $n \log n$          & $\log n$ \\
           segdSplitMerge  & $n \log n$          & $\log n$ \\
           mapD tripletToATup2  & gmax           & 1 \\
           joinD xs        & gmax                & 1 \\
           \midrule
-          accu            & gmax                & \log gmax \\
+          accu            & gmax                & $\log gmax$ \\
           sparseToDenseD  & gmax                & 1 \\
           splitSparseD    & gmax                & 1 \\
           mapD scanlS     & gmax                & 1 \\
@@ -57,9 +57,7 @@
           as              & gmax                & 1 \\
           splitD          & gmax                & 1 \\
           mapD normScale  & gmax                & 1 \\
-          joinD           & gmax                & 1 \\
-          %\midrule
-          %expandPS  & gmax  & 1 \\
+          joinD           & gmax                & 1 \\ %\midrule %expandPS  & gmax  & 1 \\
           \midrule
           img' (the new image)     & n                   & 1 \\
           concatPS        & 1                   & 1 \\
