@@ -756,6 +756,8 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
 \section{\algo}
   \label{section:hbalanceintro}
   This section will introduce \algo. It will state the problem and give an overview of its solution.
+  
+  \subsection{Problem}
   Suppose an $w \times h$-8-bit-gray-tone image with low contrast.
   \footnote{Photo by Phillip Capper. Source: \url{https://en.wikipedia.org/wiki/File:Unequalized_Hawkes_Bay_NZ.jpg}}
       
@@ -809,67 +811,67 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
       }
       % TODO? I should include visual diagrams for this in the thesis.
       
-      \paragraph{}
-      To define the image transformation $ hbalance: Image \rightarrow Image$ we need the following definitions:
-      \begin{itemize}
-        \item $Image := (Width,Height,Width \times Height \rightarrow Graytone)$:
-          An image is assigns each pair of coordinates a gray tone. It is bounded in width and height.
-        \item $Histogram_a: Graytone \rightarrow a$:
-          A histogram assigns a value of type $a$ to each gray tone. For $a = Int$,
-          this becomes is an (accumulated) histogram. For $a = Double$, one can
-          describe normalised histograms.
-        \item $\gmax: Graytone$:
-          It is the maximum gray tone for the gray tones in use (e.g. 255 for 8-bit gray tones).
-      \end{itemize}
-      
-      The method is broken down into the following functions:
-      
-      \begin{enumerate}
-        \item $hist: Image \rightarrow Histogram_{Int}$
-          It calculates the histogram of an image.
-        \item $accu: Histogram_{Int} \rightarrow Histogram_{Int}$
-          It calculates the accumulating histogram from the original histogram.
-        \item $normalize: Int \times Int \times Histogram_{Int} \rightarrow Histogram_{Double}$
-          It normalizes the accumulated histogram
-          to a range from 0 to 1. (3)
-          The arguments are denoted $a0$ and $agmax$.
-          $agmax$ denotes the number of total pixels in the image.
-          $a0$ denoted the number of pixels with the lowest gray tone - namely 0.
-          Normalisation is defined in mapping the histogram values by $x \mapsto \frac{(x - a0)}{agmax - a0}$.
-          \comment{
-            For an accumulated histogram $a:Histogram_{Int}$ it can be calculated with
-            $a(gmax)$ or $a(g')$ where $g'$ is highest gray tone in the image.
-            Both are equal, so the implementations may take the liberty to use any of these formulas.
-          }
-        \item $scale: Graytone \times Histogram_{Double} \rightarrow Histogram_{Int}$
-          It scales the normalized values to the maximum gray tone (gmax) and rounds down to the nearest integer.
-          Scaling is defined in mapping the histogram values by $x \mapsto \left \lfloor{x \cdot gmax}\right \rfloor $.
-        \item $apply: Histogram_{Int} \times Image \rightarrow Image$
-          It maps each gray tone to its new value as dictated by the histogram in the first argument.
-      \end{enumerate}
-      
-      Given these functions $hbalance: Image \rightarrow Image$ can be defined as:
-      \begin{equation*}
-      \begin{split}
-          h & := hist(img) \\
-          a & := accu(h) \\
-          n & := normalize(a(0), a(gmax), a) \\
-          gs & := scale(gmax,n) \\
-        hbalance(img) & := apply(gs,img) \\
-      \end{split}
-      \end{equation*}
-      
-      Concrete implementations are given in the coming chapters.
-      Applying the algorithm to the example image gives \ref{fig:img-eq}
-      \footnote{Photo by Phillip Capper. Source: \url{https://en.wikipedia.org/wiki/File:Equalized_Hawkes_Bay_NZ.jpg}}
-      . Details are indeed more distinguishable in the balanced image.
-      
-      \begin{figure}[h]
-        \centering
-        \includegraphics[width=0.45\textwidth]{img-eq}
-        \caption{The equalized image}
-        \label{fig:img-eq}
-      \end{figure}
+  \subsection{Algorithm}
+    To define the image transformation $ hbalance: Image \rightarrow Image$ we need the following definitions:
+    \begin{itemize}
+      \item $Image := (Width,Height,Width \times Height \rightarrow Graytone)$:
+        An image is assigns each pair of coordinates a gray tone. It is bounded in width and height.
+      \item $Histogram_a: Graytone \rightarrow a$:
+        A histogram assigns a value of type $a$ to each gray tone. For $a = Int$,
+        this becomes is an (accumulated) histogram. For $a = Double$, one can
+        describe normalised histograms.
+      \item $\gmax: Graytone$:
+        It is the maximum gray tone for the gray tones in use (e.g. 255 for 8-bit gray tones).
+    \end{itemize}
+    
+    The method is broken down into the following functions:
+    
+    \begin{enumerate}
+      \item $hist: Image \rightarrow Histogram_{Int}$
+        It calculates the histogram of an image.
+      \item $accu: Histogram_{Int} \rightarrow Histogram_{Int}$
+        It calculates the accumulating histogram from the original histogram.
+      \item $normalize: Int \times Int \times Histogram_{Int} \rightarrow Histogram_{Double}$
+        It normalizes the accumulated histogram
+        to a range from 0 to 1. (3)
+        The arguments are denoted $a0$ and $agmax$.
+        $agmax$ denotes the number of total pixels in the image.
+        $a0$ denoted the number of pixels with the lowest gray tone - namely 0.
+        Normalisation is defined in mapping the histogram values by $x \mapsto \frac{(x - a0)}{agmax - a0}$.
+        \comment{
+          For an accumulated histogram $a:Histogram_{Int}$ it can be calculated with
+          $a(gmax)$ or $a(g')$ where $g'$ is highest gray tone in the image.
+          Both are equal, so the implementations may take the liberty to use any of these formulas.
+        }
+      \item $scale: Graytone \times Histogram_{Double} \rightarrow Histogram_{Int}$
+        It scales the normalized values to the maximum gray tone (gmax) and rounds down to the nearest integer.
+        Scaling is defined in mapping the histogram values by $x \mapsto \left \lfloor{x \cdot gmax}\right \rfloor $.
+      \item $apply: Histogram_{Int} \times Image \rightarrow Image$
+        It maps each gray tone to its new value as dictated by the histogram in the first argument.
+    \end{enumerate}
+    
+    Given these functions $hbalance: Image \rightarrow Image$ can be defined as:
+    \begin{equation*}
+    \begin{split}
+        h & := hist(img) \\
+        a & := accu(h) \\
+        n & := normalize(a(0), a(gmax), a) \\
+        gs & := scale(gmax,n) \\
+      hbalance(img) & := apply(gs,img) \\
+    \end{split}
+    \end{equation*}
+    
+    Concrete implementations are given in the coming chapters.
+    Applying the algorithm to the example image gives \ref{fig:img-eq}
+    \footnote{Photo by Phillip Capper. Source: \url{https://en.wikipedia.org/wiki/File:Equalized_Hawkes_Bay_NZ.jpg}}
+    . Details are indeed more distinguishable in the balanced image.
+    
+    \begin{figure}[h]
+      \centering
+      \includegraphics[width=0.45\textwidth]{img-eq}
+      \caption{The equalized image}
+      \label{fig:img-eq}
+    \end{figure}
     
   \algo{} is a frequently used algorithm in image processing. It is 
   one of first methods applied on images to decrease their complexity.
