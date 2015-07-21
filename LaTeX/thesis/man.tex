@@ -35,7 +35,7 @@ Table \ref{table:parprims} shows a few of these primitives.
   To implement \algo in parallel, one has to revisit the sequential
   implementation. The parallel creation of the accumulated histogram is
   a difficult task. The goal is to try to come up with
-  an low complexity algorithm for the histogram calcuation.
+  an low complexity algorithm for the histogram calculation.
   After a few tries, one can give the following implementation:
   
   \begin{lstlisting}
@@ -49,7 +49,7 @@ accuHist xs  = let (left,right) = splitMid xs
   The general idea is to merge accumulation and histogram creation
   into a single tree-like reduction. To each array of pixels, \c{accuHist}
   returns the accumulated histogram of its gray tones.
-  The algorithim can be broken down into two edge-cases and one recursive case
+  The algorithm can be broken down into two edge-cases and one recursive case
   . Figure \ref{figure:accuHist} gives an example of its evaluation.
   
   \begin{figure}[h]
@@ -70,7 +70,7 @@ accuHist xs  = let (left,right) = splitMid xs
   of larger images is broken down by splitting the array into half
   \footnote{splitting is a constant time operation
   for these view-based arrays} and applying \c{accuHist}
-  recursively. Finally, the histograms are merged with elementwise addition
+  recursively. Finally, the histograms are merged with element-wise addition
   ({\c{zipWith(+)}}).
   
   This algorithm was carefully constructed after many failed approaches
@@ -78,7 +78,7 @@ accuHist xs  = let (left,right) = splitMid xs
   yield an acceptable complexity compared to \c{accuHist}.
 
 \section{Implementation}
-  Given the introduction, the manurally parallised \man can finally be implemented.
+  Given the introduction, the manually parallelized \man can finally be implemented.
   The parallel primitives can be integrated
   well into normalisation and scaling.
   However, \c{accuHist} and \c{apply} need to be adapted.
@@ -100,8 +100,8 @@ hbalance img =
   As explained in the previous section, the parallel
   accumulated histogram calculation has been implemented in \c{accuHist}.
   For the gray tone mapping (\c{apply}) to work, nested arrays cannot be used
-  \footnote{as they would result into an array of pointers to subarrays.
-  This is undesireable due to Cache Locality.}
+  \footnote{as they would result into an array of pointers to sub-arrays.
+  This is undesirable due to Cache Locality.}
   .
   One needs to change the entire image representation to a flat array manually.
   To retrieve a specific pixel one needs to calculate
@@ -111,10 +111,10 @@ hbalance img =
   would have to cope with the flat image representation directly.
     
 \section{Complexities}
-  In this section, complexitiy measures for the functions
+  In this section, complexity measures for the functions
   involved in \man will be given.
   To calculate work and depth of \man, one needs the measures of
-  all subfunctions and subexpressions. \c{accuHist} is
+  all sub-functions and sub-expressions. \c{accuHist} is
   not a built-in function - and so needs an individual analysis first.
   
   \paragraph{\c{accuHist}}
@@ -136,7 +136,7 @@ hbalance img =
     Such a recurrence relation can be resolved by tying the knot
     or using the Master Theorem's first case
     \footnote{Master theorem: \cite{Cormen2001}}
-    \footnote{However, the Master Theorem doesn't apply directly
+    \footnote{However, the Master Theorem does not apply directly
     because it treats \c{gmax} as a constant -
     and not as a variable parameter.
     The Master Theorem would give $O(n)$ whereas tying the knot

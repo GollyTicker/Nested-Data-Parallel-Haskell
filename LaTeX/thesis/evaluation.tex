@@ -1,21 +1,60 @@
 
 % Vertrauen ist gut, Kontrolle ist besser.
 
-This chapter will summarise results of the the four implementations
-\seq, \man, \ndpn and \npdv.
+This chapter summarises results of the the four implementations
+\seq, \man, \ndpn and \npdv. First the complexities of
+the implementations are given and discussed. Then
+the pro and contra of each implementation are states.
+Finally, this chapter end with a comparison of
+sequential to parallel programming
+and manual to compiler-optimised programming.
 
 \section{Complexities}
-  * show a table of complexities.
+  The complexities of all four programs are summarised in table
+  \ref{table:allcomps}.
+  
+  \begin{table}[h]
+    \caption{Work and Depth complexities}
+    \label{table:allcomps}
+    \centering
+    \begin{tabular}{lll}
+      \toprule
+      program & work & depth \\
+      \midrule
+      \seq  & $n \log gmax + gmax$ & $n \log gmax + gmax$ \\
+      \man  & $n \cdot gmax$ & $\log n$ \\
+      \ndpn & $n \log n + gmax$ & $\log n + \log gmax$ \\
+      \ndpn & $n \log n + gmax$ & $\log n + \log gmax$ \\
+    \end{tabular}
+  \end{table}
+  One can make multiple observations.
+  
+  First, 
+  
+  pman better in parallel? pndpv better in work
+  
+  Second, Pnest and Pvect equal in work and depth. Only better
+  constant factor. "The compiler cannot do the impossible".
+  
+  Third. sequential has the fastest work, but is purely sequential.
+  (Parallel programs have an overhead).
 
-\section{Constant Factors}
-  * summarise the constant factors each implemenation has
-
-\section{Ranking}
-  ...
   Different ratios of gmax and n make differnt algorithms faster. (binary tree of desicions)
   
-  % Use bullet points from analysis .tex!
+\section{\seq}
+  ...
+
+\section{\man}
+  ...
+
+\section{\pndn and \ndpv}
   
+  
+  
+\paragraph{Speedup in Parallisation}
+  ...
+
+\paragraph{\man vs \ndpn and \ndpv}
   Before moving to the next chapter - one shall be reminded that
   \man involved much manual work. It was not a direct translation
   of the algorithms description. It, especially requires
@@ -23,10 +62,4 @@ This chapter will summarise results of the the four implementations
   \footnote{Unless one wraps \man with (un-)flattening operations.
   However, that approach is a manual replication of the
   flattening approach used in NDP.}
-  
-\section{Speedup in Parallisation}
-  ...
-
-\section{\man vs \ndpn and \ndpv}
-  ...
 

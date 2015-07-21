@@ -3,9 +3,9 @@
 
 This chapter will give an introduction into the basics needed to
 understand this thesis. First, an introduction into functional programming
-in Haskell is given - it is to ease the understanding of the code involed.
+in Haskell is given - it is to ease the understanding of the code involved.
 Then Nested Data Parallelism (NDP) is covered where
-key insights are made and concepts exploit them are presented.
+key insights are made and concepts that exploit them are presented.
 Afterwards a short introduction into parallel complexity measures is given.
 The concept of work and depth complexities are given
 - together with definitions to calculate them.
@@ -20,7 +20,7 @@ the solution is formulated.
   The former means the use of high abstractions to write concise code -
   while the latter means the use of sophisticated compilers
   \footnote{some which - like the Glasgow Haskell Compiler - are written in Haskell themselves}
-  to optimise the abstractions to efficient mashine code.
+  to optimise the abstractions to efficient machine code.
   
   A few of the main features needed in this thesis are presented now:
   
@@ -94,11 +94,11 @@ myFunc = bar a b                        -- indented, implicit argument
     
   \paragraph{Naming Conventions}
     Higher order functions are denoted with \c{f},\c{g} or \c{h}.
-    Usual variables are denoted by \c{x},\c{y},\c{z},\c{a},\c{b},\c{c}
-    or b longer names like \c{divisor} or \c{multWith2}.
+    Variables are denoted with \c{x},\c{y},\c{z},\c{a},\c{b},\c{c}
+    or with longer names like \c{divisor} or \c{multWith2}.
     Two closely related variables are given
     primes. E.g. they are named \c{x} and \c{x'}. A prime is a part of the variable name.
-    Finally, a collection of \c{x} will be refered to by \c{xs}.
+    Finally, a collection of \c{x} will be referred to by \c{xs}.
     E.g. \c{xs} is an array, \c{xss} is a two dimensional array, and so on.
   
   \paragraph{Strong typing and Type Inference}
@@ -116,11 +116,11 @@ myFunc = bar a b                        -- indented, implicit argument
     Functions and expressions are referentially transparent in Haskell.
     Like their inspiring equivalent in Mathematics, they always return
     the same result when evaluated (with the same arguments).
-    A consequece is Immutability - variables and data structures
+    A consequence is Immutability - variables and data structures
     cannot be mutated. Functions over data structures return
     new copies instead of mutating the argument. This enables
-    powerful optimiuaiton techniques such as Inlining and Rewrite Rules.
-    They are explored in section \ref{ndpintro}.
+    powerful optimization techniques such as Inlining and Rewrite Rules.
+    They are explored in section \ref{section:ndpintro}.
     
   \paragraph{Record Syntax}
     Records combine multiple values into a single complex value.
@@ -202,7 +202,7 @@ g . f = \x -> g (f x)
   The paper presented some of Belloch's earlier work (\cite{NepaBelloch1993}) on NESL
   - a programming language specifically designed for expressing parallelism
   in functional programming languages. Its ideas and insights were
-  adapted to various languguages - one of them being Haskell.
+  adapted to various languages - one of them being Haskell.
   Multitude years of research generalized the
   results of the special purpose language NESL
   to the widely general purpose language Haskell.
@@ -213,38 +213,38 @@ g . f = \x -> g (f x)
   
   \paragraph{}
     In Flat Data Parallelism, the programmer is provided with parallel mapping primitives
-    to express parallelism. Such a function micht be \c{map} such that \c{map f xs} applies \c{f}
+    to express parallelism. Such a function might be \c{map} such that \c{map f xs} applies \c{f}
     on each of the elements in the array \c{xs} in parallel.
     
-    This function has a farily intuitive parallel implementation:
+    This function has a fairly intuitive parallel implementation:
     First distribute the input array evenly across the \underline{p}rocessing \underline{u}nits (PUs),
     then compute each local chunk of the array with its PU and finally join all elements together.
     The inner function \c{f} is applied by each processing unit (PU) sequentially.
     
     Statements like \c{map incr}
     \footnote{\c{incr :: Int -> Int} increments an integer.}
-    can be perfectly parallelised.
+    can be perfectly parallelized.
     However, one comes it its limits when considering statements like \c{map (map incr)} or \c{map (map (map incr))}.
     Within Flat Data Parallelism only the outer-most level is run in parallel.
-    Running the inner elements in parallel requires a different apporach in dividing up the workload.
+    Running the inner elements in parallel requires a different approach in dividing up the workload.
     
     \p
     Nested Data Parallelism lifts these limitations.
     In NDP \c{f} can be a parallel operation either. All levels of nesting can
     be executed in parallel - hence the name: \textbf{Nested} Data Parallelism.
-    It achives this by transforming the source program into a functionally
+    It achieves this by transforming the source program into a functionally
     equivalent flat data-parallel program. This (non-trivial) transformation
-    is called 'Flattening' or 'Vectoriation' and includes subsequent compiler optimisations.
+    is called 'Flattening' or 'Vectorization' and includes subsequent compiler optimisations.
     
     The entire program transformation can be broken down in three steps.
     Each step introduces its new data types. They are presented below:
     \begin{enumerate}
       \item \emph{Vectorization} -
-        The nested arrays \pan{} which are used by the programer
+        The nested arrays \pan{} which are used by the programmer
         are converted to flat type-dependent array representations - namely  \pav{}.
         The flattening is also applied to nested parallel functions like
         those mentioned in the previous paragraph.
-      \item \emph{Communicaiton Fusioning} -
+      \item \emph{Communication Fusioning} -
         By inlining the definitions of the parallel functions and
         using semantics-preserving rewrite rules one can
         reduce unnecessary synchronisation points and
@@ -278,7 +278,7 @@ g . f = \x -> g (f x)
         zipWithP & \c{(a -> b -> c)} & zip together pairs of elements with a \\
          & \c{-> [:a:] -> [:b:] -> [:c:]} & function and return an array of results \\
         sortP & \c{[:Int:] -> [:Int:]} & sorts an array \\
-        sumP & \c{[:Int:] -> Int} & summes the arrays elements \\
+        sumP & \c{[:Int:] -> Int} & sums the arrays elements \\
         concatP & \c{[:[:a:]:] -> [:a:]} & removes a level of nesting \\
         unconcatP & \c{[:[:a::]] -> [:b:] -> [:[:b:]:]} & exposes a structure to a flat array \\
         replP & \c{Int -> a -> [:a:]} & replicates an element \\
@@ -291,29 +291,29 @@ g . f = \x -> g (f x)
     Both will be explained in detail below.
   
     \subsubsection{Type dependent representation}
-      Type dependent representation enbales the programer
+      Type dependent representation enables the programmer
       to work with arrays containing complex
-      data structures without sacrifying efficiency.
+      data structures without scarifying efficiency.
       It is described in 
       \cite{FastArr2003Chakravarty}
       and \cite{DataFamily2005Chakravarty}.
       
       Consider for example \type{[:Int:]} and \type{[:[:Int:]:]}.
-      The former can be easily implemented using a contiguos region
+      The former can be easily implemented using a contiguous region
       of memory and inserting the bytes. The latter however cannot
-      be implemented equally. The subarray could be of different size.
+      be implemented equally. The sub-array could be of different size.
       To allocate a block of memory, one needs to know the size of all arrays beforehand.
       Implementing nested array naively would use an array of pointers to
-      to arrays of integers. Pointers however are undesireable, since they
+      to arrays of integers. Pointers however are undesirable, since they
       decrease Cache Locality. CPU Caching is crucial for performance
       and is directly linked to Cache Locality.
       
       Nested arrays need a different approach for representation.
       That approach is the separation of data and structure.
-      The folowing example describes how a nested array
+      The following example describes how a nested array
       like \c{[[1,2,3],[4,5],[],[6]] :: [:[:Int:]:]} can be implemented
       to increase Cache Locality:
-      \footnote{\c{[\string#1,2,3\string#]} is the notation used for a contiguos-memory array.}
+      \footnote{\c{[\string#1,2,3\string#]} is the notation used for a contiguous-memory array.}
       \begin{lstlisting}
 array :: PA (PA Int)
 array = AArr {
@@ -323,12 +323,12 @@ array = AArr {
 }
       \end{lstlisting}
       All data is packed together into a data field - regardless of nesting.
-      All structucal information is divied into two arrays of integers.
+      All structural information is divided into two arrays of integers.
       The indices-array contains - for every subarray in the 
       original array - the index of the first element if it were
       to be indexed into the \c{data} field. The lengths describe the lengths of
-      each subarray. Each subarray corresponds to a pair of index and length.
-      For example, the \underline{second} subarray (\c{[4,5]}) corresponds to
+      each sub-array. Each sub-array corresponds to a pair of index and length.
+      For example, the \underline{second} sub-array (\c{[4,5]}) corresponds to
       the \underline{second} index (3) and \underline{second} length (2). Extracting
       2 elements starting at index 3 in the \c{data} array will return
       exactly these two elements.
@@ -358,11 +358,11 @@ array = AInt [# 1,2,3 #]
       every parallel functions (like \c{fooP}) to
       their predefined scalar counterparts (like \c{fooPS}).
       The scalar functions work directly on the flat representation
-      and are designed to exploit them for efficieny.
+      and are designed to exploit them for efficiency.
       \c{concatPS} and \c{unconcatPS} are examples thereof.
       In fact, functions like \c{fooP} have no actual implementation
       because they are entirely replaced by their \c{fooPS} counterparts.
-      They are soley used to simpilfy the programmer view.
+      They are solely used to simplify the programmer view.
     
     \nomenclature{Cache Locality}{TODO}
       
@@ -377,7 +377,7 @@ array = AInt [# 1,2,3 #]
       The most important one among them is lifted \c{mapPS} - namely \c{mapPL}.
       To \c{mapPS} of type \c{(a -> b) -> PA a -> PA b},
       \c{mapPL} is of type \c{(a -> b) -> PA (PA a) -> PA (PA b)}.
-      To overcome the limitations of flat data parallelsim,
+      To overcome the limitations of flat data parallelism,
       its implementation has to map over all elements at once
       (instead of mapping over the outer-nesting level only).
       The following implementation does that.
@@ -392,10 +392,10 @@ mapPL f xss =
     The definition of \c{mapPL} is curcial.
     First it flattens the array (line 5), then it applies
     the flat data-parallel operation (line 4) using \c{fL}
-    and finally the array is unflattened to the original structure (line 3).
+    and finally the array is un-flattened to the original structure (line 3).
     \footnote{This implementation is different from the original in one important aspect - 
-    namely the handling of presupplied arguments in the function. Our
-    implementation only handles functions without presupplied arguments -
+    namely the handling of pre-supplied arguments in the function. Our
+    implementation only handles functions without pre-supplied arguments -
     but it much simpler to understand than the original in
     in \cite{HighOrdFlat2006}.
     More accurately, one has an additional expression \c{expandPS xss fEnv}.
@@ -408,8 +408,8 @@ mapPL f xss =
     \begin{figure}[h!]
         \begin{center}
         \includegraphics[width=\linewidth]{mapP.png}
-        \caption{Conceptional programer view and actual implementation of \c{mapP (mapP incr)}
-        \footnote{Here, the commas inbetween the elements have been omitted for visual clarity.
+        \caption{Conceptional programmer view and actual implementation of \c{mapP (mapP incr)}
+        \footnote{Here, the commas in-between the elements have been omitted for visual clarity.
         This thesis will sometimes use such spaces for separation
         instead of commas.
         }
@@ -421,11 +421,11 @@ mapPL f xss =
     This is the key insight in NDP. Nested parallel functions are
     transformed into calls of \c{mapPL} which avoids the nesting of
     the arrays entirely and maps over the array is a single pass.
-    Using this precedure, one can transform nested data parallel programs
+    Using this procedure, one can transform nested data parallel programs
     to flat data parallel programs. The former is easier to write in and flexible
     - while the latter can be implemented directly and is efficient.
             
-    Vectorization itself is a complex transformation and many details were omited.
+    Vectorization itself is a complex transformation and many details were omitted.
     More details can be found in \cite{Harness2008}.
     
   \subsection{Communication Fusion}
@@ -489,15 +489,15 @@ myFunc = joinD . mapD mult2S . splitD . joinD . mapD incrS . splitD
     laws and allow the compiler to rewrite parts of the code according to them.
     They are written by humans and table \ref{rules} introduces some of them.
     Among them is "splitD/joinD". It states the general law,
-    that joining and resplitting an array doesn't change the array at all.
+    that joining and re-splitting an array does not change the array at all.
     This is clear for humans - but not for the compiler. By specifying such rules
-    the compiler is aided in using equational reasoning to
-    optimise the code. In our case the compiler finds the splitD/joinD pair and applies the rule to get:
+    the compiler is aided in optimising the code.
+    In our case the compiler finds the splitD/joinD pair and applies the rule to get:
     \begin{lstlisting}
 myFunc :: PA Int -> PA Int
 myFunc = joinD . mapD mult2S . mapD incrS . splitD
     \end{lstlisting}
-    The was able to eliminated communication inbetween two phases of computation.
+    The was able to eliminated communication in-between two phases of computation.
     This is a step towards more efficient evaluation.
     Using another rule, namely "mapD/mapD", the compiler can further optimise to.
     \begin{lstlisting}
@@ -505,7 +505,7 @@ myFunc :: PA Int -> PA Int
 myFunc = joinD . mapD (mult2S . incrS) . splitD
     \end{lstlisting}
     Communication Fusion did not only reduce the communication but also
-    packed together consecutive operations. This is desireable behaviour.
+    packed together consecutive operations. This is desirable behaviour.
     Now the compiler can further optimise local operations using Stream Fusion.
     
   \subsection{Stream Fusion}
@@ -526,7 +526,7 @@ myFunc = joinD . mapD (mult2S . incrS) . splitD
         Functions over streams are implemented non-recursively.
         They are crucial for the Stream Fusion.
       \item Any streams left over after optimisations are converted back into.
-        \c{Vector a}. Streams are only used for optimisaition, but not as a collection.
+        \c{Vector a}. Streams are only used for optimisation, but not as a collection.
     \end{itemize}
     Applying Stream Fusion creates the following code:
     \begin{lstlisting}
@@ -584,10 +584,10 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
             They are used as the distributed chunks of \pad.}
     
     Most of the functions are simply inlined during optimisation.
-    They don't exist anymore at runtime and
-    therefore are marked 'not-executed'.
+    They do not exist at runtime anymore and
+    therefore they are marked 'not-executed'.
     Besides these functions, the compiler needs rewrite rules.
-    Most importantant ones are described in table \ref{rules}.
+    Most important ones are described in table \ref{rules}.
     
     \begin{table}[h!]
       \caption{Rewrite Rules in NDP}
@@ -596,7 +596,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
           \toprule
           rule & rewrite & description \\
           \midrule
-          splitD/joinD & splitD . joinD = id & Joining and spliting an distributed array  \\
+          splitD/joinD & splitD . joinD = id & Joining and splitting an distributed array  \\
           & & is equivalent to a no-op. \\
           
           mapD/mapD & mapD g . mapD f & Two consecutive mappings are \\
@@ -608,7 +608,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
           & & directly applying the function and \\
           & & subsequently replicating it. \\
           
-          splitD/replPS & splitD . replPS n & Replicating and spliting a value \\
+          splitD/replPS & splitD . replPS n & Replicating and splitting a value \\
           & = replD n & is equivalent to creating the local chunks\\
           & & directly. ReplD implements this and knows \\
           & & which chunk its PU is responsible for. \\
@@ -634,16 +634,16 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     different statuses of progress. Inconsistent literature and a project
     still in work is a problem for a thesis on that topic.
     It is not simple to use the original ideas from NESL directly
-    on Haskell as there are great differences inbetween them (not mentioning
+    on Haskell as there are great differences in-between them (not mentioning
     the 15 years of research already in it).
     
     Therefore, in this thesis, the author has improvised on a few conflicting or
     missing details to create an overall consistent view on NDP.
     The author specifically used implementations which could really have been
-    used in NDP.\footnote{E.g. \c{groupP} as introducted in chapter \ref{chapter:ndpn} doesn't
+    used in NDP.\footnote{E.g. \c{groupP} as introduced in chapter \ref{chapter:ndpn} does not
     is not included in NDP right now. However, its implementation described there is perfectly possible.}
     The reader is hereby noted that the details
-    mentioned here are implementable - but not nesessarily an accurate
+    mentioned here are implementable - but not necessarily an accurate
     representation of the current state of progress.
     
     After this introduction to NDP, the next sections will explain
@@ -663,24 +663,24 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   It is also the time needed if one had an unlimited number of processors.
   
   There are limited ways to calculate work and depth. Both are defined
-  recursively over the work and depths of their subexpressions. Generally,
-  work is the sum of operations involved in all of the subexpressions
+  recursively over the work and depths of their sub-expressions. Generally,
+  work is the sum of operations involved in all of the sub-expressions
   - while depth is the maximum of number of operations involved in
-  any particular chain of subexpressions.
+  any particular chain of sub-expressions.
   In this thesis, the functions $\W(\cdot)$ and $\D(\cdot)$ denote work
-  and depth, respectively. In some cases, syntactics constructs
+  and depth, respectively. In some cases, syntactic constructs
   like $\W(f,x)$ are used to denote the work involved in \emph{applying}
   \c{f} on \c{x}. It does not include the work involved
   in calculating \c{x} in the first place. Sometimes,
   the thesis denotes $\W(n)$ or $\D(n,gmax)$ to emphasize,
   that the work and depth is dependent of the length of the input
-  or of the parameter $gmax$. In these cases, the function refered to
+  or of the parameter $gmax$. In these cases, the function referred to
   is clear from the context.
   Table \ref{table:workdepth} gives work and depth complexities the parallel primitives
   of table \ref{table:parfuns}.
   
   \begin{table}[h]
-    \caption{Work and Depth complexities}
+    \caption{Work and Depth - Definitions and Complexities}
     \label{table:workdepth}
     \begin{center}
     \begin{tabular}{lll}
@@ -704,7 +704,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     \end{center}
   \end{table}
   
-  The work and depth of \c{mapP} embodies the idea, that both are the sum or maximum of the subexpressions.
+  The work and depth of \c{mapP} embodies the idea, that both are the sum or maximum of the sub-expressions.
   
   An example is given now. Given the expression
   \c{ys = mapP inrc (replP n 1)}, one can apply
@@ -811,7 +811,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
       \caption{The histogram of the balanced image}
       \label{fig:hist-eq}
     \end{figure}
-    This mapping can be definedby spreading out the gray tones such that more
+    This mapping can be defined by spreading out the gray tones such that more
     frequent gray tones get a larger range to occupy. This idea is
     explained more in detail next.
     \comment{
@@ -824,7 +824,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     % TODO? I should include visual diagrams for this in the thesis.
       
   \subsection{Algorithm}
-    To describe the image transformation $ hbalance: Image \rightarrow Image$ a few definitions are nesessary:
+    To describe the image transformation $ hbalance: Image \rightarrow Image$ a few definitions are necessary:
     
     \begin{table}[h!]
     \label{table:hbaldefs}

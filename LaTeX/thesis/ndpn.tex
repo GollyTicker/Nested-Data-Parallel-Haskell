@@ -4,14 +4,14 @@
 This chapter describes an implementation of \algo that uses
 Nested Data Parallelism in Haskell (as in \cite{Harness2008}).
 First, a few predefined functions are presented to
-increase their the understanding of their operational behavior.
+increase their the understanding of their operational behaviour.
 Then the implementation is presented
 and finally its complexities are calculated.
 
 \section{Utilities}
 
   \subsection{Scanl}
-    Parallel prefix sum has well studied efficient implementaitons.
+    Parallel prefix sum has well studied efficient implementations.
     One of them is the following:
     \begin{lstlisting}   
 scanlP f z xs =
@@ -36,7 +36,7 @@ $ xs
         \label{figure:scanlPsteps}
     \end{figure}
     In terms of depth and parallel complexity, the propagation is the bottleneck.
-    However, since the progapation itself is structurally isomorphic to prefix summing itself,
+    However, since the propagation itself is structurally isomorphic to prefix summing itself,
     one can use a binary-tree-like scheme for propagation for the local values distributed on the PUs.
     This propagation happens in time logarithmic to the number of PUs.
     It an be derived from \cite{Scanl1980}. For the purposes of this thesis,
@@ -80,12 +80,12 @@ AArr {
     of the right list. If both triplets correspond to the same value,
     then a new triplet with the total count and the left index is used.
     If both are unequal, then they are left unchanged. The implementation
-    of \c{groupP} uses a subfunction \c{segdSplitMerge} to implement the
-    splitting and merging. This function will be exposed lateron in
+    of \c{groupP} uses a sub-function \c{segdSplitMerge} to implement the
+    splitting and merging. This function will be exposed later-on in
     the vectorization of \ndpn.
     Further analysis reveals the complexities $\W(n) \in O(n)$ and $\D(n) \in O(\log n)$.
     All in all, \c{groupP} is an operation which can very well exploit the flat representation of nested arrays.
-    % TODO: and to appendix and refer ot it?
+    % TODO: and to appendix and refer to it?
     
   \subsection{SortP}
     General parallel sorting can be as simple as a parallel
@@ -96,8 +96,8 @@ AArr {
     \footnote{There exists other sorting mechanism
     like \emph{Batcher's Bitonic Sort} with $O(n \log^2 n)$ work and $O(\log^2 n)$
     depth. The author did not use its implementation as it is sophisticated and
-    the workload of its vectorization were expected to be enourmous (on top of the all the other work).
-    Retrospectively, the thesis inline and expose the internals of \c{sortP} in \ndpv.
+    the workload of its vectorization were expected to be enormous (on top of the all the other work).
+    Retrospectively, the thesis does not inline and expose the internals of \c{sortP} in \ndpv.
     But this was not clear beforehand.
     }
     % TODO: cite. Parallel mergesort with work and depth.
@@ -111,15 +111,15 @@ AArr {
     the goal is to create a sparse array that compresses elements
     by encoding consecutive equal elements
     with a tuple of the element and its number of occurrences.
-    E.g. it transformes \c{[4,2,2,2,2,3,3,1]} to \c{[(4,1),(2,4),(3,2),(1,1)]}.
+    E.g. it transforms \c{[4,2,2,2,2,3,3,1]} to \c{[(4,1),(2,4),(3,2),(1,1)]}.
     An implementation can be formulated directly.
     \begin{lstlisting}
 runLengthEncode :: [:a:] -> [:(a,Int):]
 runLengthEncode = mapP (\xs -> (headP xs, lengthP xs)) . groupP
     \end{lstlisting}
-    This function uses \c{groupP} to first create subarrays of
+    This function uses \c{groupP} to first create sub-arrays of
     equal consecutive elements. Then it
-    transform subarrays like \c{[2,2,2,2]} to tuples like \c{(2,4)}.
+    transform sub-arrays like \c{[2,2,2,2]} to tuples like \c{(2,4)}.
     This is the second step of run length encoding.
     
     Run length encoding is an useful intermediate step in
@@ -127,9 +127,9 @@ runLengthEncode = mapP (\xs -> (headP xs, lengthP xs)) . groupP
     of a histogram.
     To make create a full histogram, the input image has to be flattened first (\¢{unconcatP}),
     then sorted(\c{sortP}) and finally applied \c{runLengthEncode} on.
-    The sorting is necessary, as it groups together regardsless of their
+    The sorting is necessary, as it groups together regardless of their
     position in the original image.
-    The resutl is an array of type \type{[:(Int,Int):]} where each element
+    The result is an array of type \type{[:(Int,Int):]} where each element
     describes a gray tone (first integer in tuple) and its number of
     occurrences (second integer in tuple).
     Using this approach, one has a parallel implementation of the histogram calculation.
@@ -180,15 +180,15 @@ apply as img = mapP (mapP (as !:)) img
   \end{lstlisting}
   The first two lines describe the data structure used to encode an image - 
   namely nested data-parallel arrays.
-  As decribed in the basics chapter - in NDP
-  nested arrays are converted to flat data and a segment decsriptor
+  As described in the basics chapter - in NDP
+  nested arrays are converted to flat data and a segment descriptor
   during vectorization. Therefore nesting
-  can be used to from the programer point of view to simplify
+  can be used to from the programmer point of view to simplify
   the programming and to support the intuition.
   
   \ndpn, like the description of \algo, 
   is split up in histogram calculation (lines 20 - 16)
-  ,histogram accumulcation (line 23), normalisation (line 26 - 30),
+  ,histogram accumulation (line 23), normalisation (line 26 - 30),
   scaling (line 33) and the final gray tone mapping (line 36).
   The significant different between \ndpn and \seq is the calculation of the histogram.
   \footnote{Aside from the the less significant fact, that \ndpn uses an array for its histogram while \seq uses a binary-search-tree.}
@@ -209,7 +209,7 @@ apply as img = mapP (mapP (as !:)) img
   \footnote{Keeping sparse arrays for the representation of the histogram is a viable option yielding possibly different (maybe better?) complexities.}
   
   The function \c{apply} uses a nested application of parallel functions.
-  Within NDO, it will be subject to flattening in \ndpv.
+  Within NDP, it will be subject to flattening in \ndpv.
   
 \section{Complexities}
   Using the work and depths measures as introduced in section \ref{section:parmeasures},
@@ -242,7 +242,7 @@ apply as img = mapP (mapP (as !:)) img
     \end{tabular}
     \end{center}
   \end{table}
-    The entries corespond to a complexity class.
+    The entries correspond to a complexity class.
     They don't denote the actual number of operations.
     For the depths,\c{hist} and \c{accu} get logarithmic bounds by
     either the size of the image or the maximum gray tone

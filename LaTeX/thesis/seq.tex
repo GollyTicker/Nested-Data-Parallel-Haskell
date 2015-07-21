@@ -26,12 +26,12 @@ type Hist a = TreeMap Int a
     \c{k} and containing values of type \c{a}. They are
     used for the representation of a histogram.
     \footnote{The use of arrays for the representation of
-    histograms has undesireable effects. Languges with
+    histograms has undesirable effects. Languages with
     mutability can destructively update the array
     for each pixel in the image. The Immutability
     of Haskell prevents this and forces the use of
     immutable and shared data-structures like \c{TreeMap k a}.}
-    Functions over \c{PtrVector} are suffixed \c{-V}. Functions over \c{TreeMap} aresuffixed \c{-M}.
+    Functions over \c{PtrVector} are suffixed \c{-V}. Functions over \c{TreeMap} are suffixed \c{-M}.
   
   \paragraph{Histogram Calculation}
     The steps for the creation of the initial histogram are given below:
@@ -42,13 +42,13 @@ hist = foldrV (\i -> insertWithM (+) i 1) emptyM . concatV
     \c{hist} proceeds in two steps. First the image is flatten
     into an one-dimensional array. Then, a \c{TreeMap} is created
     counting the number of occurrences of each gray tone.
-    \c{foldrV} is linear in the size of the flattened iamge array.
+    \c{foldrV} is linear in the size of the flattened image array.
     \c{insertWithM} is logarithmic in the number elements
     inserted into the map. The size is bounded by the number of 
     gray tones - namely \c{gmax+1}.
     
   \paragraph{Accumulation}
-  Calculating the accumulated histogram can be implented by
+  Calculating the accumulated histogram can be implemented by
   a prefix sum over values. It is linear in the size of the map.
   \begin{lstlisting}
 accu :: Hist Int -> Hist Int
@@ -67,7 +67,7 @@ normalize a0' agmax' as =
         divisor = agmax - a0
     in  mapM (\freq' -> (fromIntegral freq' - a0) / divisor) as
   \end{lstlisting}
-  It applies the mapping over the tree-mapusing \c{mapM}.
+  It applies the mapping over the tree-map using \c{mapM}.
   \c{fromIntegral} explicitly converts from \c{Int} to \c{Double} since
   Haskell clearly distinguishes them. Variable names with a prime
   (') denote values of type \c{Int}. Variable names without a prime
@@ -122,9 +122,9 @@ hbalance img =
   \begin{itemize}
     \item[n:] the number of pixels in the image
     \item[$h$:] the height of the image and equally the
-              the number of subarrays in the nested array
+              the number of sub-arrays in the nested array
     \item[$w$:] the width of the image and
-              equally the length of the subarrays
+              equally the length of the sub-arrays
   \end{itemize}
   
   \begin{table}[h!]
@@ -161,7 +161,7 @@ hbalance img =
   in table \ref{table:seq}.
   The functions are grouped together by their context.
   Each component of \seq (e.g. \c{hist}, \c{accu}) is
-  given a group with its each of its subfunctions and
+  given a group with its each of its sub-functions and
   the components complexity.
   For example, \c{hist} uses three functions.
   \c{concatV} has linear complexity in the number
@@ -169,7 +169,7 @@ hbalance img =
   \c{insertWithM} is an logarithmic time insertion operation
   into a tree. \c{foldrV} traverses each pixel,
   starting with an empty map \c{emptyM} and
-  adds each pixel into the TreeMap using \c{insertWithM}.
+  adds each pixel into the tree-map using \c{insertWithM}.
   There are \c{n} pixels in the array and and each insertion
   takes at-most time logarithmic to the maximum gray tone \c{gmax}.
   Therefore its time complexity is $O(n \log gmax)$.
