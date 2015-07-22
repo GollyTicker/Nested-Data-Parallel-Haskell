@@ -1,34 +1,130 @@
 
-% Zitat?
+
+\epigraph{\emph{
+%"I never think of the future. It comes soon enough."
+"I claim to be a simple individual \\
+liable to err like any other fellow mortal. \\
+I own, however, that I have humility \\
+enough to confess my errors \\
+and to retrace my steps.
+}}{
+%Albert Einstein
+Mahatma Gandhi
+}
 
 \section{Summary}
-  ...
+  This thesis gave an evaluation of Nested Data Parallelism in
+  the functional programming language Haskell by giving
+  four implementations of \algo and comparing them to each other.
+  They were \seq, \man, \ndpn and \ndpv. The results suggest
+  that no program was clearly better than all
+  other programs. Each of them had its advantages and disadvantages.
+  While \seq performs the best on a few number of processors,
+  it is out-competed by parallelized programs when the number rises.
+  \man has the lowest complexity for large number
+  of processors - though it has the highest complexity for small numbers.
+  However, \ndpv is a good compromise between both extremes.
+  It enables almost as much abstraction as does \seq
+  while still performing well on varying number of processors.
+  
 
 \section{Related Work}
-  Other work on optimisation in parallel functional programming (in haskell)
-  same things as in expose
+  There is much active research in parallel programming
+  in general and in the programming language Haskell.
+  
+  Generally, there are two approaches on parallel programming.
+  In the following a summary of these approaches is given. The
+  comments after the semi-cola state properties of problems
+  for which the approach is fruitful.
+  \begin{itemize}
+    \item Task Parallelism; irregular, non-deterministic
+    \begin{itemize}
+      \item dependence graph-based: \cite{GenTaskPar2015}, deterministic, medium-abstraction
+      \item futures-based: \cite{FutPar2012}, simple integration, subtle-preconditions 
+      \item thread-based: \cite{POXISthreads1997}, high-control, low-abstraction
+      \item In Haskell: \cite{Marlow2012Parallel}
+      \begin{itemize}
+        \item Algorithm + Strategy = Parallelism: \cite{Trinder1998Algorithm}; task-based, deterministic, subtle-preconditions
+        \item The Par Monad; \cite{Marlow2011Monad}; dependency graph, in-concise, high-performing
+      \end{itemize}
+    \end{itemize}
+    \item Data Parallelism: \cite{DataParallel1986}; (ir-)regular, deterministic
+    \begin{itemize}
+      \item Flat GPU Parallelism: CUDA \cite{CUDA2008}, OpenCL \cite{OpenCL2010}; highly regular and high-performing, deterministic, 
+      \item In Haskell: \cite{Marlow2012Parallel}
+      \begin{itemize}
+          \item Repa: \cite{Keller2010Regular}; nested arrays, regular, data-parallel, high-performing
+          \item Accelerate: \cite{McDonell2013Optimising}; GPU, high-performing, data-parallel, regular
+          \item Nested Data Parallel: \cite{Harness2008}; type-dependent, irregular/flexible, concise
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+  All related work on parallelism in Haskell (except for \cite{Marlow2011Monad})
+  implement sophisticated optimisations strategies like NDP. In
+  functional programming, these optimisations are more necessary than an option.
+  Unoptimised functional programs are usually slower by a magnitude than their imperative counterparts.
+  
   
 \section{Future Work}
-  ...
+  Based on the results on this thesis, further work can be of interest:
   
-  further analysis with more knowledge about implementations
-  would enable the use exact counts of operations ratther than only Big O classes.
+  \subsection{Brent's Equation}
+    The work and depth complexities calculated in this thesis are mere complexitiy classes.
+    Given more time and details on the implementation of the NDP functions,
+    one could give an exact expression for the work and depth of each program.
+    One could then use Brent's Equation \cite{Brent2011}:
+    
+    $$ \frac{W}{P} \leq T \leq \frac{W}{P} + L \cdot D $$
+    
+    where $P$ is the number of processors,
+    $L$ is the communication latency in number of machine instructions,
+    and $W$ and $D$ are work and depth in number of instructions, respectively.
+    
+    Brent's Equation gives upper and lower bounds on
+    the time a program with work $W$ and depth $D$
+    requires given $L$ latency and $P$ processors.
+    
+    If given exact numbers for work and depth (of table \ref{table:allcomps}), one could do a
+    more fruitful and exact analysis in the parameter-space
+    built spanned by $n$, $gmax$, $P$ and $L$.
+    For concrete parameters one could solve for the optimal
+    algorithm to use.
   
-  One could use Breent's Equation and solve for
-  solutions in the parameter space where the on or the other
-  implementation is better.
-  
-  "Alternate Algorithms"
-    Rose Tree Data strcture -> Interesting, Custom Types, too compliated
-    Djikstra on Image -> Too regular, huge for manual vectorization
-      Connected Components Labeling -> huge for manual vectorization
-      Contour Detection -> Too fast and simple to benefit from parallization
-  "Distributed NDP"
-    ...
+  \subsection{Alternate Algorithms}
+    Given the flexibility of NDP, alternate algorithms and data structures can be considered.
+    The original papers \cite{Harness2008} use the 'Banes-Hut-Algorithm' for
+    their examples. It is an $O(n \log n)$ algorithm for the approximate of
+    calculation of n-bodies moving in three-dimensional space under the
+    force of gravity. A comparison with manual implementation is
+    a relevant question - since the algorithm is known
+    to be hard to parallelize. For image processing,
+    one could similarly consider other algorithms such as
+    'Connected-Components-Labelling' or 'Face-Detection'.
+    
+  \subsection{Distributed NDP}
+    The implementation of NDP in Haskell is much more general than its original
+    implementation in NESL. Considering the explicit distinction of locality (e.g the use of \c{Dist})
+    used, there might be only limited work necessary to expand NDP from working on a single machine
+    with many processors to working on multiple machines with multiple processors.
 
-\section{Retrospection}
-  % self critique
+\comment{
+
+\section{Retrospectare Persona}
+  I am impressed of myself on how much work was involved in this thesis -
+  given the time-frame of mere three months. I am satisfied with this
+  thesis - though I went to different paths on many directions. I
+  had great fun in dealing with a few topics of personal interest
+  and lifting it into an entire thesis. Even though it was fragile
+  in the one of other aspect - it did however turn out
+  well. Given my immediate future path, I am to say goodbye
+  - and thank for the past three years at the HAW Hamburg.
+  I especially want to thank my parents for their continuous support
+  and my friends for ...
+
+}
 
 \section{Final words}
-  % our small trip ends here
-
+  With this paragraph, the thesis comes to an end.
+  The thesis gave a short evaluation of Nested Data Parallelism
+  in Haskell for implementations of \algo.
+  The author thanks greatfully for your attention.

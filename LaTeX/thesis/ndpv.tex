@@ -1,6 +1,9 @@
-\label{chapter:ndpv}
-% TINA - There is no alternative.
-%   - Angela Merkel
+\epigraph{\emph{
+"Now I will have less distraction."
+}}{
+Leonhard Euler, after loosing \\ his right eyesight
+}
+
 
 This chapter will apply the core transformation and optimisations
 offered by Nested Data Parallelism in Haskell.
@@ -175,6 +178,12 @@ multDoubleL as = joinD . zipWithD multDoubleS (splitD as) . splitD
     It greatly reduced constant factors in its complexity by pushing
     replications from global redistributions into local PU operations.
     Stream Fusion further improves this.
+    
+    \nomenclature{Constant Factors}{
+    Constant factors increasing the running time of a
+    program that are hidden inside Landau-Notation $O(\cdot)$.
+    They are important for decreasing practical running time. 
+    }
     
   \subsection{Stream Fusioning}
     Stream Fusioning is the final step of optimisation. Applying it improves

@@ -1,5 +1,9 @@
 
-% Zitat: Auf den Schultern von Riesen.
+\epigraph{\emph{
+"Auf den Schultern von Riesen"
+}}{
+Johannes von Salisbury
+}
 
 This chapter will give an introduction into the basics needed to
 understand this thesis. First, an introduction into functional programming
@@ -215,10 +219,34 @@ g . f = \x -> g (f x)
     to express parallelism. Such a function might be \c{map} such that \c{map f xs} applies \c{f}
     on each of the elements in the array \c{xs} in parallel.
     
+    
+    \nomenclature{Flat Data Parallelism}{
+    Expression of parallelism
+    via parallel primitives over flat arrays.
+    The primitives cannot be nested.
+    }
+    \nomenclature{Nested Data Parallelism}{
+    Expression of parallelism
+    via parallel primitives over nested arrays.
+    The primitives can be nested. It flattens the code
+    before execution.
+    }
+    
     This function has a fairly intuitive parallel implementation:
     First distribute the input array evenly across the \underline{p}rocessing \underline{u}nits (PUs),
     then compute each local chunk of the array with its PU and finally join all elements together.
     The inner function \c{f} is applied by each processing unit (PU) sequentially.
+    
+    \nomenclature{Chunk}{
+    An local array (or linked list) that is part of a
+    globally distributed array (or linked list).
+    }
+    
+    \nomenclature{PU}{
+    A processing unit. Refers mostly to CPUs on a
+    single machine. Can also be CPUs in a cluster
+    or in a distributed setting.
+    }
     
     Statements like \c{map incr}
     \footnote{\c{incr :: Int -> Int} increments an integer.}
@@ -253,9 +281,28 @@ g . f = \x -> g (f x)
         Sequential functions local to each PU can further
         be optimised to reduce the number of intermediate arrays
         and to create tight loops.
-        It uses \type{Vector a} and \c{Stream a} to
+        It uses \type{Vector a} and \c{Stream a}\footnotemark to
         implement the local array chunks and to fuse loops, respectively.
     \end{enumerate}
+    
+    \footnotetext{Streams are special data structures
+    which are designed to specifically enable non-recursive
+    definitions of fusing functions e.g. \c{mapP} by
+    moving the recursion from the function
+    to a step-wise definition.}
+    
+    \nomenclature{Vectorization}{
+    A compiler transformation which flattens and uses Fusion
+    a nested data parallel program to increase
+    cache locality, decrease communication and traversals
+    for higher performance.
+    }
+    
+    \nomenclature{Fusion}{
+    The use of Inlining and semantic-preserving Rewrite Rules
+    to find and eliminate communication (Communication Fusion)
+    or intermediate data structures (Stream Fusion).
+    }
     
   \p
   For parallel arrays, one has few predefined functions.
@@ -289,7 +336,7 @@ g . f = \x -> g (f x)
     Vectorization involves two major steps -
     \emph{Type dependent representation} and \emph{Lifting}.
     Both will be explained in detail below.
-  
+    
     \subsubsection{Type dependent representation}
       Type dependent representation enables the programmer
       to work with arrays containing complex
@@ -306,7 +353,7 @@ g . f = \x -> g (f x)
       Implementing nested array naively would use an array of pointers to
       to arrays of integers. Pointers however are undesirable, since they
       decrease Cache Locality. CPU Caching is crucial for performance
-      and is directly linked to Cache Locality.
+      and is directly linked to Cache Locality. \cite{Locality2005}.
       
       Nested arrays need a different approach for representation.
       That approach is the separation of data and structure.
@@ -314,6 +361,15 @@ g . f = \x -> g (f x)
       like \c{[[1,2,3],[4,5],[],[6]] :: [:[:Int:]:]} can be implemented
       to increase Cache Locality:
       \footnote{\c{[\string#1,2,3\string#]} is the notation used for a contiguous-memory bytearray.}
+      
+      \nomenclature{Cache Locality}{
+      Use of contiguous-memory data over
+      pointer-based data to create an
+      execution behaviour that simplifies
+      CPUs cache hierarchies to optimise for
+      and greatly increases performance.
+      }
+      
       \begin{lstlisting}
 array :: PA (PA Int)
 array = AArr {
@@ -364,7 +420,6 @@ array = AInt [# 1,2,3 #]
       because they are entirely replaced by their \c{fooPS} counterparts.
       They are solely used to simplify the programmer view.
     
-    \nomenclature{Cache Locality}{TODO}
       
     \subsubsection{Lifting}
       During lifting where all occurrences of \c{mapPS f} are
@@ -408,16 +463,17 @@ mapPL f xss =
     \begin{figure}[h!]
         \begin{center}
         \includegraphics[width=\linewidth]{mapP.png}
-        \caption[Flattening of Nested Parallelism]{Conceptional programmer view and actual implementation of \c{mapP (mapP incr)}
-        \footnote{Here, the commas in-between the elements have been omitted for visual clarity.
-        This thesis will sometimes use such spaces for separation
-        instead of commas.
-        }
+        \caption[Flattening of Nested Parallelism]{Conceptual view and actual implementation of \c{mapP (mapP incr)\footnotemark}
+        
         }
         \label{figure:mapP}
         \end{center}
     \end{figure}
-    
+    \footnotetext{Here, the commas in-between the elements have been omitted for visual clarity.
+    This thesis will sometimes use such spaces for separation
+    instead of commas.
+    }
+        
     This is the key insight in NDP. Nested parallel functions are
     transformed into calls of \c{mapPL} which avoids the nesting of
     the arrays entirely and maps over the array is a single pass.
@@ -663,7 +719,14 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   to be the time (counted in number of operations)
   the algorithms needs, if it were executed on a single processor.
   Depth is defined as the longest chain of sequential data dependency.
-  It is also the time needed if one had an unlimited number of processors.
+  It is also the time needed if one had an unlimited number of processors -
+  or if one had as many processors as the largest intermediate array.
+  
+  \nomenclature{Work and Depth}{
+  Language-based measures for the time
+  necessary if given one processor (work) or infinitely many (depth)
+  in number of instructions.
+  }
   
   There are limited ways to calculate work and depth. Both are defined
   recursively over the work and depths of their sub-expressions. Generally,
@@ -680,7 +743,8 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   or of the parameter $gmax$. In these cases, the function referred to
   is clear from the context.
   Table \ref{table:workdepth} gives work and depth complexities the parallel primitives
-  of table \ref{table:parfuns}.
+  of table \ref{table:parfuns}. Landau-Notation is used for
+  the complexity classes $O(\cdot)$.
   
   \begin{table}[h]
     \caption{Work and Depth - Definitions and Complexities}

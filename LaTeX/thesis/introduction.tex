@@ -1,37 +1,37 @@
 
 
-Suppose one wants use the exponentially
-increasing number of processors and machines
-available to speed-up programs.
-This is a common task in image processing.
-Data parallelism is a frequently used
-to parallelize these programs.
+The exponentially increasing number of processors and machines
+available in current hardware are a great
+opportunity to speed-up programs.
+This is desired in image processing
+and is frequently expressed with Data Parallelism.
 
 Data-parallel programs express parallelism
-via bulkd-primitives over parallel data structures - e.g. \c{map/reduce}.
+via bulk-primitives over parallel data structures - e.g. \c{map/reduce}.
 They perform well on flat data and with regular
 non-recursive program flow.
-Most applications in need of parallelism
-however have irregular behaviour. Their
+However, most applications in need of parallelism
+have irregular behaviour. Their
 algorithms work with nested
 arrays (e.g. images or matrices),
 graphs, trees or complex recursion (e.g. clustering or machine learning).
 Direct parallel implementation of such algorithms
 in flat data parallelism results in
 a performance penalty.
+Parallel programming then mostly becomes manual work and utterly complex.
 
-Nested Data Parallelism \cite{Belloch1996} lifts these limits
-and enables the high-level expression of irregularly-parallel programs
+In contrast, Nested Data Parallelism \cite{Belloch1996} lifts these limits
+and enables the concise expression of irregularly-parallel programs
 - while still compiling to efficient machine code.
 It uses a non-trivial program transformation called 'Vectorization'
 (or 'Flattening') where the original program is transformed
 into an equivalent flat data-parallel program.
 
-Due properties like Immutability and Referential Transparency,
+Due to properties like Immutability and Referential Transparency,
 Functional programming languages are fruitful grounds for
 sophisticated program transformations
 and high-level expressiveness. They are key building
-blocks for Nested Data Parallelism.
+blocks for effective Nested Data Parallelism.
 
 \paragraph{}
 This thesis is about the effectiveness of Nested Data Parallelism
@@ -58,6 +58,12 @@ expression of irregular image processing algorithms.
 
     \ndpv $:=$ The vectorized implementation of \ac from \ndpn
   
+  The sequential implementation \seq serves as a control-implementation
+  for the parallel programs. The manual implementation \man
+  will be compared against the nested data parallel ones.
+  It is also distinguished between the original program \ndpn and
+  its vectorization \ndpv. This distinctions enables
+  to pin-point the advantages created by Vectorization.
   
   Given the generalisations of NDP into Haskell \cite{Harness2008},
   Haskell is an optimal choice for the implementation.
@@ -66,7 +72,7 @@ expression of irregular image processing algorithms.
   
   Contrary to any expectations,
   the thesis does not present directly executable
-  programs. NDP is Haskell is still in developement and
+  programs. NDP is Haskell is still in development and
   the program transformation is not yet completely implemented.
   The vectorization - usually done by the compiler
   - is done manually here.
