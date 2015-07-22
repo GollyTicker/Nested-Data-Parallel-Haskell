@@ -19,8 +19,7 @@ its work and depth complexities - as introduced in section \ref{section:parmeasu
 
 
 \section{Implementation}
-  \seq is a direct implemenation of the description of \algo
-  of section \ref{section:hbalanceintro}.
+  \seq is a direct implemenation of \ac as described in \ref{section:hbalanceintro}.
   First the data structures used are presented.
   Then each component of the implementation is given. Afterwards
   the components are assembled to \seq.
@@ -37,12 +36,9 @@ type Hist a = TreeMap Int a
     \c{TreeMap k a} is a binary search tree indexed by keys of type
     \c{k} and containing values of type \c{a}. They are
     used for the representation of a histogram.
-    \footnote{The use of arrays for the representation of
-    histograms has undesirable effects. Languages with
-    mutability can destructively update the array
-    for each pixel in the image. The Immutability
-    of Haskell prevents this and forces the use of
-    immutable and shared data-structures like \c{TreeMap k a}.}
+    \footnote{Due to Immutability, arrays are not an option.
+    They require the replication of the entire array
+    to change a single value.}
     Functions over \c{PtrVector} are suffixed \c{-V}. Functions over \c{TreeMap} are suffixed \c{-M}.
   
   \paragraph{Histogram Calculation}
@@ -56,7 +52,7 @@ hist = foldrV (\i -> insertWithM (+) i 1) emptyM . concatV
     counting the number of occurrences of each gray tone.
     \c{foldrV} is linear in the size of the flattened image array.
     \c{insertWithM} is logarithmic in the number elements
-    inserted into the map. The size is bounded by the number of 
+    inserted into the map. Its size is bounded by the number of 
     gray tones - namely \c{gmax+1}.
     
   \paragraph{Accumulation}
@@ -75,9 +71,9 @@ accu = scanlM (+) 0
 normalize :: Int -> Int -> Hist Int -> Hist Double
 normalize a0' agmax' as =
     let a0 = fromIntegral a0'
-        agmax = fromIntegral agmax'
-        divisor = agmax - a0
-    in  mapM (\freq' -> (fromIntegral freq' - a0) / divisor) as
+          agmax = fromIntegral agmax'
+          divisor = agmax - a0
+    in    mapM (\freq' -> (fromIntegral freq' - a0) / divisor) as
   \end{lstlisting}
   It applies the mapping over the tree-map using \c{mapM}.
   \c{fromIntegral} explicitly converts from \c{Int} to \c{Double} since
@@ -110,13 +106,13 @@ apply as img = mapV (mapV (lookupLessEqualM as)) img
 hbalance :: Image -> Image
 hbalance img =
   let h = hist img
-      a = accu h
-      a0 = firstM a
-      agmax = lastM a
-      n = normalize a0 agmax a
-      gs = scale gmax n
-      img' = apply gs img
-  in img'
+        a = accu h
+        a0 = firstM a
+        agmax = lastM a
+        n = normalize a0 agmax a
+        gs = scale gmax n
+        img' = apply gs img
+  in    img'
   \end{lstlisting}
   First the histogram is created (line 3). Then it is accumulated (line 4).
   After that it is normalised (line 5 to 7) and scaled(line 8).

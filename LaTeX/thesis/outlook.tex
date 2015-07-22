@@ -27,6 +27,9 @@ Mahatma Gandhi
   It enables almost as much abstraction as does \seq
   while still performing well on varying number of processors.
   
+  This leads to the conclusion, that Nested Data Parallelism is a
+  very welcome programming model in functional programming.
+  
 
 \section{Related Work}
   There is much active research in parallel programming
@@ -82,11 +85,11 @@ Mahatma Gandhi
     
     Brent's Equation gives upper and lower bounds on
     the time a program with work $W$ and depth $D$
-    requires given $L$ latency and $P$ processors.
+    requires given a latency of $L$ and $P$ processors.
     
     If given exact numbers for work and depth (of table \ref{table:allcomps}), one could do a
     more fruitful and exact analysis in the parameter-space
-    built spanned by $n$, $gmax$, $P$ and $L$.
+    spanned by $n$, $gmax$, $P$ and $L$.
     For concrete parameters one could solve for the optimal
     algorithm to use.
   

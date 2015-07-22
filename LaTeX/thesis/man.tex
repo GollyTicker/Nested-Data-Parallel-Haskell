@@ -50,8 +50,8 @@ accuHist :: Image -> Hist
 accuHist []  = parReplicate gmax 0
 accuHist [x] = parGenerate gmax (\i -> if (i >= x) then 1 else 0)
 accuHist xs  = let (left,right) = splitMid xs
-                   [leftRes,rightRes] = parMap accuHist [left,right]
-               in  parZipWith (+) leftRes rightRes
+                          [leftRes,rightRes] = parMap accuHist [left,right]
+                    in    parZipWith (+) leftRes rightRes
   \end{lstlisting}
   The general idea is to merge accumulation and histogram creation
   into a single tree-like reduction. To each array of pixels, \c{accuHist}
@@ -77,12 +77,13 @@ accuHist xs  = let (left,right) = splitMid xs
   of larger images is broken down by splitting the array into half
   \footnote{splitting is a constant time operation
   for these view-based arrays} and applying \c{accuHist}
-  recursively. Finally, the histograms are merged with element-wise addition
-  ({\c{zipWith(+)}}).
+  recursively.
+  Finally, the histograms are combined by element-wise addition
+  with \c{zipWith(+)} (histogram merging).
   
   This algorithm was carefully constructed after many failed approaches
   on such an algorithm. Alternatives were considered, but they did not
-  yield an acceptable complexity compared to \c{accuHist}.
+  yield an acceptable complexity when compared to \c{accuHist}.
 
 \section{Implementation}
   Given the introduction, the manually parallelized \man can finally be implemented.
@@ -109,7 +110,7 @@ hbalance img =
   in  img'
   \end{lstlisting}
   As explained in the previous section, the parallel
-  accumulated histogram calculation has been implemented in \c{accuHist}.
+  histogram accumulation has been implemented in \c{accuHist}.
   For the gray tone mapping (\c{apply}) to work, nested arrays cannot be used
   \footnote{as they would result into an array of pointers to sub-arrays.
   This is undesirable due to Cache Locality.}
@@ -135,7 +136,7 @@ hbalance img =
     The exceptions are the two recursive calls (packed together into a
     \c{parMap}).
     
-    One can state the work of \c{accuHist} as a recursive function
+    One can formulate the work of \c{accuHist} as a recursive function.
     \begin{equation*}
     \W(n,gmax) = \begin{cases}
                  gmax & \text{ if } n \le 1 \\ 
@@ -150,8 +151,8 @@ hbalance img =
     \footnote{However, the Master Theorem does not apply directly
     because it treats \c{gmax} as a constant -
     and not as a variable parameter.
-    The Master Theorem would give $O(n)$ whereas tying the knot
-    would give the more accurate class $O(n \cdot gmax)$.}
+    The Master Theorem gives $O(n)$ whereas tying the knot
+    gives the more accurate class $O(n \cdot gmax)$.}
     .
     The following equations shall tie the knot:
     \begin{equation*}
@@ -159,9 +160,9 @@ hbalance img =
     \W(n,gmax)
       & = \begin{cases}
             gmax & \text{ if } n \le 1 \\ 
-            gmax2^0 + 2^1\W(\frac{n}{2}) & \text{ if } n = 2 \\
-            gmax2^0 + gmax2^1 + 2^2\W(\frac{n}{4}) & \text{ if } n = 3 \\
-            gmax2^0 + gmax2^1 + ... + gmax 2^{\log n - 1} + 2^{\log n}\W(1) & \text{ else }
+            2^0gmax + 2^1\W(\frac{n}{2}) & \text{ if } n = 2 \\
+            2^0gmax + 2^1gmax + 2^2\W(\frac{n}{4}) & \text{ if } n = 3 \\
+            2^0gmax + 2^1gmax + ... + 2^{\log n - 1}gmax + 2^{\log n}\W(1) & \text{ else }
           \end{cases} \\
       & = \textrm{ (... tying the knot ...) } \\
       & = gmax \sum_{i=0}^{\log n}{2^i} \\
@@ -173,7 +174,7 @@ hbalance img =
     
     The work involved is an product of the number of gray tones and
     the number of pixels $O(g \cdot gmax)$.
-    Such a tree-like reduction has height logarithmic
+    The reduction tree has height logarithmic
     in the size of the input array. The input array is the image and
     has size \c{n}. Therefore, one can conclude
     $\D(n, gmax) \in O(\log n)$.
@@ -193,12 +194,12 @@ hbalance img =
         \toprule
         function or variable & $\W \in O(...)$           & $\D \in O(...)$ \\
         \midrule
-        hbalance        & n \cdot gmax    & $\log$ n \\
+        hbalance        & n $\cdot$ gmax    & $\log$ n \\
         apply           & n           & 1 \\
         parMap sclNrm   & gmax        & 1 \\
-        accuHist        & n  \cdot gmax    & $\log$ n \\
+        accuHist        & n  $\cdot$ gmax    & $\log$ n \\
         \midrule
-        accuHist        & n  \cdot gmax    & $\log$ n \\
+        accuHist        & n  $\cdot$ gmax    & $\log$ n \\
         splitMid        & 1           & 1 \\
         parZipWith      & gmax        & 1 \\
         parReplicate    & gmax        & 1 \\

@@ -10,7 +10,7 @@ This chapter summarises results of the four implementations
 \seq, \man, \ndpn and \ndpv.
 First the complexities of the programs are given
 and discussed.
-Then, the pro and contra of each program are presented.
+Then, the pros and contras of each program are presented.
 They compare them on different aspects.
 Finally, the chapter ends with a conclusion
 on Nested Data Parallelism.
@@ -27,7 +27,7 @@ on Nested Data Parallelism.
     \centering
     \begin{tabular}{lll}
       \toprule
-      program & work & depth \\
+      program & $\W \in O(...)$           & $\D \in O(...)$ \\
       \midrule
       \seq  & $n \log gmax + gmax$ & $n \log gmax + gmax$ \\
       \man  & $n \cdot gmax$ & $\log n$ \\
@@ -66,7 +66,7 @@ on Nested Data Parallelism.
     \man and \ndpn instead used more advanced methods to
     implement parallel histogram creation.
     
-    On the one hand, their methods have worse work complexities.
+    On one hand, their methods have worse work complexities.
     If $gmax$ is treated as a constant, then \seq grows linearly
     - whereas \man and \ndpv grow $O(n \log n)$.
     On the other hand, they greatly improve in depth complexities.
@@ -102,7 +102,7 @@ on Nested Data Parallelism.
           \toprule
           program & pro/contra \\
           \midrule
-          \seq & \pro It is a direct implementation \ac. \\
+          \seq & \pro It is a direct implementation of \ac. \\
            & \pro It requires the least amount of human work.\\
            & \con It has semi-high constant factors due to pointer-based nesting.\\
            & \con It is purely sequential and cannot gain from parallelism. \\
@@ -123,7 +123,7 @@ on Nested Data Parallelism.
            & \pro It implements parallel histogram creation using  \\
            & \ind only high level function compositions. \\
            & \pro It involves only limited workload for the human. \\
-           & \con It has high constant factors (than \man and \ndpv) due  \\
+           & \con It has high constant factors (compared to \man and \ndpv) due  \\
            & \ind to nesting and unoptimised communication and traversals. \\
           \ndpv & \\
            & \pro The programmer does not need to think about the flat representation of the image. \\

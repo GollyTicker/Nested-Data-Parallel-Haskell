@@ -33,7 +33,7 @@ $ xs
     Second, the total sum of each of the PUs is propagated
     - adding up subsequent values (line 4).
     Third, the updated sum is used to increase the values of the local chunks (line 39).
-    This approach is visualised in \ref{figure:scanlPsteps}
+    This approach is visualised in figure \ref{figure:scanlPsteps}
     
     \begin{figure}[h!]
         \includegraphics[width=\linewidth]{scanlP-three-steps.png}
@@ -43,7 +43,7 @@ $ xs
     In terms of depth and parallel complexity, the propagation is the bottleneck.
     However, since the propagation itself is structurally isomorphic to prefix summing itself,
     one can use a binary-tree-like scheme for propagation for the local values distributed on the PUs.
-    This propagation happens in time logarithmic to the number of PUs.
+    This propagation runs in time logarithmic to the number of PUs.
     It an be derived from \cite{Scanl1980}. For the purposes of this thesis,
     it is sufficient to state the following complexities for \c{scanlP (+) 0}:
     $\W(n) \in O(n)$ and $\D(n) \in O(\log n)$.
@@ -91,27 +91,25 @@ AArr {
     the vectorization of \ndpn.
     Further analysis reveals the complexities $\W(n) \in O(n)$ and $\D(n) \in O(\log n)$.
     All in all, \c{groupP} is an operation which can very well exploit the flat representation of nested arrays.
-    % TODO: and to appendix and refer to it?
+    % NO DO: and to appendix and refer to it?
     
   \subsection*{SortP}
     General parallel sorting can be as simple as a parallel
-    implementation of merge-sort where the recursive calls are executed
+    implementation of merge-sort \cite{ParMergeSort1988} where the recursive calls are executed
     in parallel. \c{sortP} of type \type{[:Int:] -> [:Int:]} implements this,
     and has complexities of $\W(n) \in O(n \log n)$
     and $\D(n) \in O(\log n)$.
     \footnote{There exists other sorting mechanism
-    like \emph{Batcher's Bitonic Sort} with $O(n \log^2 n)$ work and $O(\log^2 n)$
+    like \emph{Batcher's Bitonic Sort} \cite{BitonicSort1968} with $O(n \log^2 n)$ work and $O(\log^2 n)$
     depth. The author did not use its implementation as it is sophisticated and
     the workload of its vectorization were expected to be enormous (on top of the all the other work).
     Retrospectively, the thesis does not inline and expose the internals of \c{sortP} in \ndpv.
     But this was not clear beforehand.
     }
-    % TODO: cite. Parallel mergesort with work and depth.
-    % TODO: cite batchers bitonic sort
 
   \subsection*{Histogram calculation}
     Conventional functional programming often enables one to write
-    consise and correct implementations using by composing
+    consise and correct implementations by composing
     independent and general functions. For example -
     consider the problem of run length encoding. Given a (possibly long) array,
     the goal is to create a sparse array that compresses elements
@@ -125,7 +123,7 @@ runLengthEncode = mapP (\xs -> (headP xs, lengthP xs)) . groupP
     \end{lstlisting}
     This function uses \c{groupP} to first create sub-arrays of
     equal consecutive elements. Then it
-    transform sub-arrays like \c{[2,2,2,2]} to tuples like \c{(2,4)}.
+    transforms sub-arrays like \c{[2,2,2,2]} to tuples like \c{(2,4)}.
     This is the second step of run length encoding.
     
     Run length encoding is an useful intermediate step in
@@ -189,12 +187,13 @@ apply as img = mapP (mapP (as !:)) img
   As described in the basics chapter - in NDP
   nested arrays are converted to flat data and a segment descriptor
   during vectorization. Therefore nesting
-  can be used to from the programmer point of view to simplify
-  the programming and to support the intuition.
+  can be used from the programmer point of view to simplify
+  the programming and to support the intuition - without
+  sacrificing performance.
   
   \ndpn, like the description of \algo, 
   is split up in histogram calculation (lines 20 - 16)
-  ,histogram accumulation (line 23), normalisation (line 26 - 30),
+  ,histogram accumulation (line 23), normalisation (lines 26 - 30),
   scaling (line 33) and the final gray tone mapping (line 36).
   The significant different between \ndpn and \seq is the calculation of the histogram.
   \footnote{Aside from the the less significant fact, that \ndpn uses an array for its histogram while \seq uses a binary-search-tree.}
@@ -218,7 +217,7 @@ apply as img = mapP (mapP (as !:)) img
   Within NDP, it will be subject to flattening in \ndpv.
   
 \section{Complexities}
-  Using the work and depths measures as introduced in section \ref{section:parmeasures},
+  Using the work and depth measures as introduced in section \ref{section:parmeasures},
   one can assign the following measures to the functions involved.
   Let $n$ be the number of pixels in an $w \times h$ image,
   then the complexities are given in table \ref{complexities:ndpn}.
@@ -256,19 +255,11 @@ apply as img = mapP (mapP (as !:)) img
     \ndpn is mostly a direct translation of \seq and \algo.
     A parallel implementation of histogram calculation is given
     by using only common purely functional processing operations (such as \c{grouP} and \c{sortP}).
-    All in all, it involves less workload for the humans then it was
+    All in all, it involves less workload for the programer then it was
     the case in \man.
     
     
     In the next chapter \ndpn is going to be transformed into \ndpv
     manually. It will show, what the compiler would do automatically.
   
-  
-  % TODO: Genau erläuteren und präzisieren wie Work&Depth mit der Anzahl der Prozessoren in den distributed Types zusammenhängen.
-  %    Die tatsächliche Parallelität steck in der Anzahl der PUs (Processing Units) und den verteilten Algorithmen
-  %    zwischen den einzelnen PUs. Damit wird sumD und propagateD auf D(log n) gedrückt.
-      
-  % Ignoriert!! Twofold interpretation: divL = <built-in parallel divL> OR < mapD divS> with distributed types and extended library optimization
-  % immer die zweite variante - weil sonst das andere Pman program nicht ginge.
-    
   

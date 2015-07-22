@@ -306,7 +306,7 @@ g . f = \x -> g (f x)
     designed to specifically enable non-recursive
     definitions of fusing functions (e.g. \c{mapP}) by
     moving the recursion from the function
-    to a step-wise stream-ful recursion. See \cite{GenVectorFusion2013}.}
+    to a step-wise stream-ful iteration. See \cite{GenVectorFusion2013}.}
     
     \nomenclature{Vectorization}{
     A compiler transformation which flattens and uses Fusion
@@ -322,7 +322,7 @@ g . f = \x -> g (f x)
     }
     
   \p
-  For parallel arrays, one has few predefined functions.
+  A few functions are predefined for parallel arrays.
   They correspond to functions used in conventional functional programming.
   Their names and their types are given in \ref{table:parfuns}.
   
@@ -333,7 +333,7 @@ g . f = \x -> g (f x)
         \toprule
         function & type & description \\
         \midrule
-        (!:),indexP & \c{[:a:] -> Int -> a} & indexes the array \\
+        (!:),indexP & \c{[:a:] -> Int -> a} & indexes the array; zero-based \\
         lengthP & \c{[:a:] -> Int} & returns the length of the array \\
         headP & \c{[:a:] -> a} & returns the first element\\
         lastP & \c{[:a:] -> a} & returns the last element \\
@@ -356,7 +356,7 @@ g . f = \x -> g (f x)
 
       Type dependent representation enables the programmer
       to work with arrays containing complex
-      data structures without scarifying efficiency.
+      data structures without scarifying.
       It is described in 
       \cite{FastArr2003Chakravarty}
       and \cite{DataFamily2005Chakravarty}.
@@ -364,7 +364,7 @@ g . f = \x -> g (f x)
       Consider for example \type{[:Int:]} and \type{[:[:Int:]:]}.
       The former can be easily implemented using a contiguous region
       of memory and inserting the bytes. The latter however cannot
-      be implemented equally. The sub-array could be of different size.
+      be implemented equally. The sub-arrays could be of different size.
       To allocate a block of memory, one needs to know the size of all arrays beforehand.
       Implementing nested array naively would use an array of pointers to
       to arrays of integers. Pointers however are undesirable, since they
@@ -377,7 +377,7 @@ g . f = \x -> g (f x)
       The following example describes how a nested array
       like \c{[[1,2,3],[4,5],[],[6]] :: [:[:Int:]:]} can be implemented
       to increase Cache Locality:
-      \footnote{\c{[\string#1,2,3\string#]} is the notation used for a contiguous-memory bytearray.}
+      \footnote{\c{[\string#1,2,3\string#]} is the notation used for a contiguous-memory byte-array.}
       
       \nomenclature{Cache Locality}{
       Use of contiguous-memory data over
@@ -408,7 +408,7 @@ array = AArr {
       
       This flat representation uses the new type \type{PA (PA Int)}
       instead of the old \type{[:[:Int:]:]}. 
-      For nested arrays the functions \c{concatP} and \c{unconcatP}
+      The functions \c{concatP} and \c{unconcatP}
       become constant time operations. Removing a level of nesting
       is as simple as discarding the segment descriptors.
       Adding a nesting structure of an existing array to a flat array
@@ -428,19 +428,19 @@ array = AInt [# 1,2,3 #]
       \end{lstlisting}
       
       Finally, during flattening the compiler transforms
-      every parallel functions (like \c{fooP}) to
-      their predefined scalar counterparts (like \c{fooPS}).
+      every parallel function (like \c{fooP}) to
+      their predefined scalar counterpart (like \c{fooPS}).
       The scalar functions work directly on the flat representation
       and are designed to exploit them for efficiency.
       \c{concatPS} and \c{unconcatPS} are examples thereof.
-      In fact, functions like \c{fooP} have no actual implementation
+      In fact, functions like \c{fooP} have no implementation
       because they are entirely replaced by their \c{fooPS} counterparts.
       They are solely used to simplify the programmer view.
     
       
     \subsubsection{Lifting}
-      During lifting where all occurrences of \c{mapPS f} are
-      replaced by \c{fL} and where \c{fL}
+      During lifting, all occurrences of \c{mapPS f} are
+      replaced by \c{fL}. \c{fL}
       is the lifted version of the original function.
       Compared to the original scalar function \c{f :: a -> b}, the lifted
       function applies the mapping over arrays. It is given by \c{fL :: PA a -> PA b}.
@@ -448,7 +448,12 @@ array = AInt [# 1,2,3 #]
       The key is now the definition of the lifted functions for the built-in functions.
       The most important one among them is lifted \c{mapPS} - namely \c{mapPL}.
       To \c{mapPS} of type \c{(a -> b) -> PA a -> PA b},
-      \c{mapPL} is of type \c{(a -> b) -> PA (PA a) -> PA (PA b)}.
+      \c{mapPL} is of type \c{(a -> b) -> PA (PA a) -> PA (PA b)}
+      \footnote{Its type actually is \c{PA (a :-> b) -> PA (PA a) -> PA (PA a)}
+      and works with a parallel array of functions as the mapping argument.
+      However, that is a detail independent of the conclusions of this thesis.
+      }
+      .
       To overcome the limitations of flat data parallelism,
       its implementation has to map over all elements at once
       (instead of mapping over the outer-nesting level only).
@@ -468,7 +473,7 @@ mapPL f xss =
     \footnote{This implementation is different from the original in one important aspect - 
     namely the handling of pre-supplied arguments in the function. Our
     implementation only handles functions without pre-supplied arguments -
-    but it much simpler to understand than the original in
+    but it is simpler to convey than the original in
     in \cite{HighOrdFlat2006}.
     More accurately, one has an additional expression \c{expandPS xss fEnv}.
     Introducing it wouldn't affect the overall situation in this thesis.
@@ -476,7 +481,8 @@ mapPL f xss =
     }
     Figure \ref{figure:mapP} shall visually aid the understanding
     using the example \c{mapP (mapP incr)}.
-    The call to \c{incrL} happens for a flat array as shown in figure \ref{figure:fdpvsndp}.
+    The call to \c{incrL} is divided among the processors
+    evenly as shown in figure \ref{figure:fdpvsndp}.
 
     \begin{figure}[h!]
         \begin{center}
@@ -485,14 +491,16 @@ mapPL f xss =
         \label{figure:mapP}
         \end{center}
     \end{figure}
-    \footnotetext{Here, the commas in-between the elements have been omitted for visual clarity.
+    \footnotetext{The commas in-between the elements have been omitted for visual clarity.
     This thesis will sometimes use such spaces for separation
     instead of commas.
     }
         
     This is the key insight in NDP. Nested parallel functions are
-    transformed into calls of \c{mapPL} which avoids the nesting of
-    the arrays entirely and maps over the array is a single pass.
+    transformed into calls of \c{mapPL} which avoid the nesting of
+    the arrays entirely and map over the array is a single pass.
+    Since the (un-)flattening functions are constant time operations,
+    there is only the cost involved in mapping over all the elements.
     Using this procedure, one can transform nested data parallel programs
     to flat data parallel programs. The former is easier to write in and flexible
     - while the latter can be implemented directly and is efficient.
@@ -511,7 +519,7 @@ mapPL f xss =
 incrL :: PA Int -> PA Int
 incrL = joinD . mapD incrS . splitD
     \end{lstlisting}
-    The types of the new functions are explained in \ref{mapPs}.
+    The types of the new functions are explained in table \ref{mapPs}.
     Essentially, the lifted functions are implemented by explicitly
     splitting the array across all PUs (\c{splitD}), applying the original
     function (in this case \c{incrS}) on each local chunk sequentially (\c{mapD})
@@ -528,38 +536,41 @@ incrL = joinD . mapD incrS . splitD
     is processed by a single PU locally and
     then redistributed globally to all PUs.
     The use of \c{Dist a} means,
-    that each PU is processing its
-    chunk of the distributed value locally.
+    that each PU is locally processing its
+    chunk of the distributed value.
     
-    After these introducing words, one can take a look at the type of expressions
-    Communication Fusion is designed to optimise. Here is an example.
+    After these introducing words, one can take a look at
+    an example of the expressions Communication Fusion is designed to optimise. Here is an example.
     \begin{lstlisting}
 myFunc :: PA Int -> PA Int
 myFunc = mult2L . incrL
     \end{lstlisting}
-    where \c{mult2L} is a function which doubles each element in the array.
-    Currently, the function works in two steps. Applying the operations individually.
-    First, it splits the array, increments its elements and joins the array. Second, it splits
-    the array again, doubles its elements and rejoins the array.
+    \c{mult2L} is a function which doubles each element in the array.
+    Currently, the function works in two steps - applying each operations individually.
+    First, it splits the array, increments its elements and joins the array
+    (\c{incrL}). Second, it splits
+    the array again, doubles its elements and rejoins the array
+    (\c{mult2L}).
     A more efficient alternative would execute both operations locally
-    in a single pass rather than two. The compiler needs optimisations.
+    in a single pass rather than two.
+    The compiler however can optimise this.
     
     Effective optimisation strategies in referentially transparent
-    programming languages like Haskell are \emph{Inlining}
+    programming languages like Haskell are Inlining
     \footnote{\cite{Inlining2002}}
-    and \emph{Rewrites Rules}
+    and Rewrites Rules
     \footnote{\cite{Simon2001Rewrites}}
     .
     Inlining refers to the inlining of definitions
-    of functions and variables. Inlining the definitions
-    of the functions in the snipper reveal the following:
+    of functions and variables.
+    Applying that on the previous snippet of code gives the following:
     \begin{lstlisting}
 myFunc :: PA Int -> PA Int
 myFunc = joinD . mapD mult2S . splitD . joinD . mapD incrS . splitD
     \end{lstlisting}
     Then rewrite rules are used. They allow the specification of general semantic-preserving
     laws and allow the compiler to rewrite parts of the code according to them.
-    They are written by humans and table \ref{rules} introduces some of them.
+    They are specified by humans and table \ref{rules} introduces a few of them.
     Among them is "splitD/joinD". It states the general law,
     that joining and re-splitting an array does not change the array at all.
     This is clear for humans - but not for the compiler. By specifying such rules
@@ -569,7 +580,7 @@ myFunc = joinD . mapD mult2S . splitD . joinD . mapD incrS . splitD
 myFunc :: PA Int -> PA Int
 myFunc = joinD . mapD mult2S . mapD incrS . splitD
     \end{lstlisting}
-    The was able to eliminated communication in-between two phases of computation.
+    The compiler eliminated communication in-between two phases of computation.
     This is a step towards more efficient evaluation.
     Using another rule, namely "mapD/mapD", the compiler can further optimise to.
     \begin{lstlisting}
@@ -596,7 +607,7 @@ myFunc = joinD . mapD (mult2S . incrS) . splitD
       \item Instead of joining "mapD/mapD", pairs of "mapS/mapS" are joined.
       \item \c{Stream a} is a special stream-full data structure.
         Functions over streams are implemented non-recursively.
-        They are crucial for the Stream Fusion.
+        They are crucial for Stream Fusion.
       \item Any streams left over after optimisations are converted back into.
         \c{Vector a}. Streams are only used for optimisation, but not as a collection.
     \end{itemize}
@@ -623,17 +634,17 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
           function & first appearance/ & type/ \\
             & execution context & description \\
           \midrule
-          mapP f xs & Programer-view & \type{(a -> b) -> [:a:] -> [:b:]} \\
+          mapP f xs & Programmer-view & \type{(a -> b) -> [:a:] -> [:b:]} \\
            & not executed & \textbf{P}arallel array functions the programer uses \\
           mapPS f xs & Vectorization & \type{(a -> b) -> PA a -> PA b} \\
            & not executed & \textbf{P}arallel \textbf{S}calar functions over flat arrays \\
           indexPL is xs & Vectorization & \type{PA Int -> PA (PA a) -> PA a} \\
            & not executed & \textbf{P}arallel \textbf{L}ifted indexing on flat arrays. It's scalar\\
-           & & function is \type{indexP :: Int -> [:a:] -> a} \\
+           & & function is \type{indexPS :: Int -> PA a -> a} \\
           mapD f x & Communication Fusion & \type{(Vector a -> Vector b)} \\
            & mapD: all PUs & \type{ -> Dist (PA a) -> Dist (PA b)} \\
-           & & Each PU applies \c{f} on it's chunk of the \\
-           & f: local per PU & \textbf{d}istributed value. True parallelsim here! \\
+           & f: local per PU & Each PU applies \c{f} on it's chunk of the \\
+           & & \textbf{d}istributed value. True parallelism here! \\
           fooS f xs & Communication Fusion & \type{Vector a -> Vector b}\\
            & local per PU & Applies a function \textbf{s}equentially. \\
            & & \c{Vector} is the Haskell implementation of \\
@@ -642,12 +653,12 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
            & all PUs & splits a glboal array into chunks and \\
            & & distributes them to each of the PUs \\
           joinD & Communication Fusion & \type{Dist (PA a) -> PA a} \\
-           & allPUs & join a distributed array into a global array \\
+           & all PUs & join a distributed array into a global array \\
           replD & Communication Fusion & \type{Int -> a -> Dist (PA a)}\\
-           & local per PU & create a distributed replication of a value \\
-           & & directly \\
+           & local per PU & create the local chunk of a distributed \\
+           & & replication directly \\
           stream & Stream Fusion & \type{Vector a -> Stream a}\\
-           & not executed & convert from an array to a stream-ful data container \\
+           & not executed & convert from an array to stream-ful data \\
           unstream & Stream Fusion & \type{Stream a -> Vector a}\\
            & not executed & convert back to an array \\
           mapSt f xs & Stream Fusion & \type{(a -> b) -> Stream a -> Stream b}\\
@@ -669,7 +680,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
       \label{rules}
       \begin{tabular}{lll}
           \toprule
-          rule & rewrite & description \\
+          name & rewrite & description \\
           \midrule
           splitD/joinD & splitD . joinD = id & Joining and splitting an distributed array  \\
           & & is equivalent to a no-op. \\
@@ -736,7 +747,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   the algorithms needs, if it were executed on a single processor.
   Depth is defined as the longest chain of sequential data dependency.
   It is also the time needed if one had an unlimited number of processors -
-  or if one had as many processors as the largest intermediate array.
+  or if one had as many processors as the length of the longest intermediate array.
   
   \nomenclature{Work and Depth}{
   Language-based measures for the time
@@ -745,7 +756,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   }
   
   There are limited ways to calculate work and depth. Both are defined
-  recursively over the work and depths of their sub-expressions. Generally,
+  recursively over work and depth of their sub-expressions. Generally,
   work is the sum of operations involved in all of the sub-expressions
   - while depth is the maximum of number of operations involved in
   any particular chain of sub-expressions.
@@ -758,9 +769,9 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   that the work and depth is dependent of the length of the input
   or of the parameter $gmax$. In these cases, the function referred to
   is clear from the context.
-  Table \ref{table:workdepth} gives work and depth complexities the parallel primitives
-  of table \ref{table:parfuns}. Landau-Notation is used for
-  the complexity classes $O(\cdot)$.
+  Table \ref{table:workdepth} gives work and depth complexities for the parallel primitives
+  of table \ref{table:parfuns}. Landau-Notation $O(\cdot)$ is used for
+  the complexity classes.
   
   \begin{table}[h]
     \caption{Work and Depth - Definitions and Complexities}
@@ -818,8 +829,8 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   neatly within Nested Data Parallelism. Consider for example the
   expression \c{mapP (mapP incr) ass} where the
   nested array \c{ass} has dimensions $w \times h$.
-  Within NDP, the nested parallel expression is flattened into a
-  flat array and mapped over once only.
+  Within NDP, the nested parallel operation is
+  flattened and the array is only once mapped over.
   Therefore, work of $O(w \cdot h)$ and depth of $O(1)$ are expected.
   This is indeed the result.
   \begin{equation*}
@@ -842,8 +853,8 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   
   Work and depth are an useful tool in measuring
   programs complexity. In the remaining thesis,
-  the work and depths complexities (mostly without their derivation)
-  are presented.
+  the work and depth complexities will be
+  presented mostly without explicit derivation.
   \comment{
     More detailed derivations of the complexities shown
     in the algorithms sections can be found
@@ -853,7 +864,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
 
 \section{\ac: \algo}
   \label{section:hbalanceintro}
-  This section will introduce \algo. It will state the problem and give an overview of its solution.
+  This section will introduce \algo \cite{ImageProcBook}. It will state the problem and give an overview of its solution.
   
   \subsection*{Problem}
     Suppose an $w \times h$-8-bit-gray-tone image with low contrast.
@@ -867,7 +878,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     \end{figure}
     The goal is to make details more visible to the human viewer.
     Inspecting the images histogram reveals new insights.
-    \footnote{made by used Wikipedia user \c{Jarekt}. Source: \url{https://en.wikipedia.org/wiki/File:Unequalized_Histogram.svg}}
+    \footnote{made by Wikipedia user \c{Jarekt}. Source: \url{https://en.wikipedia.org/wiki/File:Unequalized_Histogram.svg}}
     
     \begin{figure}[h]
       \centering
@@ -882,13 +893,13 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     total number of pixels with a gray tone $g$ such that $g \leq x$.
 
     Details are difficult to recognize in the original image
-    due to their tight packing in the histogram. The
+    due to the tight packing in the histogram. The
     entire image limits its values to the range [120..205].
     \algo solves this problem by defining a mapping
     $f: Graytone \rightarrow Graytone$, such that the accumulating count
     of the resulting image increases as uniformly as possible from 0 to 255.
     The histogram \ref{fig:hist-eq}
-    \footnote{made by used Wikipedia user \c{Jarekt}. Source: \url{https://en.wikipedia.org/wiki/File:Equalized_Histogram.svg}}
+    \footnote{made by Wikipedia user \c{Jarekt}. Source: \url{https://en.wikipedia.org/wiki/File:Equalized_Histogram.svg}}
     is the envisioned goal.
     
     \begin{figure}[h]
@@ -899,7 +910,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     \end{figure}
     This mapping can be defined by spreading out the gray tones such that more
     frequent gray tones get a larger range to occupy. This idea is
-    explained more in detail next.
+    explained detailed next.
   \subsection*{Algorithm}
     To describe the image transformation $ hbalance: Image \rightarrow Image$ a few definitions are necessary:
     
@@ -907,7 +918,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     \label{table:hbaldefs}
     \centering
     \begin{tabular}{ll}
-      $Image$ & := $(Width,Height,Width \times Height \rightarrow Graytone)$ \\
+      $Image$ & = $(Width,Height,Width \times Height \rightarrow Graytone)$ \\
       $Histogram_a$ & $: Graytone \rightarrow a$ \\
       $gmax$ & : $Graytone$ \\
     \end{tabular}
@@ -930,8 +941,8 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
         It normalizes the accumulated histogram
         to a range from 0 to 1.
         The arguments are denoted $a0$ and $agmax$.
-        $a0$ denotes the number of pixels with the lowest gray tone.
-        $agmax$ denotes the number of total pixels in the image.
+        $a0$ denotes the number of pixels having the lowest gray tone.
+        $agmax$ denotes the total number of pixels in the image.
         Normalisation is defined in mapping the histogram values by $x \mapsto \frac{(x - a0)}{agmax - a0}$.
         \comment{
           For an accumulated histogram $a:Histogram_{Int}$ it can be calculated with
@@ -979,5 +990,3 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     the programs \seq, \man\, \ndpn and \ndpv
     are presented and analysed next.
   
-  % TODO: cite a book for its uses and the algorithm itself
-    

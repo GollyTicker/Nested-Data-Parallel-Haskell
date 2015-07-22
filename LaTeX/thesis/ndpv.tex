@@ -86,7 +86,7 @@ in unconcatPS img
     overall situation (in terms of work and depth) and therefore
     it is not further discussed.
     
-    In total, the program runtime has a few smaller constants factors. This is mainly due to the elimination of nested data structures
+    In total, the program has a few smaller Constant Factors now. This is mainly due to the elimination of nested data structures
     and operations. However, there is still much room for improvement.
     
   \subsection{Communication Fusioning}
@@ -114,7 +114,7 @@ let a = joinD                           -- scanlPS ends
       One can firstly observe the occurrence of distributed functions (with a \c{-D} suffix). They operate either
       on each PU locally (as with \c{mapD}) or implement some specific inter-PU calculation (as does \c{propagateD}).
       These functions are the result of inlining various parallel functions and eliminating communication.
-      The correspondence to their original functions are given as comments in the code. Only sortPS and concatPS
+      The correspondence to their original functions is given as comments in the code. Only sortPS and concatPS
       are unchanged. A real compiler would have inlined their definitions and looked for optimisations.      
       
       Aside from them, inlining \c{scanlPS} and \c{sparseToDensePS}
@@ -188,6 +188,9 @@ multDoubleL as = joinD . zipWithD multDoubleS (splitD as) . splitD
   \subsection{Stream Fusioning}
     Stream Fusioning is the final step of optimisation. Applying it improves
     the normalisation and scaling only. The new code is given below:
+     \footnote{\c{flip} were not actually inserted by the compiler.
+     However, the nesting of functions is easier to display
+     using \c{flip}s.}
     \begin{lstlisting}
 let a0      = int2Double . headPS $ a 
       divisor = minusDouble (int2Double (lastPS a))
@@ -272,7 +275,7 @@ let a :: Hist
   On the surface, the algorithm works quite similar to a direct implementation of \ndpn.
   First the histogram is calculated (lines 18 to 11) and accumulated (lines 10 - 7).
   Then the constants \c{a0},\c{divisor} and \c{gmax'} are calculated globally and distributed
-  to each PU (lines 22 to 33). After that, each PU applies the normalisation and scaling transformations(line 36).
+  to each PU (lines 22 to 33). After that, each PU applies the normalisation and scaling transformations (line 36).
   The mapping array \c{gs} is then finally used to map each gray tone to its new value (lines 41 to 38).
   The gray tone mapping is an example of the flattening of nested parallel functions in NDP.
   
@@ -280,7 +283,6 @@ let a :: Hist
   \begin{itemize}
     \item a decreased number of communication and synchronisation points
     \item flat data structures and flat operations further decrease constant factors
-    % \item distributed prefix-sum, groupP and sortP  TODO. nennen?
     \item Inlining and optimisation fused
           normalisation and scaling together - even though
           they were separated in \ndpn. The programmer did not
@@ -298,12 +300,19 @@ let a :: Hist
   \footnote{
   The calculation of \c{a} is re-split into \c{hist} and \c{accu}.
   }
+  \footnote{
+  The reader might ask, why \c{propagateD} has higher depth than work 
+  - and why work is simply 1. That is, because the value
+  increases logarithmically with the number of PUs.
+  Since in 'work' only a single processor is used,
+  there is no propagation of values and the time is constant.
+  }
   \begin{equation*}
   \begin{split}
   \W(w \times h,gmax)
         & = \W(hist) + \W(accu) + \W(gs) + \comment{\W(expandPS) +} \W(img') \\
         & \in O( (n \log n + gmax) + gmax + gmax \comment{ + 1} + n) \\
-        & = O(n \log n + gmax)) \\
+        & = O(n \log n + gmax) \\
   \D(w \times h,gmax)
       & = \D(hist) + \D(accu) + \D(gs) \comment{+ \D(expandPS)} + \D(img') \\
       & \in O(\log n + \log gmax + 1 + 1)  \\
