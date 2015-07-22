@@ -18,7 +18,8 @@ graphs, trees or complex recursion (e.g. clustering or machine learning).
 Direct parallel implementation of such algorithms
 in flat data parallelism results in
 a performance penalty.
-Parallel programming then mostly becomes manual work and utterly complex.
+Programming parallel algorithms then mostly
+becomes manual work and utterly complex.
 
 In contrast, Nested Data Parallelism \cite{Belloch1996} lifts these limits
 and enables the concise expression of irregularly-parallel programs
@@ -28,14 +29,14 @@ It uses a non-trivial program transformation called 'Vectorization'
 into an equivalent flat data-parallel program.
 
 Due to properties like Immutability and Referential Transparency,
-Functional programming languages are fruitful grounds for
+functional programming languages like Haskell are fruitful grounds for
 sophisticated program transformations
 and high-level expressiveness. They are key building
 blocks for effective Nested Data Parallelism.
 
 \paragraph{}
-This thesis is about the effectiveness of Nested Data Parallelism
-in functional programming languages like Haskell for the
+This thesis is a comparison of Nested Data Parallelism
+to manual parallelism in functional programming languages like Haskell for the
 expression of irregular image processing algorithms.
 
 
@@ -79,16 +80,14 @@ expression of irregular image processing algorithms.
   This leads to a theoretical analysis of all programs
   instead of benchmarking and statistical analysis.
   
-  The image processing algorithm used
-  for \ac is \algo.
-  After consideration of alternatives, \algo
-  is irregular as well as simple enough
-  to be implemented three times and manually vectorized.
+  \algo was chosen for \ac because of its
+  simplicity and limited-irregularity. It suits
+  for three implementations and manual vectorization.
 
 \section{Structure}
   This thesis begins with the basics in chapter \ref{chapter:basics}. It
-  presents Haskell, Nested Data Parallelism and Vectorization,
-  parallel complexity measures and gives a description of \algo.
+  presents Haskell and Nested Data Parallelism with Vectorization.
+  Parallel complexity measures and \algo are introduced either.
   The subsequent four chapters
   present and analyse four implementations.
   First, the sequential \seq
@@ -99,10 +98,10 @@ expression of irregular image processing algorithms.
   is given (chapter \ref{chapter:ndpn}).
   Fourth, its vectorization \ndpn is examined
   (chapter \ref{chapter:ndpv}).
-  The thesis then evaluates and compares the programs
+  The thesis then compares and evaluates the programs
   in chapter \ref{chapter:results}.
   Finally, chapter \ref{chapter:outlook}
-  summarizes the thesis, states related work and gives an outlook.
+  summarizes the thesis, references to related work and gives an outlook.
   
   %TODO: citations
   

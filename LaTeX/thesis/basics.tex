@@ -10,11 +10,11 @@ understand this thesis. First, an introduction into functional programming
 in Haskell is given - it is to ease the understanding of the code involved.
 Then Nested Data Parallelism (NDP) is covered where
 key insights are made and concepts that exploit them are presented.
-Afterwards a short introduction into parallel complexity measures is given.
-The concept of work and depth complexities are given
+Afterwards an introduction into parallel complexity measures is given.
+The concept of work and depth complexities are presented
 - together with definitions to calculate them.
 Finally, \algo is presented. Its problem is described and
-the solution is formulated.
+the algorithm is formulated.
 
 \section{Haskell}
   Haskell is a general-purpose strongly-typed purely-functional programming
@@ -30,7 +30,7 @@ the solution is formulated.
   
   
   \paragraph{Syntax}
-    Consider this function:
+    Consider this function definition:
     \begin{lstlisting}
 foo :: Double -> Int
 foo x = round (max 5 x)
@@ -38,25 +38,25 @@ foo x = round (max 5 x)
     \c{foo} takes the maximum of 5 and the argument number \c{x} and
     rounds it to the nearest integer. The function is given a type
     signature in the first line. \c{f :: t} denotes that \c{f} is of type \c{t}.
-    The type describes a function from a double floating number
-    to an integer. Multiple argument functions are typed with multiple arrows.
-    E.g. \c{max :: Double -> Double -> Double}.
+    The type of \c{foo} describes a function from a double floating number
+    to an integer. Multiple argument functions are typed with multiple arrows
+    - e.g. \c{max :: Double -> Double -> Double}.
     In contrast to many programming languages parentheses \c{()} are not used for function application
     (as in \c{f(a)}) but instead are used to specify precedence/ordering.
-    Function application is expressed with spacing - space as in ' '. E.g. \c{round 5.2} applies the built-in
+    Function application is expressed with spaces - as in ' '. E.g. \c{round 5.2} applies the built-in
     floating point rounding function to return the integer \c{5}. Multiple-argument
     functions are be applied with multiple spaces. E.g. \c{max 5 x}
     applies \c{max} on \c{5} and \c{x}.
     
-    The function is written alternatively as:
+    The function can be written alternatively as:
     \begin{lstlisting}
 foo :: Double -> Int
 foo x = let a = max 5 x
                   b = round a
-            in  b
+            in    b
     \end{lstlisting}
-    \c{let} statements bind expressions to variables.
-    The expression after the \c{in} keyword is the return value of the
+    \c{let}-statements bind expressions to variables.
+    The expression after the \c{in}-keyword is the return value of the
     entire expression.
     
     The function can be written without the explicit use of its argument \c{x}.
@@ -64,11 +64,14 @@ foo x = let a = max 5 x
 foo = (round) . (max 5)
 foo = round . max 5
     \end{lstlisting}
-    This is called currying and function composition.
+    This is called Currying and function composition.
     One can omit the last argument of a function and define the function
-    \c{foo} and focus on the functionality: "Take the maximum of 5 and then round".
-    Function composition is denoted by a dot \c{(.)}.
-    The second line shows, that the space operator binds stronger than function composition.
+    \c{foo} by a series of compositions.
+    Function composition is denoted by a dot (\c{.}).
+    In this case \c{foo} is the composition
+    of \c{x $\mapsto$ max 5 x} and \c{x $\mapsto$ round x}.
+    Both lines are equivalent and show, that function application ' '
+    binds stronger than composition (\c{.}).
     
     In functional programming one often ends up nesting multiple functions:
     \begin{lstlisting}
@@ -77,6 +80,7 @@ myFunc x = (bar a b (baz c (foo d x)))
     One can write the same function in various different ways - depending on space
     and visual ease.
     \begin{lstlisting}
+myFunc x = (bar a b . baz c . foo d) $ x
 myFunc x = bar a b . baz c . foo d $ x  -- single-line, explicit argument
 myFunc = bar a b . baz c . foo d        -- single-line, implicit argument
 myFunc x = bar a b                      -- multi-line, explicit argument
@@ -87,12 +91,12 @@ myFunc = bar a b                        -- multi-line, implicit argument
              . baz c
              . foo d
     \end{lstlisting}
-    The new \c{\$} operator is used here. It denotes function application either.
+    The \c{\$} operator denotes function application either.
     % \footnote{Fun fact: \c{\$} is defined in Haskell itself! It goes by \c{f \$ x = f x}}
     However, it
-    has very low precedence - so that the functions are composed first
-    before the argument is applied into the pipeline of functions.
-    The reader is noted, that the multi-line definitions actually apply
+    has very low precedence. Such that the functions are composed first
+    before the argument is applied into the composition (line 1).
+    The reader is noted, that the multi-line definitions apply
     the functions from bottom to up. First foo, then baz
     and finally bar is applied - even though foo is written last.
     
@@ -103,13 +107,14 @@ myFunc = bar a b                        -- multi-line, implicit argument
     Two closely related variables are given
     primes. E.g. they are named \c{x} and \c{x'}. A prime is a part of the variable name.
     Finally, a collection of \c{x} will be referred to by \c{xs}.
-    E.g. \c{xs} is an array, \c{xss} is a two dimensional array, and so on.
+    E.g. \c{xs} is an array, \c{xss} is a two dimensional array, etc.
   
   \paragraph{Strong typing and Type Inference}
     Every expression has a type. A program containing
-    ill-typed expressions, e.g. \c{3 + False}, is rejected.
+    ill-typed expressions, e.g. \c{3 + False}, is rejected
+    by the compiler.
     Types can be (almost always) be inferred from the context and
-    don't need to be specified.
+    then don't need to be specified.
     
   \paragraph{Type Synonyms}
     Type synonyms enable one to refer to a complicated type by a simpler name.
@@ -153,7 +158,7 @@ foo x y = x
     
     Similarly, one can define functions over polymorphic data types.
     E.g. \c{List a} denotes a list of elements of type a. \c{List Int}
-    is by that definition a linked list of integers.
+    is by that definition a list of integers.
     
     Polymorphisim is for example useful in \c{map :: (a -> b) -> List a -> List b}.
   
@@ -174,21 +179,21 @@ map :: (a -> b) -> List a -> List b
     The backslash \textbackslash{} is used inside code snippets - \lam{} is used outside of them.
     \footnote{The \textbackslash{} is used because of its similarity to \lam.}
     
-  \paragraph{Identity, flip and function composition}
+  \paragraph{Identity, Flip and Function Composition}
     Three commonly used functions are:
     \begin{lstlisting}
 id :: a -> a
 id x = x
 flip :: (a -> b -> c) -> b -> a -> c
 flip f x y = f y x
-(.) :: (b -> c) -> (a-> b) -> a -> c
+(.) :: (b -> c) -> (a -> b) -> a -> c
 g . f = \x -> g (f x)
     \end{lstlisting}
     \c{id} is the identity function and \c{flip} exchanges a functions
     first two arguments.
     The identity function is the neutral element of function composition \c{(.)}
     and the following law holds:
-     \c{\textrm{$\forall$} f: f . id = id . f = f}. This is useful for Rewrite Rules.
+     \c{\textrm{$\forall$}f: f . id = id . f = f}. This is useful for Rewrite Rules.
 
 
   \p
@@ -202,13 +207,13 @@ g . f = \x -> g (f x)
   In the ground breaking work \cite{Belloch1996}
   major contributions to parallel programming in
   functional programming languages were made.
-  The paper presented some of Belloch's earlier work (\cite{NepaBelloch1993}) on NESL
+  The paper presented his earlier work \cite{NepaBelloch1993} on NESL
   - a programming language specifically designed for expressing parallelism
   in functional programming languages. Its ideas and insights were
   adapted to various languages - one of them being Haskell.
   Multitude years of research generalized the
   results of the special purpose language NESL
-  to the widely general purpose language Haskell.
+  to the widely used general purpose language Haskell.
   \footnote{For example \cite{Harness2008}, \cite{DPHStatus2007},
   \cite{EffiVect2012Lipp}, \cite{HighOrdFlat2006} and \cite{DistTypes1999}.}
   This project is called Nested Data Parallel Haskell and this section will give
@@ -235,7 +240,7 @@ g . f = \x -> g (f x)
     This function has a fairly intuitive parallel implementation:
     First distribute the input array evenly across the \underline{p}rocessing \underline{u}nits (PUs),
     then compute each local chunk of the array with its PU and finally join all elements together.
-    The inner function \c{f} is applied by each processing unit (PU) sequentially.
+    The inner function \c{f} is run sequentially.
     
     \nomenclature{Chunk}{
     An local array (or linked list) that is part of a
@@ -251,9 +256,21 @@ g . f = \x -> g (f x)
     Statements like \c{map incr}
     \footnote{\c{incr :: Int -> Int} increments an integer.}
     can be perfectly parallelized.
-    However, one comes it its limits when considering statements like \c{map (map incr)} or \c{map (map (map incr))}.
+    However, it reaches its limit when considering statements like \c{map (map incr)} or \c{map (map (map incr))}.
     Within Flat Data Parallelism only the outer-most level is run in parallel.
+    That can lead to unbalanced work distribution.
+    The sub-arrays can be of very different length. Figure \ref{figure:fdpvsndp}
+    shows an example.
     Running the inner elements in parallel requires a different approach in dividing up the workload.
+    
+    
+    \begin{figure}[h!]
+        \begin{center}
+        \includegraphics[width=\linewidth]{fdpvsndp.png}
+        \caption{Workload distribution in Flat and Nested Data Parallelism}
+        \label{figure:fdpvsndp}
+        \end{center}
+    \end{figure}
     
     \p
     Nested Data Parallelism lifts these limitations.
@@ -274,7 +291,7 @@ g . f = \x -> g (f x)
       \item \emph{Communication Fusioning} -
         By inlining the definitions of the parallel functions and
         using semantics-preserving rewrite rules one can
-        reduce unnecessary synchronisation points and
+        eliminate specific synchronisation points and
         create tight processing pipelines. It uses \pad{} to denote
         distributed chunks of the global array \pav{}.
       \item \emph{Stream Fusioning} -
@@ -285,11 +302,11 @@ g . f = \x -> g (f x)
         implement the local array chunks and to fuse loops, respectively.
     \end{enumerate}
     
-    \footnotetext{Streams are special data structures
-    which are designed to specifically enable non-recursive
-    definitions of fusing functions e.g. \c{mapP} by
+    \footnotetext{\c{Stream} is a data structure
+    designed to specifically enable non-recursive
+    definitions of fusing functions (e.g. \c{mapP}) by
     moving the recursion from the function
-    to a step-wise definition.}
+    to a step-wise stream-ful recursion. See \cite{GenVectorFusion2013}.}
     
     \nomenclature{Vectorization}{
     A compiler transformation which flattens and uses Fusion
@@ -330,14 +347,13 @@ g . f = \x -> g (f x)
         replP & \c{Int -> a -> [:a:]} & replicates an element \\
     \end{tabular}
   \end{table}
-  \footnotetext{e.g. \c{zipWithP (+) [:1,2,3:] [:1,3,4:] = [:1+1,2+3,3+4:]}. The arrays as assumed to be of equal size.}
-
   \subsection{Vectorization}
     Vectorization involves two major steps -
     \emph{Type dependent representation} and \emph{Lifting}.
     Both will be explained in detail below.
     
     \subsubsection{Type dependent representation}
+
       Type dependent representation enables the programmer
       to work with arrays containing complex
       data structures without scarifying efficiency.
@@ -354,7 +370,8 @@ g . f = \x -> g (f x)
       to arrays of integers. Pointers however are undesirable, since they
       decrease Cache Locality. CPU Caching is crucial for performance
       and is directly linked to Cache Locality. \cite{Locality2005}.
-      
+  \footnotetext{e.g. \c{zipWithP (+) [:1,2,3:] [:1,3,4:] = [:1+1,2+3,3+4:]}. The arrays as assumed to be of equal size.}
+  
       Nested arrays need a different approach for representation.
       That approach is the separation of data and structure.
       The following example describes how a nested array
@@ -456,16 +473,15 @@ mapPL f xss =
     More accurately, one has an additional expression \c{expandPS xss fEnv}.
     Introducing it wouldn't affect the overall situation in this thesis.
     Therefore, it was omitted.
-    } 
+    }
     Figure \ref{figure:mapP} shall visually aid the understanding
     using the example \c{mapP (mapP incr)}.
-    
+    The call to \c{incrL} happens for a flat array as shown in figure \ref{figure:fdpvsndp}.
+
     \begin{figure}[h!]
         \begin{center}
         \includegraphics[width=\linewidth]{mapP.png}
-        \caption[Flattening of Nested Parallelism]{Conceptual view and actual implementation of \c{mapP (mapP incr)\footnotemark}
-        
-        }
+        \caption[Flattening of Nested Parallelism]{Conceptual view and actual implementation of \c{mapP (mapP incr)\footnotemark}}
         \label{figure:mapP}
         \end{center}
     \end{figure}
