@@ -17,7 +17,7 @@ on Nested Data Parallelism.
   number of gray tones each pixel has available.
   
   \begin{table}[h!]
-    \caption{Work and Depth complexities}
+    \caption{Complexities for \seq, \man, \ndpn and \ndpv}
     \label{table:allcomps}
     \centering
     \begin{tabular}{lll}
@@ -119,7 +119,7 @@ on Nested Data Parallelism.
            & \ind only high level function compositions. \\
            & \pro It involves only limited workload for the human. \\
            & \con It has high constant factors (than \man and \ndpv) due  \\
-           & \ind to nesting and umoptimised communication and traversals. \\
+           & \ind to nesting and unoptimised communication and traversals. \\
           \ndpv & \\
            & \pro The programmer does not need to think about the flat representation of the image. \\
            & \pro Flattening of arrays and nested functions reduce constant factors. \\
@@ -147,10 +147,10 @@ on Nested Data Parallelism.
     
     
     All in all, the four programs, \seq, \man, \ndpn and \ndpv,
-    have different strenghts and weaknesses. No program is strictly better in all aspects than any other.
-     
-    
-    
+    have different strengths and weaknesses. No program is strictly better in all aspects than any other.
+    However, the use of Nested Data Parallelism enabled
+    a sufficiently high-level implementation with only modest
+    performance drawbacks as compared to manual parallelization.
     
   
   \footnotetext{Unless one wraps \man with (un-)flattening operations. This approach however manually implements the flattening approach used in NDP.}

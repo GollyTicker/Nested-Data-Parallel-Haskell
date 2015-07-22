@@ -173,7 +173,7 @@
 \newpage
 %% enable if these lists should be shown on their own page
 \listoftables
-% \listoffigures
+\listoffigures
 %\lstlistoflistings
 
 %% main
@@ -183,28 +183,35 @@
 %\typeout{===== File: chapter1}
 %% include chapter file (chapter1.tex)
 
-\chapter{Introduction (=2)}
+\chapter{Introduction}
   \input{introduction.tex}
 
 \chapter{Basics}
+  \label{chapter:basics}
   \input{basics.tex}
   
 \chapter{Sequential: \seq}
+  \label{chapter:seq}
   \input{seq.tex}
   
 \chapter{Manually parallelized: \man}
+  \label{chapter:man}
   \input{man.tex}
 
 \chapter{Nested-Data-Parallel: \ndpn}
+  \label{chapter:ndpn}
   \input{ndpn.tex}
 
-\chapter{Optimised Nested-Data-Parallel: \ndpv}
+\chapter{Vectorized Nested-Data-Parallel: \ndpv}
+  \label{chapter:ndpv}
   \input{ndpv.tex}
 
 \chapter{Results and Discussion}
+  \label{chapter:results}
   \input{results.tex}
 
 \chapter{Outlook (<5)}
+  \label{chapter:outlook}
   \input{outlook.tex}
 
 %% appendix if used
@@ -213,8 +220,8 @@
 %%\include{appendix}
 
 \chapter*{Appendix}
-\addcontentsline{toc}{chapter}{Appendix}
-  %\input{appendix.tex}
+  \addcontentsline{toc}{chapter}{Appendix}
+  \input{appendix.tex}
 
 % bibliography and other stuff
 \backmatter

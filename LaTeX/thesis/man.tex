@@ -18,7 +18,7 @@ Table \ref{table:parprims} shows a few of these primitives.
       \midrule
       parMap & \c{(a -> b) -> Vector a -> Vector b} \\
       parZipWith & \c{(a -> b -> c)} \\
-       & \c{Vector a -> Vector b -> Vector c} \\
+       & \c{-> Vector a -> Vector b -> Vector c} \\
       parReplicate & \c{Int -> a -> Vector a} \\
       parGenerate & \c{Int -> (Int -> a) -> Vector a} \\
     \end{tabular}
@@ -56,7 +56,7 @@ accuHist xs  = let (left,right) = splitMid xs
     \centering
     \includegraphics[width=\linewidth]{accuHist}
     \label{figure:accuHist}
-    \caption{Evaluation of \c{accuHist [1,3,1,0]}}
+    \caption[Parallel Histogram Accumulation]{Evaluation of \c{accuHist [1,3,1,0]}}
   \end{figure}
   
   Suppose \c{gmax = 4} then the algorithm returns \c{[0 0 0 0 0]} if
@@ -89,13 +89,17 @@ type Hist   = Vector Int
 
 hbalance :: Image -> Image
 hbalance img =
-  let hist = accuHist img
-      a0 = hist ! 0
-      agmax = hist ! gmax
-      apply gs = parMap (\i -> gs ! i) img
-      sclNrm :: Int -> Int
+  let as = accuHist img
+      a0 = as ! 0
+      agmax = as ! gmax
+      
       sclNrm x = floor ( (x-a0)/(agmax - a0)*gmax )
-  in  apply (parMap sclNrm) hist
+      gs = parMap sclNrm as
+      
+      apply gs = parMap (\i -> gs ! i) img
+      img' = apply gs img
+      
+  in  img'
   \end{lstlisting}
   As explained in the previous section, the parallel
   accumulated histogram calculation has been implemented in \c{accuHist}.
@@ -160,6 +164,8 @@ hbalance img =
     \end{split}
     \end{equation*}
     
+    The work involved is an product of the number of gray tones and
+    the number of pixels $O(g \cdot gmax)$.
     Such a tree-like reduction has height logarithmic
     in the size of the input array. The input array is the image and
     has size \c{n}. Therefore, one can conclude
@@ -174,7 +180,7 @@ hbalance img =
     
   \begin{table}[h]
     \centering
-    \caption{Complexities of\man}
+    \caption{Complexities for \man}
     \label{table:man}
     \begin{tabular}{lll}
         \toprule
@@ -199,11 +205,11 @@ hbalance img =
   \begin{equation*}
   \begin{split}
   \W(n,gmax)
-        & = \W(accuHist) + \W(parMap,sclNrm) + \W(apply) \\
+        & = \W(accuHist) + \W(parMap,sclNrm) + \W(apply,gs) \\
         & = n \cdot gmax + gmax + n \\
         & \in O(n \cdot gmax) \\
   \D(n,gmax)
-      & = \D(accuHist) + \D(parMap,sclNrm) +  \D(apply) \\
+      & = \D(accuHist) + \D(parMap,sclNrm) +  \D(apply,gs) \\
       & = \max \{ \log n, 1, 1\} \\
       & \in O(\log n) \\
   \end{split}

@@ -1,61 +1,103 @@
 
 
-\section{Context}
-  In the past few decades the raw processing power of CPUs has
-  not increased by any significant amount.
-  Instead, we are presented with hardware with an
-  exponentially increasing number of processors
-  - each of them as fast as the previous generation.
-  Parallel COmputing is concerned with the use of multiple
-  processing units to increase performance.
-  Functional programming languages are
-  particularly successfull in parallel programming
-  due to their immutability and cache friendly-ness
+Suppose one wants use the exponentially
+increasing number of processors and machines
+available to speed-up programs.
+This is a common task in image processing.
+Data parallelism is a frequently used
+to parallelize these programs.
+
+Data-parallel programs express parallelism
+via bulkd-primitives over parallel data structures - e.g. \c{map/reduce}.
+They perform well on flat data and with regular
+non-recursive program flow.
+Most applications in need of parallelism
+however have irregular behaviour. Their
+algorithms work with nested
+arrays (e.g. images or matrices),
+graphs, trees or complex recursion (e.g. clustering or machine learning).
+Direct parallel implementation of such algorithms
+in flat data parallelism results in
+a performance penalty.
+
+Nested Data Parallelism \cite{Belloch1996} lifts these limits
+and enables the high-level expression of irregularly-parallel programs
+- while still compiling to efficient machine code.
+It uses a non-trivial program transformation called 'Vectorization'
+(or 'Flattening') where the original program is transformed
+into an equivalent flat data-parallel program.
+
+Due properties like Immutability and Referential Transparency,
+Functional programming languages are fruitful grounds for
+sophisticated program transformations
+and high-level expressiveness. They are key building
+blocks for Nested Data Parallelism.
+
+\paragraph{}
+This thesis is about the effectiveness of Nested Data Parallelism
+in functional programming languages like Haskell for the
+expression of irregular image processing algorithms.
+
+
+\section{Aim and Methodology}
+  The question on how Nested Data Parallelism (NDP) compares to
+  conventional parallelism is tackled by the following methodology:
+  An image processing algorithm with irregular behaviour
+  is implemented in four variations. These variations are
+  then compared on performance, human workload and other aspects.
+  Finally a conclusion is drawn.
   
-  Research and Development in this field is generally referred to as Parallel Computing.
-  For my thesis, I have further reduced the context to the programming language Haskell and Image Processing. An explanation is given next.
+  \paragraph{}
+    \ac $:=$ \algo, a conceptual image processing algorithm
     
-  
-  A few questions arise:
-  
-  !Context like in the expose!
-  
-  Why Image Processing? Simply interesting topic. Using Histogram Balancing
-  
-  
-  Focus on practical functional programming.
-    Why Haskell?
-    many researchers do their work in the haskell community,
-      on of them will be used here - that is Nested Data Parallel Haskell
-    I enjoyed haskell the most and learned many concepts there. (like in expose)
+    \seq $:=$ A direct sequential implementation of \ac
+
+    \man $:=$ A manually-parallelized implementation of \ac
     
-    Results can (and are) applied to other functional programming
-    lanuguages. cite? 
-    
-    
-    Constant Factors
+    \ndpn $:=$ A nested data-parallel implementation of \ac
 
-\section{Goal}
-
-  To answer these questions, an image processing algorithm
-  is chosen and implemented in four variations.
+    \ndpv $:=$ The vectorized implementation of \ac from \ndpn
   
-  \ac $:=$ \algo, the conceptual image processing algorithm
   
-  \seq $:=$ An ordinary Haskell implementation of \ac
-
-  \man $:=$ A manually-parallelized implementation of \ac
+  Given the generalisations of NDP into Haskell \cite{Harness2008},
+  Haskell is an optimal choice for the implementation.
+  The results of this thesis however can be easily adopted
+  to related functional programming languages.
   
-  \ndpn $:=$ A Nested-Data-Parallel implementation of \ac
-
-  \ndpv $:=$ The compiler-transformed implementation of \ac from \ndpn
-        
-
-  Leading question. Subquestion.
-  Formulating the approach
+  Contrary to any expectations,
+  the thesis does not present directly executable
+  programs. NDP is Haskell is still in developement and
+  the program transformation is not yet completely implemented.
+  The vectorization - usually done by the compiler
+  - is done manually here.
+  This leads to a theoretical analysis of all programs
+  instead of benchmarking and statistical analysis.
   
-  Formulate Concept/Algorithm of Histogram Balanding as $A$.
+  The image processing algorithm used
+  for \ac is \algo.
+  After consideration of alternatives, \algo
+  is irregular as well as simple enough
+  to be implemented three times and manually vectorized.
 
 \section{Structure}
-  Describe what each chapter does
+  This thesis begins with the basics in chapter \ref{chapter:basics}. It
+  presents Haskell, Nested Data Parallelism and Vectorization,
+  parallel complexity measures and gives a description of \algo.
+  The subsequent four chapters
+  present and analyse four implementations.
+  First, the sequential \seq
+  is presented (chapter \ref{chapter:seq}).
+  Second, comes the manually parallelized \man
+  (chapter \ref{chapter:man}).
+  Third, the nested data parallel \ndpn
+  is given (chapter \ref{chapter:ndpn}).
+  Fourth, its vectorization \ndpn is examined
+  (chapter \ref{chapter:ndpv}).
+  The thesis then evaluates and compares the programs
+  in chapter \ref{chapter:results}.
+  Finally, chapter \ref{chapter:outlook}
+  summarizes the thesis, states related work and gives an outlook.
+  
+  %TODO: citations
+  
 

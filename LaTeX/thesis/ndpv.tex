@@ -23,7 +23,7 @@ At the end of this chapter, complexity measures for \ndpv are given.
       the use of Rewrite Rules to reduce the number of traversals.
   \end{enumerate}
   
-  The compiler begin with Vectorization.
+  The compiler begins with Vectorization.
   
   \subsection{Vectorization}
     Applying the vectorization procedure as described in \cite{Harness2008} yields the following code:
@@ -56,7 +56,7 @@ in unconcatPS img
     Various functions (like \c{hist} and \c{accu}) have been inlined and are tightly packed together here.
     The program also replaced the nested \pan by flat \pav.
     It also replaced polymorphic functions like \c{fromIntegral}
-    by specific monomorphic primitive machine functions like \c{intToDouble}.
+    by specific monomorphic primitive machine functions like \c{int2Double}.
     
     Starting, lines 9 to 4 describe the calculation of the histogram.
     It's only difference is the use of vectorized scalar functions (e.g.\c{groupPS}). These functions operate of the efficient flat
@@ -77,7 +77,7 @@ in unconcatPS img
     has now been flatten to use a lifted parallel operation, namely \c{indexPL}, over a \textbf{flat} array of
     the pixels of the image. This is an embodiment of the key insight in Nested Data Parallelism.
     
-    The compiler however had to add an expression \c{expandPS img gs} to it to be
+    The compiler however had to add an expression \c{expandPS img gs} for it to be
     correct. That is an artefact of the actual flattening procedure.
     It is responsible for the redistribution of the \c{gs} array. It does not affect the
     overall situation (in terms of work and depth) and therefore
@@ -115,18 +115,18 @@ let a = joinD                           -- scanlPS ends
       are unchanged. A real compiler would have inlined their definitions and looked for optimisations.      
       
       Aside from them, inlining \c{scanlPS} and \c{sparseToDensePS}
-      \footnote{It's definition is given in the appendix.} exposes their internals.
+      \footnote{It's definition is given in the appendix \ref{lst:sparsetodenseps}.} exposes their internals.
       In-between both of the functions, there was a composition of the distribution primitives - namely \c{splitD . joinD}.
       Applying the rewrite rule "splitD/joinD" eliminated a point of synchronisation.
       
       This leaves \c{propagateD} as the only inter-PU communication in-between the splitting of the
       sparse array and joining the histogram at the end (line 1).
       
-      The expression \c{mapP (\lam g -> (headP g,lengthP g))} and \c{groupPS}
-      were involved in a rather special fusion. Essentially, the lambda expression was
+      The expression \c{mapP (\lam g -> (headP g,lengthP g)) . groupPS}
+      was involved in a rather special fusion. Essentially, the lambda expression was
       was applied to the result of groupPS. This enabled further communication
       fusion and created the local operation \c{tripletToATup2}
-      \footnote{tripletToATup2 :: (LinkedList (Int,Int,Int)) -> (PA (Int,Int))}
+      \footnote{\c{tripletToATup2 :: LinkedList (Int,Int,Int) -> PA (Int,Int)}.}
       . It creates the
       local chunks of the sparse-array directly. \c{segdSplitMerge} does the
       actual work of the distributed grouping\footnote{as explained in chapter \ref{chapter:ndpn}}.
@@ -135,22 +135,22 @@ let a = joinD                           -- scanlPS ends
     The new code for normalisation and scaling is given below:
     \begin{lstlisting}
 let n = lengthPS a
-  gs = joinD . mapD f . splitD $ a
-  f = (\gmax' divisor a0 x ->
-        floorDoubleS
-          (multDoubleS
-            (divDoubleS
-              (minusDoubleS
-                (int2DoubleS x)
-                a0)
-              divisor)
-            gmax')
-        )
-        $ ( replD n . int2Double $ gmax )
-        $ ( replD n
-            . minusDouble (int2Double (lastPS a))
-            . int2Double . headPS $ a )
-        $ ( replD n . int2Double . headPS $ a )
+      gs = joinD . mapD f . splitD $ a
+      f = (\gmax' divisor a0 x ->
+            floorDoubleS
+              (multDoubleS
+                (divDoubleS
+                  (minusDoubleS
+                    (int2DoubleS x)
+                    a0)
+                  divisor)
+                gmax')
+            )
+            $ ( replD n . int2Double $ gmax )
+            $ ( replD n
+                . minusDouble (int2Double (lastPS a))
+                . int2Double . headPS $ a )
+            $ ( replD n . int2Double . headPS $ a )
     \end{lstlisting}
     The definitions of the lifted functions are similar to these two examples:
     \begin{lstlisting}
@@ -161,8 +161,8 @@ multDoubleL as = joinD . zipWithD multDoubleS (splitD as) . splitD
     eliminated using the "splitD/joinD" rule.
     
     After that, a cascade of rewrite rules fired and propagated the normalisation and scaling
-    constants towards local computation. A sophisticated combination of the rules
-    "mapD/zipWithD", "splitD,replPS", "mapD/replD" and "ZipReplSplit" resulted in
+    constants into local computation. A sophisticated combination of the rules
+    "mapD/zipWithD", "splitD/replPS", "mapD/replD" and "ZipReplSplit" resulted in
     the code given above.
     
     Operationally, there is an important change in the normalisation and scaling.
@@ -181,15 +181,15 @@ multDoubleL as = joinD . zipWithD multDoubleS (splitD as) . splitD
     the normalisation and scaling only. The new code is given below:
     \begin{lstlisting}
 let a0      = int2Double . headPS $ a 
-  divisor = minusDouble (int2Double (lastPS a))
-                . int2Double . headPS $ a
-  gmax'   = int2Double $ gmax
-  normScale = floorDouble
-                  . (flip multDouble) gmax'
-                  . (flip divDouble) divisor
-                  . (flip minusDouble) a0
-                  . int2Double
-  gs = joinD . mapD (mapS normScale) . splitD $ a
+      divisor = minusDouble (int2Double (lastPS a))
+                    . int2Double . headPS $ a
+      gmax'   = int2Double $ gmax
+      normScale = floorDouble
+                      . (flip multDouble) gmax'
+                      . (flip divDouble) divisor
+                      . (flip minusDouble) a0
+                      . int2Double
+      gs = joinD . mapD (mapS normScale) . splitD $ a
      \end{lstlisting}
      The replications have been removed entirely.
      Constants are calculated first and then used in \c{normScale}
@@ -224,41 +224,41 @@ type Hist  = PA Int
 hbalance :: Image -> Image
 hbalance img =
 let a :: Hist
-    a = joinD
-          . mapD (\(as,a) -> mapS (plusInt a) as)
-          . propagateD plusInt 0
-          . mapD (scanlS plusInt 0)
-          . sparseToDenseD (plusInt gmax 1) 0
-          . splitSparseD (plusInt gmax 1)
-          . joinD
-          . mapD tripletToATup2
-          . segdSplitMerge 0
-          . sortPS
-          . concatPS
-          $ img
-    n :: Int
-    n = lengthPS a
-    
-    a0, divisor, gmax' :: Double
-    a0      = int2Double . headPS $ a
-    divisor = minusDouble (int2Double (lastPS a))
-                  . int2Double . headPS $ a
-    gmax'   = int2Double gmax
-    
-    normScale :: Int -> Int
-    normScale = floorDouble
-                      . (flip multDouble) gmax'
-                      . (flip divDouble) divisor
-                      . (flip minusDouble) a
-                      . int2Double
+      a = joinD
+            . mapD (\(as,a) -> mapS (plusInt a) as)
+            . propagateD plusInt 0
+            . mapD (scanlS plusInt 0)
+            . sparseToDenseD (plusInt gmax 1) 0
+            . splitSparseD (plusInt gmax 1)
+            . joinD
+            . mapD tripletToATup2
+            . segdSplitMerge 0
+            . sortPS
+            . concatPS
+            $ img
+      n :: Int
+      n = lengthPS a
       
-    gs :: Hist
-    gs = joinD . mapD (mapS normScale) . splitD $ a
-    
-in unconcatPS img
-     . indexPL (expandPS img gs)
-     . concatPS
-     $ img
+      a0, divisor, gmax' :: Double
+      a0      = int2Double . headPS $ a
+      divisor = minusDouble (int2Double (lastPS a))
+                    . int2Double . headPS $ a
+      gmax'   = int2Double gmax
+      
+      normScale :: Int -> Int
+      normScale = floorDouble
+                        . (flip multDouble) gmax'
+                        . (flip divDouble) divisor
+                        . (flip minusDouble) a
+                        . int2Double
+        
+      gs :: Hist
+      gs = joinD . mapD (mapS normScale) . splitD $ a
+      
+ in  unconcatPS img
+       . indexPL (expandPS img gs)
+       . concatPS
+       $ img
   \end{lstlisting} %  (expandPS img gs)
   On the surface, the algorithm works quite similar to a direct implementation of \ndpn.
   First the histogram is calculated (lines 18 to 11) and accumulated (lines 10 - 7).
@@ -293,12 +293,12 @@ in unconcatPS img
   \begin{split}
   \W(w \times h,gmax)
         & = \W(hist) + \W(accu) + \W(gs) + \comment{\W(expandPS) +} \W(img') \\
-        & = O( (n \log n + gmax) + gmax + gmax \comment{ + 1} + n) \\
-        & \in O(n \log n + gmax)) \\
+        & \in O( (n \log n + gmax) + gmax + gmax \comment{ + 1} + n) \\
+        & = O(n \log n + gmax)) \\
   \D(w \times h,gmax)
-      & = \D(hist) + \D(accu) + \D(gs) + \comment{+ \D(expandPS)} + \D(img)' \\
-      & = \log n + \log gmax + 1 + 1  \\
-      & \in O(\log n + \log gmax)) \\
+      & = \D(hist) + \D(accu) + \D(gs) \comment{+ \D(expandPS)} + \D(img') \\
+      & \in O(\log n + \log gmax + 1 + 1)  \\
+      & = O(\log n + \log gmax) \\
   \end{split}
   \end{equation*}
   The use of the plentiful new functions does not change the overall situation compared to \ndpn.
@@ -306,12 +306,53 @@ in unconcatPS img
   Being at $O(n \log n + gmax)$ in work
   the histogram calculation remains the most expensive when executed on a single processor.
   With increasing number of processors, the various logarithmic depth
-  operations in the (accumulated) histogram calculation becomes the bottleneck.
-  They require time logarithmic in the number of gray tones \c{gmax} or the number
-  of pixels \c{n} - depending on which one is greater.
-  A overview of all the functions an their complexities can be found in the table \ref{complexities_ndpv} in the appendix.
+  operations in the (accumulated) histogram calculation become the bottleneck.
+  They require time logarithmic in the number of gray tones
+  \c{gmax} and the number of pixels \c{n}.
+  A overview of all the functions an their complexities can be found in the table \ref{complexities:ndpv}.
   
+  \begin{table}[h]
+    \caption{Complexities for \ndpv}
+    \label{complexities:ndpv}
+    \centering
+    \begin{tabular}{lll}
+        \toprule
+        function or variable & $\W \in O(...)$           & $\D \in O(...)$ \\
+        \midrule
+        hbalance        & $n \log n + gmax$ & $\log n + \log gmax$ \\
+        \midrule
+        hist            & $n \log n + gmax$& \log n \\
+        concatPS        & 1                   & 1 \\
+        sortPS          & $n \log n$          & $\log n$ \\
+        segdSplitMerge  & $n \log n$          & $\log n$ \\
+        mapD tripletToATup2  & gmax           & 1 \\
+        joinD xs        & gmax                & 1 \\
+        \midrule
+        accu            & gmax                & $\log gmax$ \\
+        sparseToDenseD  & gmax                & 1 \\
+        splitSparseD    & gmax                & 1 \\
+        mapD scanlS     & gmax                & 1 \\
+        propagateD      & 1                   & $\log gmax$ \\
+        mapD (mapS plusInt) & gmax            & 1 \\
+        joinD           & gmax                & 1 \\
+        \midrule
+        as              & gmax                & 1 \\
+        splitD          & gmax                & 1 \\
+        mapD normScale  & gmax                & 1 \\
+        joinD           & gmax                & 1 \\
+        \midrule
+        expandPS        & n & 1 \\
+        \midrule
+        img'            & n                   & 1 \\
+        concatPS        & 1                   & 1 \\
+        indexPL         & n                   & 1 \\
+        unconcatPS      & 1                   & 1 \\
+    \end{tabular}
+  \end{table}
   
-  The implementation and analysis of the programs \seq, \man, \ndpn and \ndpv
-  have been given. The next chapter will give an evaluation.
+  \paragraph{}
+    The implementation and analysis of the programs \seq, \man, \ndpn and \ndpv
+    have been given.
+    The next chapter with the discussion of the results.
+    
 

@@ -32,7 +32,7 @@ $ xs
     
     \begin{figure}[h!]
         \includegraphics[width=\linewidth]{scanlP-three-steps.png}
-        \caption{Parallel prefix sum in three steps (Figure from \cite{DistTypes1999}) }
+        \caption[Three-Step Parallel Prefix Sum]{Parallel prefix sum in three steps (Figure from \cite{DistTypes1999}) }
         \label{figure:scanlPsteps}
     \end{figure}
     In terms of depth and parallel complexity, the propagation is the bottleneck.
@@ -40,7 +40,7 @@ $ xs
     one can use a binary-tree-like scheme for propagation for the local values distributed on the PUs.
     This propagation happens in time logarithmic to the number of PUs.
     It an be derived from \cite{Scanl1980}. For the purposes of this thesis,
-    it is sufficient to state the following complexities for scanlP:
+    it is sufficient to state the following complexities for \c{scanlP (+) 0}:
     $\W(n) \in O(n)$ and $\D(n) \in O(\log n)$.
 
   \subsection*{GroupP}
@@ -58,15 +58,16 @@ AArr {
 }
     \end{lstlisting}
     An efficient parallel implementation of \c{groupP}
-    relies on the following key insight - that the \c{data} field in the nested array
+    relies on the following key insight: The \c{data} field in the nested array
     is the identical to the source array itself. To implement \c{groupP} one only
-    needs to efficiently calculate the segment descriptor field. This is
+    needs to efficiently calculate the segment descriptor field
+    and attach it to the source array. This is
     possible in depth logarithmic to the size of the input array.
     
     \begin{figure}[h!]
         \begin{center}
         \includegraphics[width=\linewidth]{groupP.png}
-        \caption{An example calculation of groupP. Each box is a PU.}
+        \caption[Parallel Evaluation of \c{groupP}]{An example calculation of groupP. Each box is a PU.}
         \label{figure:groupP}
         \end{center}
     \end{figure}
@@ -105,8 +106,8 @@ AArr {
 
   \subsection*{Histogram calculation}
     Conventional functional programming often enables one to write
-    consise and correct implementations of functionality on ordered
-    data structures (like lists and arrays). For example -
+    consise and correct implementations using by composing
+    independent and general functions. For example -
     consider the problem of run length encoding. Given a (possibly long) array,
     the goal is to create a sparse array that compresses elements
     by encoding consecutive equal elements
@@ -127,7 +128,7 @@ runLengthEncode = mapP (\xs -> (headP xs, lengthP xs)) . groupP
     of a histogram.
     To make create a full histogram, the input image has to be flattened first (\¢{unconcatP}),
     then sorted(\c{sortP}) and finally applied \c{runLengthEncode} on.
-    The sorting is necessary, as it groups together regardless of their
+    The sorting is necessary, as it groups together pixels regardless of their
     position in the original image.
     The result is an array of type \type{[:(Int,Int):]} where each element
     describes a gray tone (first integer in tuple) and its number of
@@ -217,11 +218,11 @@ apply as img = mapP (mapP (as !:)) img
   Let $n$ be the number of pixels in an $w \times h$ image,
   then the complexities are given in table \ref{complexities:ndpn}.
   \begin{table}[h!]
-    \caption{Complexities of \ndpn}
+    \caption{Complexities for \ndpn}
     \label{complexities:ndpn}
     \begin{center}
     \begin{tabular}{lll}
-0        \toprule
+        \toprule
         function or variable & $\W \in O(...)$           & $\D \in O(...)$ \\
         \midrule
         hbalance        & $n \log n + gmax$   & $\log n + \log gmax$\\
@@ -242,15 +243,10 @@ apply as img = mapP (mapP (as !:)) img
     \end{tabular}
     \end{center}
   \end{table}
-    The entries correspond to a complexity class.
-    They don't denote the actual number of operations.
     For the depths, \c{hist} and \c{accu} get logarithmic bounds by
-    either the size of the image or the maximum gray tone
-    - depending on which one creates the longer chain of dependency.
+    either the size of the image and the maximum gray tone, respectively.
     All in all, \ndpn has $\W \in O(n \log n + gmax)$
     and $\D \in O(\log n + \log gmax)$.
-    These special case distinctions are the source
-    of interesting analysis in the final evaluation.
     
     \ndpn is mostly a direct translation of \seq and \algo.
     A parallel implementation of histogram calculation is given

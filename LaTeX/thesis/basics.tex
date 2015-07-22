@@ -36,7 +36,7 @@ foo x = round (max 5 x)
     signature in the first line. \c{f :: t} denotes that \c{f} is of type \c{t}.
     The type describes a function from a double floating number
     to an integer. Multiple argument functions are typed with multiple arrows.
-    E.g. \c{max :: Double -> Double -> Double}-
+    E.g. \c{max :: Double -> Double -> Double}.
     In contrast to many programming languages parentheses \c{()} are not used for function application
     (as in \c{f(a)}) but instead are used to specify precedence/ordering.
     Function application is expressed with spacing - space as in ' '. E.g. \c{round 5.2} applies the built-in
@@ -73,13 +73,13 @@ myFunc x = (bar a b (baz c (foo d x)))
     One can write the same function in various different ways - depending on space
     and visual ease.
     \begin{lstlisting}
-myFunc x = bar a b . baz c . foo d $ x  -- composed with explicit argument
-myFunc = bar a b . baz c . foo d        -- composed with implicit argument
-myFunc x = bar a b                      -- indented, explicit argument
+myFunc x = bar a b . baz c . foo d $ x  -- single-line, explicit argument
+myFunc = bar a b . baz c . foo d        -- single-line, implicit argument
+myFunc x = bar a b                      -- multi-line, explicit argument
                . baz c 
                . foo d
                $ x
-myFunc = bar a b                        -- indented, implicit argument
+myFunc = bar a b                        -- multi-line, implicit argument
              . baz c
              . foo d
     \end{lstlisting}
@@ -145,7 +145,7 @@ foo x y = x
     This function is well-defined for both arguments
     as long as the return type is same as the type of \c{x}. This
     restriction is reflected in the type signature - the first and
-    the last type variable have to be equal. 
+    the last type variables are equal. 
     
     Similarly, one can define functions over polymorphic data types.
     E.g. \c{List a} denotes a list of elements of type a. \c{List Int}
@@ -154,7 +154,7 @@ foo x y = x
     Polymorphisim is for example useful in \c{map :: (a -> b) -> List a -> List b}.
   
   \paragraph{Higher Order Functions}
-    Functions are values and can be taken or passed ar arguments to other functions.
+    Functions are values and can be taken or passed as arguments to other functions.
     \c{map} is an example.
     \begin{lstlisting}
 map :: (a -> b) -> List a -> List b
@@ -261,7 +261,7 @@ g . f = \x -> g (f x)
   For parallel arrays, one has few predefined functions.
   They correspond to functions used in conventional functional programming.
   Their names and their types are given in \ref{table:parfuns}.
-  \footnote{e.g. \c{zipWithP (*) [:1,2,3:] [:1,3,4:] = [:1*1,2*3,3*4:]}. The arrays as assumed to be of equal size.}
+  
   \begin{table}[h]
     \caption{Parallel functions in NDP}
     \label{table:parfuns}
@@ -275,7 +275,7 @@ g . f = \x -> g (f x)
         lastP & \c{[:a:] -> a} & returns the last element \\
         mapP & \c{(a -> b) -> [:a:] -> [:b:]} & applies a function on all elements \\
         zipWithP & \c{(a -> b -> c)} & zip together pairs of elements by \c{f} \\
-         & \c{-> [:a:] -> [:b:] -> [:c:]} & and return an array of results \\
+         & \c{-> [:a:] -> [:b:] -> [:c:]} & and return an array of results \footnotemark \\
         sortP & \c{[:Int:] -> [:Int:]} & sorts an array \\
         sumP & \c{[:Int:] -> Int} & sums the arrays elements \\
         concatP & \c{[:[:a:]:] -> [:a:]} & removes a level of nesting \\
@@ -283,7 +283,8 @@ g . f = \x -> g (f x)
         replP & \c{Int -> a -> [:a:]} & replicates an element \\
     \end{tabular}
   \end{table}
-    
+  \footnotetext{e.g. \c{zipWithP (+) [:1,2,3:] [:1,3,4:] = [:1+1,2+3,3+4:]}. The arrays as assumed to be of equal size.}
+
   \subsection{Vectorization}
     Vectorization involves two major steps -
     \emph{Type dependent representation} and \emph{Lifting}.
@@ -312,7 +313,7 @@ g . f = \x -> g (f x)
       The following example describes how a nested array
       like \c{[[1,2,3],[4,5],[],[6]] :: [:[:Int:]:]} can be implemented
       to increase Cache Locality:
-      \footnote{\c{[\string#1,2,3\string#]} is the notation used for a contiguous-memory array.}
+      \footnote{\c{[\string#1,2,3\string#]} is the notation used for a contiguous-memory bytearray.}
       \begin{lstlisting}
 array :: PA (PA Int)
 array = AArr {
@@ -407,7 +408,7 @@ mapPL f xss =
     \begin{figure}[h!]
         \begin{center}
         \includegraphics[width=\linewidth]{mapP.png}
-        \caption{Conceptional programmer view and actual implementation of \c{mapP (mapP incr)}
+        \caption[Flattening of Nested Parallelism]{Conceptional programmer view and actual implementation of \c{mapP (mapP incr)}
         \footnote{Here, the commas in-between the elements have been omitted for visual clarity.
         This thesis will sometimes use such spaces for separation
         instead of commas.
@@ -562,7 +563,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
            & & Each PU applies \c{f} on it's chunk of the \\
            & f: local per PU & \textbf{d}istributed value. True parallelsim here! \\
           fooS f xs & Communication Fusion & \type{Vector a -> Vector b}\\
-           & local PU & Applies a function \textbf{s}equentially. \\
+           & local per PU & Applies a function \textbf{s}equentially. \\
            & & \c{Vector} is the Haskell implementation of \\
            & & conventional PU-local in-memory arrays. \\
           splitD & Communication Fusion & \type{PA -> Dist (PA a)}\\
@@ -570,6 +571,9 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
            & & distributes them to each of the PUs \\
           joinD & Communication Fusion & \type{Dist (PA a) -> PA a} \\
            & allPUs & join a distributed array into a global array \\
+          replD & Communication Fusion & \type{Int -> a -> Dist (PA a)}\\
+           & local per PU & create a distributed replication of a value \\
+           & & directly \\
           stream & Stream Fusion & \type{Vector a -> Stream a}\\
            & not executed & convert from an array to a stream-ful data container \\
           unstream & Stream Fusion & \type{Stream a -> Vector a}\\
@@ -639,8 +643,8 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     Therefore, in this thesis, the author has improvised on a few conflicting or
     missing details to create an overall consistent view on NDP.
     The author specifically used implementations which could really have been
-    used in NDP.\footnote{E.g. \c{groupP} as introduced in chapter \ref{chapter:ndpn} does not
-    is not included in NDP right now. However, its implementation described there is perfectly possible.}
+    used in NDP.\footnote{E.g. \c{groupP} as introduced in chapter \ref{chapter:ndpn}
+    is not included in NDP currently. However, its implementation described there is perfectly possible.}
     The reader is hereby noted that the details
     mentioned here are implementable - but not necessarily an accurate
     representation of the current state of progress.
@@ -689,7 +693,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
       g . f & $\W(g) + \W(f)$ & $\D(g) + \D(f)$ \\
       mapP f xs & 1 + $\W(xs) + \sum_{x \in xs}\W(f,x)$ & 1+ $\D(xs) + \max_{x \in xs}\D(f,x)$ \\
       zipWith f as bs & 1 + $\W(as) + \W(bs)$ & 1 + $\D(as) + \D(bs)$ \\
-        & $+ \sum_{pairs (x,y) \in (xs,ys)}\W(f,x,y)$ & $ + \sum_{pairs (x,y) \in (xs,ys)}\D(f,x,y)$ \\
+        & $+ \sum_{pairs (x,y) \in (xs,ys)}\W(f,x,y)$ & $ + \max_{pairs (x,y) \in (xs,ys)}\D(f,x,y)$ \\
       sortP & $O(n \log n)$ & $O(\log n)$ \\
       sumP & n & $\log$ n \\
       replP &  n & 1 \\
@@ -703,7 +707,10 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     \end{center}
   \end{table}
   
-  The work and depth of \c{mapP} embodies the idea, that both are the sum or maximum of the sub-expressions.
+  The work and depth of \c{mapP} embodies the idea,
+  that both are the sum or maximum of the sub-expressions.
+  Work and depth of a function composition are the sum of the
+  work and depths of each function.
   
   An example is given now. Given the expression
   \c{ys = mapP inrc (replP n 1)}, one can apply
@@ -764,7 +771,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   }
 
 
-\section{\algo}
+\section{\ac: \algo}
   \label{section:hbalanceintro}
   This section will introduce \algo. It will state the problem and give an overview of its solution.
   
@@ -775,7 +782,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     \begin{figure}[h]
       \centering
       \includegraphics[width=0.45\textwidth]{img-org}
-      \caption{An image with low constrast}
+      \caption[Unbalanced Image]{An image with low contrast}
       \label{fig:img-org}
     \end{figure}
     The goal is to make details more visible to the human viewer.
@@ -785,7 +792,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     \begin{figure}[h]
       \centering
       \includegraphics[width=0.45\textwidth]{hist-org}
-      \caption{The histogram of the original image with absolute(red) and accumulative(black) count.}
+      \caption[Unbalanced Histogram]{The histogram of the original image with absolute(red) and accumulative(black) count.}
       \label{fig:hist-org}
     \end{figure}
     
@@ -807,21 +814,12 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     \begin{figure}[h]
       \centering
       \includegraphics[width=0.45\textwidth]{hist-eq}
-      \caption{The histogram of the balanced image}
+      \caption[Balanced Histogram]{The images balanced histogram}
       \label{fig:hist-eq}
     \end{figure}
     This mapping can be defined by spreading out the gray tones such that more
     frequent gray tones get a larger range to occupy. This idea is
     explained more in detail next.
-    \comment{
-      Given this interpretation, one can proceed by,
-      first build the accumulating histogram (1 and 2) and remembering which
-      bar belongs to which gray tone, normalize(3) and scale(4) the bars to [0..255] - 
-      and finally - assign each bar (and therefore its gray tone) a new gray tone
-      using the bars location in the range [0..255](5).
-    }
-    % TODO? I should include visual diagrams for this in the thesis.
-      
   \subsection*{Algorithm}
     To describe the image transformation $ hbalance: Image \rightarrow Image$ a few definitions are necessary:
     
@@ -850,10 +848,10 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
         It calculates the accumulating histogram from the original histogram.
       \item $normalize: Int \times Int \times Histogram_{Int} \rightarrow Histogram_{Double}$  \newline
         It normalizes the accumulated histogram
-        to a range from 0 to 1. (3)
+        to a range from 0 to 1.
         The arguments are denoted $a0$ and $agmax$.
+        $a0$ denotes the number of pixels with the lowest gray tone.
         $agmax$ denotes the number of total pixels in the image.
-        $a0$ denoted the number of pixels with the lowest gray tone - namely 0.
         Normalisation is defined in mapping the histogram values by $x \mapsto \frac{(x - a0)}{agmax - a0}$.
         \comment{
           For an accumulated histogram $a:Histogram_{Int}$ it can be calculated with
@@ -886,7 +884,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
     \begin{figure}[h]
       \centering
       \includegraphics[width=0.45\textwidth]{img-eq}
-      \caption{The equalized image}
+      \caption[Balanced Image]{The balanced image}
       \label{fig:img-eq}
     \end{figure}
     
@@ -903,14 +901,3 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   
   % TODO: cite a book for its uses and the algorithm itself
     
-  \comment{
-    Prefix sum is a very common operation in computer science. It is a special
-      case of scanning through a ordered container from left ro right applying a binary
-      associative function \c{f}.
-      It is defined as:
-        $$ scanl(f,z,[a_1,a_2,...,a_n])
-           := [f(z,a_1),f(f(z,a_1),a_2),...,f(f(...f(f(z,a_1),a_2)...,a_{n-1}),a_n)]
-        $$
-      An example shall be $scanl(+,0,[1,2,2,3,-2]) = [1,3,5,8,6]$. In some definitions
-      the first element is $z$. This is however not the definition one needs here.
-  }
