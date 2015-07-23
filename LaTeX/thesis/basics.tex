@@ -204,18 +204,18 @@ g . f = \x -> g (f x)
 \section{Nested Data Parallelism}
   \label{section:ndpintro}
   
-  In the ground breaking work \cite{Belloch1996}
+  In the ground breaking work \cite{Blelloch1996}
   major contributions to parallel programming in
   functional programming languages were made.
-  The paper presented his earlier work \cite{NepaBelloch1993} on NESL
+  The paper presented his earlier work \cite{NepaBlelloch1993} on NESL
   - a programming language specifically designed for expressing parallelism
   in functional programming languages. Its ideas and insights were
   adapted to various languages - one of them being Haskell.
   Multitude years of research generalized the
   results of the special purpose language NESL
   to the widely used general purpose language Haskell.
-  \footnote{For example \cite{Harness2008}, \cite{DPHStatus2007},
-  \cite{EffiVect2012Lipp}, \cite{HighOrdFlat2006} and \cite{DistTypes1999}.}
+  \footnote{Papers on NDP in Haskell: \cite{Harness2008}, \cite{DPHStatus2007},
+  \cite{LeshchinskiyPhD2005}, \cite{HighOrdFlat2006}, \cite{DistTypes1999} and \cite{EffiVect2012Lipp}.}
   This project is called Nested Data Parallel Haskell and this section will give
   an overview of its key concepts.
   
@@ -474,7 +474,7 @@ mapPL f xss =
     namely the handling of pre-supplied arguments in the function. Our
     implementation only handles functions without pre-supplied arguments -
     but it is simpler to convey than the original in
-    in \cite{HighOrdFlat2006}.
+    in \cite{LeshchinskiyPhD2005} and \cite{HighOrdFlat2006}.
     More accurately, one has an additional expression \c{expandPS xss fEnv}.
     Introducing it wouldn't affect the overall situation in this thesis.
     Therefore, it was omitted.
@@ -827,7 +827,7 @@ myFunc = joinD . mapD (mapS (mult2 . incr)) . splitD
   the elements locally. Each PU would execute a constant number of operations
   This is indeed constant time in total.
   
-  These measures, as introduced in \cite{Belloch1996}, work
+  These measures, as introduced in \cite{Blelloch1996}, work
   neatly within Nested Data Parallelism. Consider for example the
   expression \c{mapP (mapP incr) ass} where the
   nested array \c{ass} has dimensions $w \times h$.

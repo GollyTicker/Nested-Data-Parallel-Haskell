@@ -177,7 +177,7 @@ Diese Arbeit verlgeicht und bewertet die Effektivität
 von Nested Data Parallelism und manueller Parallelisierung.
 Es werden vier Implementierungen des Histogramausgleichs erstellt - 
 eine Sequentielle, eine Manuell-parallelisierte,
-Eine die NDP verwendet und die davon Vektorisierte.
+Eine die Nested-Data-Parallelism verwendet und die davon Vektorisierte.
 Diese werden bezüglich Arbeitsaufwand, Ähnlichkeit
 zum Algorithmus, Komplexitätklassen und mehr bewertet.
 Dies gechieht in Haskell als Example für funktionale Programmiersprachen.
@@ -196,9 +196,8 @@ the concise expression of irregularly parallel programs
 while still being nearly as performing as flat data parallel programs.
 This is achived by a program transformation ('Vectorizaiton')
 . It flattens complex nesting of data structures and functions.
-This thesis is a comparison and evaluation of nested data parallel
-and manually parallelized implementation
-of irregular image processing algorithms such as \aglo
+This thesis is a comparison and evaluation of Nested Data Parallelism
+and manual parallelism of irregular image processing algorithms such as \algo
 in functional programming languages by the example of Haskell.
 Four implementations for \algo are created and evaluated on
 constant factors, running time complexity, human workload and more. 
