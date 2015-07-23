@@ -25,7 +25,6 @@ cabal.sandbox.config
 *.lol
 *.nlo
 *.nls
-*.pdf
 *.aux
 *.glo
 *.idx
