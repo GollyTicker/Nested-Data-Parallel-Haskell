@@ -162,7 +162,7 @@
 \HAWAbstractPage
 %% German abstract
 {Nested Data Parallelism, Haskell,
-Bewertung, Vectorization, Fusion, Histogrammausgleich,
+Bewertung, Histogrammausgleich,
 Funktionale Programmierung, Parallele Programmierung, Bildverarbeitung}%
 {
 Nested Data Parallelism
@@ -171,16 +171,12 @@ Ausdruck irregulär-paralleler Programme
 und erreicht trotzdessen eine Performance
 vergleichbar zu Flat Data Parallelism.
 Dies wird durch eine Programmtransformation ('Vectorization')
-erreicht. Verschachtelte Funktionen und Datenstrukturen
-werden dabei auf flache Funktionen und Datenstrukturen reduziert.
+erreicht.
 Diese Arbeit verlgeicht und bewertet die Effektivität
 von Nested Data Parallelism und manueller Parallelisierung.
-Es werden vier Implementierungen des Histogramausgleichs erstellt - 
-eine Sequentielle, eine Manuell-parallelisierte,
-Eine die Nested-Data-Parallelism verwendet und die davon Vektorisierte.
+Es werden vier Implementierungen von Histogrammausgleich erstellt.
 Diese werden bezüglich Arbeitsaufwand, Ähnlichkeit
 zum Algorithmus, Komplexitätklassen und mehr bewertet.
-Dies gechieht in Haskell als Example für funktionale Programmiersprachen.
 Die Arbeit zieht den Schluss, dass Nested Data Parallelism
 effektiv im allgemeinen Verlgeich ist.
 Jede Implementierung hat Stärken und Schwächen. Es gibt
@@ -195,14 +191,10 @@ Nested Data Parallelism enables
 the concise expression of irregularly parallel programs
 while still being nearly as performing as flat data parallel programs.
 This is achived by a program transformation ('Vectorizaiton')
-. It flattens complex nesting of data structures and functions.
 This thesis is a comparison and evaluation of Nested Data Parallelism
-and manual parallelism of irregular image processing algorithms such as \algo
-in functional programming languages by the example of Haskell.
+and manual parallelism of irregular image processing algorithms such as \algo.
 Four implementations for \algo are created and evaluated on
 constant factors, running time complexity, human workload and more. 
-They are: sequential, manually-parallelized,
-nested data parallel and finally a vectorized thereof.
 The thesis comes to the conclusion, that Nested Data Parallelism
 compares well to the other approaches.
 Though, every implementation has its advantages and drawbacks -
